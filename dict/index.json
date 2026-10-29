@@ -1,0 +1,18 @@
+[
+  {
+    "file": "de-en-b1-verbs-prepositions.tsv",
+    "name": "Verbs with prepositions",
+    "level": "B1",
+    "pair": "DE → EN",
+    "words": 16,
+    "desc": "Example list: verbs with fixed prepositions, with example sentences"
+  },
+  {
+    "file": "de-be-b1-verbs-prepositions.tsv",
+    "name": "Дзеясловы з прыназоўнікамі",
+    "level": "B1",
+    "pair": "DE → BE",
+    "words": 16,
+    "desc": "Прыклад: дзеясловы з устойлівымі прыназоўнікамі і прыкладамі"
+  }
+]

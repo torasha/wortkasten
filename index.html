@@ -1,0 +1,1688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wortkasten">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F1F4F2">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<script>window.WK_STANDALONE=true;</script>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Wortkasten</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<style>
+/* Layout: one narrow column, app header with view switcher, exercise switcher as chips, a single task card. */
+:root{
+  --bg:#F1F4F2; --surface:#FFFFFF; --surface2:#E6EBE8; --line:#D0D8D4;
+  --fg:#17201D; --muted:#59665F;
+  --accent:#2C4F9E; --accent-fg:#FFFFFF; --accent-soft:#E2E8F6;
+  --ok:#1F7446; --ok-soft:#DFF0E6; --err:#B0281F; --err-soft:#F7E0DD;
+  --hint:#8F620E; --hint-soft:#F5EAD2;
+  --p-done:#1F3B73; --p-review:#1B8A84; --p-learn:#7FC6DA;
+  --p-done-soft:#E1E7F4; --p-review-soft:#D8EFED; --p-learn-soft:#DDF0F6; --p-learn-ink:#1C6377; --p-known:#A9B6CC;
+  --font-ui:"Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-word:"Literata", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111513; --surface:#1A201D; --surface2:#242B28; --line:#34403B;
+    --fg:#E5ECE8; --muted:#9AA8A1;
+    --accent:#8EA9F2; --accent-fg:#0E1526; --accent-soft:#232E4A;
+    --ok:#6FCB95; --ok-soft:#1C3327; --err:#F08C80; --err-soft:#3E2220;
+    --hint:#E2B45E; --hint-soft:#3A2F18;
+    --p-done:#7D9BE8; --p-review:#3DBDB1; --p-learn:#2E7488;
+    --p-done-soft:#1E2943; --p-review-soft:#173733; --p-learn-soft:#183039; --p-learn-ink:#8FD3E6; --p-known:#4E5D7A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111513; --surface:#1A201D; --surface2:#242B28; --line:#34403B;
+  --fg:#E5ECE8; --muted:#9AA8A1;
+  --accent:#8EA9F2; --accent-fg:#0E1526; --accent-soft:#232E4A;
+  --ok:#6FCB95; --ok-soft:#1C3327; --err:#F08C80; --err-soft:#3E2220;
+  --hint:#E2B45E; --hint-soft:#3A2F18;
+  --p-done:#7D9BE8; --p-review:#3DBDB1; --p-learn:#2E7488;
+  --p-done-soft:#1E2943; --p-review-soft:#173733; --p-learn-soft:#183039; --p-learn-ink:#8FD3E6; --p-known:#4E5D7A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--font-ui);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+button{font-family:inherit}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 48px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;padding-block:6px 12px}
+.brand{font-family:var(--font-word);font-weight:600;font-size:1.4rem;letter-spacing:-.01em;line-height:1.1}
+.brand small{display:block;font-family:var(--font-ui);font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+nav.views{display:flex;background:var(--surface2);border-radius:999px;padding:3px;gap:2px;max-width:100%;overflow-x:auto}
+nav.views button{flex:none;border:0;background:transparent;color:var(--muted);font-weight:500;font-size:.9rem;padding:7px 12px;border-radius:999px;cursor:pointer}
+nav.views button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-block:2px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:500;font-size:.92rem;padding:8px 13px;border-radius:8px;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.stat{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);padding-block:0 10px;font-variant-numeric:tabular-nums}
+.stat b{color:var(--fg);font-weight:600}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.pill.new{background:var(--surface2);color:var(--muted)}
+.pill.learning{background:var(--p-learn-soft);color:var(--p-learn-ink)}
+.pill.review{background:var(--p-review-soft);color:var(--p-review)}
+.pill.done{background:var(--p-done-soft);color:var(--p-done)}
+.pill.known{background:var(--surface2);color:var(--muted)}
+.knowbtn{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:.82rem;font-weight:500;padding:4px 10px;border-radius:999px;cursor:pointer}
+.knowbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.listen{display:flex;flex-direction:column;gap:10px}
+.listen .row{gap:8px}
+.play svg{width:18px;height:18px;vertical-align:-3px;margin-right:6px}
+.arts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.art{font-family:var(--font-word);font-size:1.3rem;padding:14px 8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);cursor:pointer}
+.art.right{background:var(--ok-soft);border-color:var(--ok)}
+.art.wrong{background:var(--err-soft);border-color:var(--err)}
+.art:disabled{cursor:default;color:var(--fg)}
+.art:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.selrow{display:flex;gap:10px;align-items:baseline;padding:9px 2px;border-top:1px solid var(--line);cursor:pointer;font-size:.95rem}
+.selrow input{width:20px;height:20px;accent-color:var(--accent);flex:none;align-self:center}
+.selbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:5}
+.tbtn{background:none;border:0;color:var(--bg);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;padding:0}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 18px;display:flex;flex-direction:column;gap:16px;min-height:280px}
+.prompt{display:flex;align-items:flex-start;gap:10px}
+.prompt-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.label{font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.prompt-main{font-family:var(--font-word);font-size:clamp(1.4rem,5.6vw,1.9rem);line-height:1.25;overflow-wrap:anywhere}
+.prompt-main.sm{font-size:clamp(1.12rem,4.5vw,1.35rem)}
+.say{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);display:grid;place-items:center;cursor:pointer}
+.say svg{width:18px;height:18px}
+.options{display:grid;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-family:var(--font-word);font-size:1.1rem;padding:12px 14px;border-radius:10px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.opt .n{font-family:var(--font-ui);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--err-soft);border-color:var(--err)}
+.opt:disabled{cursor:default;color:var(--fg)}
+input.answer{width:100%;font-family:var(--font-word);font-size:1.25rem;padding:12px 14px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+input.answer:focus{outline:none;border-color:var(--accent)}
+input.answer.bad{border-color:var(--err);background:var(--err-soft)}
+input.answer.good{border-color:var(--ok);background:var(--ok-soft)}
+.keys{display:flex;gap:6px;flex-wrap:wrap}
+.key{min-width:44px;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--fg);font-family:var(--font-word);font-size:1.1rem;cursor:pointer}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:500;font-size:.95rem;padding:10px 16px;border-radius:10px;cursor:pointer;line-height:1.2}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.sm{padding:6px 11px;font-size:.85rem;border-radius:8px}
+.btn.danger{color:var(--err);border-color:var(--err)}
+.btn.armed{background:var(--err);border-color:var(--err);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+:is(.btn,.chip,.opt,.tile,.mt,.key,.say,nav.views button,summary,input,select,textarea):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.feedback{font-size:.95rem;display:flex;flex-direction:column;gap:4px;min-height:1.3em}
+.feedback .ok{color:var(--ok);font-weight:600}
+.feedback .err{color:var(--err);font-weight:600}
+.feedback .ex{color:var(--muted);font-size:.9rem}
+.feedback .ex i{font-style:normal;color:var(--fg);font-family:var(--font-word)}
+.hintline{font-family:var(--font-word);letter-spacing:.2em;color:var(--hint);font-size:1.1rem;min-height:1.2em}
+.tiles{display:flex;flex-wrap:wrap;gap:8px}
+.tile{min-width:44px;height:46px;padding:0 12px;font-family:var(--font-word);font-size:1.15rem;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--fg);cursor:pointer}
+.tile.used{visibility:hidden}
+.tile.flash{animation:shake .3s;border-color:var(--err);background:var(--err-soft)}
+.tile.hinted{border-color:var(--hint);background:var(--hint-soft)}
+.slots{display:flex;flex-wrap:wrap;gap:4px 3px;font-family:var(--font-word);font-size:1.5rem;min-height:2.2rem}
+.slot{min-width:1.05em;border-bottom:2px solid var(--line);text-align:center;padding:0 1px;min-height:1.5em}
+.slot.space{border:0;min-width:.55em}
+.slot.filled{border-color:var(--accent)}
+.built{font-family:var(--font-word);font-size:1.3rem;line-height:1.6;min-height:2.2em;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;border-bottom:2px solid var(--line);padding-bottom:6px}
+.built .ph{color:var(--muted)}
+.sentence{font-family:var(--font-word);font-size:1.3rem;line-height:1.9;overflow-wrap:anywhere}
+.gap{display:inline-block;min-width:3.5ch;border-bottom:2px solid var(--line);padding:0 3px;line-height:1.3}
+.gap.cur{border-color:var(--accent);background:var(--accent-soft)}
+.gap.done{border-color:var(--ok);color:var(--ok)}
+.gap .rest{color:var(--muted);letter-spacing:.1em}
+.base{font-size:.95rem;color:var(--hint)}
+.msg{font-size:.93rem;min-height:1.35em;color:var(--muted)}
+.msg.warn{color:var(--hint)} .msg.err{color:var(--err)}
+mark.fix{background:var(--err-soft);color:var(--err);border-radius:3px;padding:0 1px;text-decoration:underline}
+mark.hint{background:var(--hint-soft);color:var(--hint);border-radius:3px;padding:0 1px}
+.gap.warn{border-color:var(--hint);color:var(--fg)}
+.gap.shown{border-color:var(--err);color:var(--err)}
+.sub-inline{color:var(--muted);font-size:.88rem}
+.seg-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.seg-tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:.85rem;font-weight:500;padding:6px 10px;border-radius:8px;cursor:pointer}
+.seg-tabs button.on{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.wr{display:flex;gap:12px;align-items:center;padding-block:8px;border-top:1px solid var(--line)}
+.wtxt{flex:1;min-width:0;display:flex;flex-direction:column;overflow-wrap:anywhere}
+.wtxt .wf{font-family:var(--font-word)}
+.wtxt .wt{font-size:.85rem;color:var(--muted)}
+.wm{width:112px;flex:none;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.meter{width:100%;height:6px;background:var(--surface2);border-radius:999px;overflow:hidden}
+.meter span{display:block;height:100%;border-radius:999px}
+.brandrow{display:flex;align-items:center;gap:12px}
+.streak{border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:50%}
+.kpis{display:flex;gap:14px 28px;flex-wrap:wrap;align-items:center}
+.kpi{display:flex;gap:12px;align-items:center}
+.kv{font-family:var(--font-word);font-size:2rem;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
+.ks{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.boxes{display:grid;gap:6px;height:180px}
+.box{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;height:100%}
+.bwrap{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;min-height:0}
+.bb{width:100%;max-width:46px;border-radius:5px 5px 0 0}
+.bv{font-size:.82rem;font-weight:600;font-variant-numeric:tabular-nums}
+.bl{font-size:.68rem;color:var(--muted);text-align:center;line-height:1.15;min-height:2.3em}
+.miles{display:flex;gap:8px;flex-wrap:wrap}
+.mile{display:flex;flex-direction:column;gap:1px;padding:8px 12px;border:1px dashed var(--line);border-radius:10px;min-width:76px;font-size:.78rem;color:var(--muted);max-width:100%}
+.mile b{font-family:var(--font-word);font-size:1.15rem;color:var(--muted)}
+.mile.on{border:1px solid var(--p-done);background:var(--p-done-soft)}
+.mile.on b{color:var(--p-done)}
+.mile .prize{color:var(--fg);overflow-wrap:anywhere}
+.ansbox{display:flex;flex-direction:column;gap:4px}
+.under{display:flex;justify-content:space-between;gap:10px;min-height:1.6em;align-items:baseline}
+.corr{font-family:var(--font-word);font-size:1.15rem;color:var(--err)}
+.lay{font-size:.78rem;color:var(--muted)}
+.wn{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mosaic{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mt{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1rem;padding:10px 12px;border-radius:10px;cursor:pointer;min-height:52px;overflow-wrap:anywhere}
+.mt.f{font-family:var(--font-word);font-size:1.05rem}
+.mt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.mt.done{opacity:.3;pointer-events:none}
+.mt.bad{animation:shake .3s;border-color:var(--err);background:var(--err-soft)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.summary{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.summary h2{font-family:var(--font-word);font-weight:600;font-size:1.4rem;margin:0}
+.summary p{margin:0;color:var(--muted)}
+.toast{display:flex;gap:14px;align-items:center;position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.92rem;max-width:calc(100% - 32px);z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+/* lists & panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.stack{display:flex;flex-direction:column;gap:12px}
+h2.h{font-family:var(--font-word);font-weight:600;font-size:1.25rem;margin:4px 0 0;text-wrap:balance}
+.note{font-size:.88rem;color:var(--muted);margin:0;max-width:62ch}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dict{display:flex;flex-direction:column;gap:8px;padding-block:12px;border-top:1px solid var(--line)}
+.dict:first-child{border-top:0;padding-top:0}
+.dict-head{display:flex;gap:10px;align-items:flex-start}
+.dict-name{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.dict-meta{font-size:.82rem;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+.switch{position:relative;width:44px;height:26px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--surface2);border:1px solid var(--line);pointer-events:none}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .15s}
+.switch input:checked+span{background:var(--accent);border-color:var(--accent)}
+.switch input:checked+span::after{transform:translateX(18px);background:var(--accent-fg)}
+.switch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.pbar{display:flex;height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.pbar.big{height:14px}
+.seg.done{background:var(--p-done)} .seg.known{background:var(--p-known)} .seg.review{background:var(--p-review)} .seg.learning{background:var(--p-learn)}
+.legend{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bignum{font-family:var(--font-word);font-size:2.6rem;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.bignum small{font-family:var(--font-ui);font-size:1rem;font-weight:400;color:var(--muted)}
+.days{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;align-items:end;height:80px}
+.day{background:var(--accent);border-radius:3px 3px 0 0;min-height:2px}
+.day.zero{background:var(--surface2)}
+.dayl{display:grid;grid-template-columns:repeat(14,1fr);gap:4px;font-size:.66rem;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.words{display:flex;flex-direction:column}
+.w{display:flex;gap:10px;align-items:baseline;padding:9px 2px;border-top:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;color:var(--fg);text-align:left;font-size:.95rem;width:100%}
+.w .wf{font-family:var(--font-word);flex:1;min-width:0;overflow-wrap:anywhere}
+.w .wt{flex:1;min-width:0;color:var(--muted);overflow-wrap:anywhere}
+.form{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-block:6px}
+.form label,.field{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--muted)}
+.form input,.form textarea,.field input,.field select,.field textarea,textarea.big{font-family:var(--font-ui);font-size:16px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
+textarea.big{min-height:140px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table.prev{border-collapse:collapse;font-size:.85rem;min-width:100%}
+table.prev td,table.prev th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+table.prev select{font-size:14px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+details.set{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.set>summary{padding:14px 16px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:8px}
+details.set>summary::-webkit-details-marker{display:none}
+details.set>summary::after{content:"+";color:var(--muted);font-weight:400}
+details.set[open]>summary::after{content:"−"}
+.setbody{padding:0 16px 16px;display:flex;flex-direction:column;gap:2px}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:8px;border-top:1px solid var(--line);font-size:.93rem}
+.sr:first-child{border-top:0}
+.sr>span{flex:1;min-width:0}
+.sr input[type=number]{width:84px;font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);text-align:right;font-variant-numeric:tabular-nums}
+.sr select,.sr input[type=text]{font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);max-width:55%}
+.sr input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.sub{font-size:.78rem;color:var(--muted);display:block}
+.stages{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+.stages th{font-weight:500;color:var(--muted);text-align:left;padding:4px}
+.stages td{padding:4px}
+.stages input{width:64px;font-size:16px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);text-align:right}
+.empty{color:var(--muted);text-align:left;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.empty b{color:var(--fg)}
+
+.libl{display:flex;flex-direction:column}
+.libi{display:flex;gap:12px;align-items:center;padding-block:10px;border-top:1px solid var(--line)}
+.libi:first-child{border-top:0}
+.help{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 18px 8px;display:flex;flex-direction:column;gap:4px}
+.help h2.h{margin:0 0 6px}
+.help section{padding-block:10px;border-top:1px solid var(--line)}
+.help section:first-of-type{border-top:0;padding-top:0}
+.help h3{font-family:var(--font-word);font-weight:600;font-size:1.08rem;margin:0 0 6px;text-wrap:balance}
+.help p,.help li{max-width:65ch;margin:0 0 8px;font-size:.95rem}
+.help ol,.help ul{margin:0 0 8px;padding-left:1.3em}
+.help i{font-family:var(--font-word)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brandrow"><div class="brand">Wortkasten<small id="sub"></small></div><button class="streak" id="streak"></button></div>
+    <nav class="views">
+      <button data-view="learn"></button>
+      <button data-view="dicts"></button>
+      <button data-view="progress"></button>
+      <button data-view="settings"></button>
+      <button data-view="help"></button>
+    </nav>
+  </header>
+  <main id="view"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+'use strict';
+/* ===================== interface languages ===================== */
+const LANGS={en:'English',de:'Deutsch',be:'Беларуская'};
+const LOCALE={en:'en-GB',de:'de-DE',be:'be-BY'};
+const I18N={
+en:{
+  sub:'vocabulary trainer', nav_learn:'Learn', nav_dicts:'Dictionaries', nav_progress:'Progress', nav_settings:'Settings', nav_help:'Help', nav_aria:'Sections',
+  ex_choice:'Choice', exh_choice:'Pick the right answer',
+  ex_mosaic:'Mosaic', exh_mosaic:'Match words with translations',
+  ex_writing:'Writing', exh_writing:'Type the word',
+  ex_letters:'Letters', exh_letters:'Build the word from letters',
+  ex_cloze:'Gap', exh_cloze:'Type the word into the sentence',
+  ex_phrase:'Sentence', exh_phrase:'Build the sentence from words',
+  all_off:'All exercises are switched off.', all_off2:'Turn on at least one in Settings.', ex_aria:'Exercise',
+  st_left:'Left', st_ok:'Correct', st_bad:'Mistakes', pill_new:'new', pill_score:'score {s}/{t}', pill_rev:'review {a}/{b}', pill_done:'learned',
+  lbl_tr:'Translation', lbl_word:'Word', lbl_trs:'Sentence translation', say:'Pronounce',
+  ev_learned:'Word learned. First review on {d}.', ev_stage:'Review passed. Next one on {d}.', ev_done:'All reviews passed. The word is fully learned.', ev_dropped:'The word went back to learning.',
+  e_nodicts:'No dictionaries yet.', e_nodicts2:'Load your own dictionary in Dictionaries.',
+  e_noact:'No active dictionaries.', e_noact2:'Switch on a dictionary in Dictionaries.',
+  e_noex:'This exercise needs examples.', e_noex_cloze:'No example in the active dictionaries contains its word. Mark it with curly braces, e.g.: Ich {nehme} an einem Kongress {teil}.', e_noex_phrase:'The active dictionaries have no usage examples.',
+  e_mosaic:'Mosaic needs at least two words.', e_nothing:'Nothing to learn right now.', e_nothing2:'All words in the active dictionaries are learned or waiting for review.', e_next:' Next review: {d}.', open_dicts:'Open dictionaries',
+  round_done:'Round complete', round_res:'Answers: {n}, correct: {ok}.', round_learned:' Moved to review: {n} {w}.', next_round:'Next round',
+  correct:'Correct', wrong:'Wrong', next:'Next', mosaic_lbl:'Match each word with its translation',
+  your_answer_aria:'Your answer', btn_check:'Check', btn_letter:'Letter', btn_skip:"Don't know", layout_fixed:'keyboard layout fixed',
+  gap_n:'Gap {i} of {n}', hint_lbl:'Hint', res_skip:"Don't know", res_err:'With a mistake', res_err_p:'With a mistake', round_retry:' Mistakes to repeat in the next round: {n}.',
+  your_answer:'Your answer:', right_answer:'Correct answer:', built_aria:'Assembled word',
+  t_won:'Hard word conquered: {w}', t_mile:'Milestone: {m} words learned!', t_prize:' Your prize: {p}', streak_aria:'{n} {d} in a row, today {a} of {g} answers',
+  save_fail:"The browser won't let the app save data. Make a backup in Settings.", tap_again:'Tap again',
+  /* dictionaries */
+  d_title:'Dictionaries', d_load:'Load dictionary',
+  d_note:'Progress belongs to the word, not to the dictionary: identical words from different dictionaries are merged, and what you have learned counts everywhere.',
+  d_seq:'New words come one dictionary at a time, starting with the top active one{cur}. Change the order with the arrows.', d_seq_cur:' (now: “{n}”)', d_all:'New words come from all active dictionaries at once.',
+  d_toggle:'Learn this dictionary', d_active:'Active: {n}', d_meta:'{n} {w} · learned {d} · in review {r} · learning {l}',
+  b_words:'Words', b_up:'Up', b_down:'Down', b_save:'Save', b_rename:'Rename', b_export:'Export', b_delete:'Delete',
+  d_empty:'No dictionaries yet. Load a table or paste a word list.', d_deleted:'Dictionary deleted',
+  w_back:'← Dictionaries', w_search:'Search', w_add:'Add word', w_none:'Nothing found.',
+  s_new:'new', s_learning:'learning', s_review:'review', s_done:'learned',
+  f_word:'Word (in the language you are learning)', f_tr:'Translation', f_ex:'Example. For the Gap exercise, put the word in curly braces: Ich {nehme} an … {teil}.', f_exT:'Example translation',
+  f_exn:'Example {n}', f_exTn:'Translation of example {n}',
+  f_manual:'The gap is marked by hand.', f_auto:'Gap found automatically: {s}', f_nf:'The word was not found in the example. Put it in curly braces for the Gap exercise.', f_noex:'Without an example the word will not appear in Gap and Sentence.',
+  b_cancel:'Cancel', b_reset_w:'Reset progress', b_del_w:'Delete word', t_need_wt:'A word and a translation are required', t_saved:'Saved', t_w_reset:'Word progress reset',
+  ex_dictation:'Dictation', exh_dictation:'Listen and type', ex_article:'der/die/das', exh_article:'Pick the article',
+  lbl_listen:'Listen and type', b_play:'Listen', b_slow:'Slowly', e_noaudio:'Dictation needs speech output, and this browser has none.',
+  e_nonouns:'No nouns with an article.', e_nonouns2:'Write nouns with der, die or das in front, e.g. das Haus.', lbl_article:'Article',
+  know:'I know it', t_known:'Marked as known: {w}', undo:'Undo', s_known:'known', wp_known:'Known', bx_known:'Known', d_meta_k:' · known {k}',
+  f_known:'I know it', f_unknow:'Back to learning', sel_known:'Mark known words', sel_do:'Mark ({n})', sel_note:'Tick the words you already know. They will not appear in exercises.', t_marked:'Marked as known: {n}',
+  dc_mode:'What to dictate', dc_word:'the word', dc_phrase:'a sentence from the examples', dc_mixed:'alternate', dc_tr:'Show the translation',
+  ar_conf:'Confident after correct answers in a row', ar_note:'Article practice does not change the word score: it only checks the gender.', p_art:'Articles: confident {a} of {b}',
+  lib_title:'Ready-made dictionaries', lib_note:'Lists published together with the app. Pick one for your level.', lib_all:'All', lib_choose:'Choose',
+  i_title:'Load dictionary', i_name:'Dictionary name', i_name_ph:'e.g. B1 — Kapitel 3', i_file:'File: Excel (.xlsx), CSV, TSV or text', i_paste:'Or paste a list, one word per line',
+  i_note:'Columns: word, translation, example, example translation; up to two more examples with translations can follow. Only word and translation are required. Separator: tab, semicolon, comma or dash. A Quizlet export works as it is. You can reassign the columns in the next step.',
+  i_next:'Next', i_xlsx_fail:"Couldn't load the Excel module. Save the table as CSV and try again.", i_read_fail:"Couldn't read the file.", i_need:'Choose a file or paste a list',
+  i_back:'← Back', i_check:'Check the columns', i_head:'The first row contains headers', i_col:'Column {i}',
+  fl_w:'Word', fl_t:'Translation', fl_ex:'Example', fl_exT:'Example translation', fl_skip:'Skip',
+  i_rows:'Rows to load: {n}. Rows without a word or a translation are skipped.', i_do:'Load {n} {r}', i_need_cols:'Mark the Word and Translation columns', i_newname:'New dictionary',
+  i_done:'Loaded: {n}', i_merged:' ({m} were already in other dictionaries — progress kept)',
+  file_note:'If the file did not download, copy the text and save it, for example in Notes or as {n}.', b_copy:'Copy', t_copied:'Copied', t_selected:'Selected — copy it manually',
+  /* progress */
+  p_title:'Progress', p_streak:'Days in a row', p_today:'today {a} of {g}', p_best:'Record', p_won:'Hard words conquered', p_boxes:'Boxes', p_learned:'learned {d} of {t}',
+  bx_new:'New', bx_learn:'Learning', bx_rev:'Review {i}', bx_done:'Learned', p_miles:'Milestones', p_togo:'{n} to go',
+  p_days:'Answers in the last 14 days', p_bydict:'By dictionary', p_off:' (off)', p_nodicts:'No dictionaries yet.',
+  wp_title:'Words', wp_learning:'Learning', wp_review:'In review', wp_done:'Learned', wp_desc:'descending', wp_asc:'ascending', wp_alpha:'A–Z', wp_sort:'Sort',
+  wp_rev:'review {a}/{b} · {d}', wp_learned:'learned', wp_err:' · {n} mist.', wp_empty:'Nothing here yet.', wp_all:'Show all {n}',
+  /* settings */
+  set_title:'Settings', set_lang:'Interface language',
+  sec_ex:'Exercises', sec_gen:'General', sec_goal:'Goal and milestones', sec_rep:'Reviewing learned words', sec_forget:'Forgetting (“ice slide”)', sec_audio:'Audio', sec_data:'Data and backup',
+  g_cap:'Points per word per day', g_cap_s:'0 = no limit. Lets a word ripen over several days', g_gap:'Pause between counted answers, min', g_gap_s:'A word earns points again only after this pause. 0 = off', n_cap:'Today’s points for this word are used up; it continues tomorrow.', n_gap:'Too soon for points: this word counts again from {h}.', pill_cap:'daily limit reached', pill_gap:'pause until {h}',
+  g_thr:'Learned when the score reaches', g_thr_s:'Then the word moves to review', g_reset:'Reset the score after a mistake',
+  g_inl:'Words in learning at once', g_inl_s:'New words are added only when there are free places', g_round:'Tasks per round', g_share:'Share of reviews in a round, %',
+  g_new:'New words', g_new_seq:'one dictionary at a time', g_new_all:'from all active', g_new_s:'One at a time: the next dictionary starts only when the current one has no new words left',
+  g_order:'Learn in dictionary order', g_order_s:'Otherwise new words are picked at random',
+  g_dir:'Direction (Choice, Writing)', g_dir_f:'translation → word', g_dir_n:'word → translation', g_dir_b:'both ways',
+  g_case:'Case-sensitive', g_case_s:'Useful for German nouns', g_uml:'Accept ae, oe, ue, ss for ä, ö, ü, ß',
+  g_auto:'Auto-enter an exact answer', g_auto_s:'The answer is accepted without pressing Check. Earlier gaps in a sentence are always accepted',
+  g_autod:'Pause before auto-enter, ms', g_lay:'Fix the keyboard layout', g_lay_s:'Letters typed in the wrong layout are converted by key position and do not count as mistakes',
+  g_layk:'Layout of the language you are learning', g_layk_de:'German (QWERTZ)', g_layk_en:'English (QWERTY)',
+  g_next:'Move on after a correct answer', g_nextd:'Pause before the next task, ms',
+  go_goal:'Daily goal, answers', go_goal_s:'The ring around the streak number fills up as you answer', go_note:'You choose the prize for each milestone yourself. When you reach it, the app will remind you of it.', go_m:'{m} words',
+  r_on:'Review learned words', r_on_s:'Otherwise a word counts as fully learned straight away', r_back:'An overdue review sends the word back to learning', r_back_s:'With half of the learned score',
+  r_h1:'Review', r_h2:'after, days', r_h3:'show, times', r_h4:'deadline, days', r_add:'Add review', r_del:'Delete review {i}', r_note:'The deadline counts from the day the word reached this review. Not reviewed in time — the word goes back to learning.',
+  fg_on:'Take points off for missed days', fg_grace:'Days without practice and without penalty', fg_per:'Points taken off per day', fg_per_s:'From every word in learning',
+  sc_plus:'Points for a correct answer', sc_minus:'Penalty for a mistake', c_opts:'Answer options', m_pairs:'Pairs on screen',
+  w_len:'Show the word length', w_cost:'— points taken off for this hint', w_first:'Show the first letter', w_lerr:'Show the correct letter after a mistake', w_lerr_s:'The correct beginning of the word appears under the field',
+  w_lcost:'Points taken off for a hint letter', w_lcost_s:'Also for the Letter button', w_werr:'Show the whole word after a mistake',
+  l_lerr:'Highlight the needed letter after a mistake', cz_base:'Show the dictionary form and translation', cz_len:'Show the gap length', ph_werr:'Highlight the needed word after a mistake', ph_cost:'— points taken off for the hint',
+  a_on:'Speak', a_auto:'Speak automatically after an answer', a_lang:'Language you are learning', a_lang_s:'Language code: de-DE, en-GB, fr-FR…', a_voice:'Voice', a_voice_s:'On iPhone, better voices can be downloaded in Settings → Accessibility → Spoken Content', a_def:'Default', a_rate:'Speech rate', a_test:'Listen',
+  dt_note:'All data is stored only on this device, in this browser. Make a backup from time to time — it lets you restore everything on another device.',
+  dt_bk:'Make a backup', dt_file:'Restore from a file', dt_paste:'or paste the backup text', dt_restore:'Restore', dt_reset:'Reset all progress', dt_def:'Restore default settings',
+  t_notbk:"This doesn't look like a backup", t_notwk:"This doesn't look like a Wortkasten backup", t_restored:'Data restored', t_preset:'Progress reset', t_sreset:'Settings reset',
+  pl_words:['word','words'], pl_days:['day','days'], pl_rows:['row','rows'],
+  sample_name:'Example: verbs with prepositions'
+},
+de:{
+  sub:'Vokabeltrainer', nav_learn:'Lernen', nav_dicts:'Wörterbücher', nav_progress:'Fortschritt', nav_settings:'Einstellungen', nav_help:'Hilfe', nav_aria:'Bereiche',
+  ex_choice:'Auswahl', exh_choice:'Wähle die richtige Antwort',
+  ex_mosaic:'Mosaik', exh_mosaic:'Ordne Wörter den Übersetzungen zu',
+  ex_writing:'Schreiben', exh_writing:'Schreib das Wort',
+  ex_letters:'Buchstaben', exh_letters:'Bilde das Wort aus Buchstaben',
+  ex_cloze:'Lücke', exh_cloze:'Setz das Wort in den Satz ein',
+  ex_phrase:'Satz', exh_phrase:'Bilde den Satz aus Wörtern',
+  all_off:'Alle Übungen sind ausgeschaltet.', all_off2:'Schalte in den Einstellungen mindestens eine ein.', ex_aria:'Übung',
+  st_left:'Übrig', st_ok:'Richtig', st_bad:'Fehler', pill_new:'neu', pill_score:'Punkte {s}/{t}', pill_rev:'Wiederholung {a}/{b}', pill_done:'gelernt',
+  lbl_tr:'Übersetzung', lbl_word:'Wort', lbl_trs:'Übersetzung des Satzes', say:'Aussprechen',
+  ev_learned:'Wort gelernt. Erste Wiederholung am {d}.', ev_stage:'Wiederholung geschafft. Die nächste am {d}.', ev_done:'Alle Wiederholungen geschafft. Das Wort ist endgültig gelernt.', ev_dropped:'Das Wort ist zurück im Lernen.',
+  e_nodicts:'Noch keine Wörterbücher.', e_nodicts2:'Lade unter „Wörterbücher“ dein eigenes Wörterbuch.',
+  e_noact:'Kein Wörterbuch ist aktiv.', e_noact2:'Schalte unter „Wörterbücher“ ein Wörterbuch ein.',
+  e_noex:'Diese Übung braucht Beispielsätze.', e_noex_cloze:'In den aktiven Wörterbüchern gibt es keinen Beispielsatz, in dem das Wort gefunden wird. Markiere es mit geschweiften Klammern, z. B.: Ich {nehme} an einem Kongress {teil}.', e_noex_phrase:'Die aktiven Wörterbücher enthalten keine Beispielsätze.',
+  e_mosaic:'Für das Mosaik braucht es mindestens zwei Wörter.', e_nothing:'Gerade gibt es nichts zu lernen.', e_nothing2:'Alle Wörter in den aktiven Wörterbüchern sind gelernt oder warten auf die Wiederholung.', e_next:' Nächste Wiederholung: {d}.', open_dicts:'Wörterbücher öffnen',
+  round_done:'Runde beendet', round_res:'Antworten: {n}, davon richtig: {ok}.', round_learned:' In die Wiederholung gewechselt: {n} {w}.', next_round:'Nächste Runde',
+  correct:'Richtig', wrong:'Falsch', next:'Weiter', mosaic_lbl:'Ordne jedem Wort seine Übersetzung zu',
+  your_answer_aria:'Deine Antwort', btn_check:'Prüfen', btn_letter:'Buchstabe', btn_skip:'Weiß nicht', layout_fixed:'Tastaturlayout korrigiert',
+  gap_n:'Lücke {i} von {n}', hint_lbl:'Hinweis', res_skip:'Weiß nicht', res_err:'Mit Fehler', res_err_p:'Mit Fehler', round_retry:' Fehler, die in der nächsten Runde wiederkommen: {n}.',
+  your_answer:'Deine Antwort:', right_answer:'Richtig:', built_aria:'Gebildetes Wort',
+  t_won:'Schweres Wort besiegt: {w}', t_mile:'Meilenstein: {m} Wörter gelernt!', t_prize:' Deine Belohnung: {p}', streak_aria:'{n} {d} in Folge, heute {a} von {g} Antworten',
+  save_fail:'Der Browser lässt die App keine Daten speichern. Mach eine Sicherung in den Einstellungen.', tap_again:'Nochmal tippen',
+  d_title:'Wörterbücher', d_load:'Wörterbuch laden',
+  d_note:'Der Fortschritt gehört zum Wort, nicht zum Wörterbuch: gleiche Wörter aus verschiedenen Wörterbüchern werden zusammengeführt, und Gelerntes zählt überall.',
+  d_seq:'Neue Wörter kommen aus einem Wörterbuch nach dem anderen, zuerst aus dem obersten aktiven{cur}. Die Reihenfolge änderst du mit den Pfeilen.', d_seq_cur:' (jetzt: „{n}“)', d_all:'Neue Wörter kommen aus allen aktiven Wörterbüchern gleichzeitig.',
+  d_toggle:'Dieses Wörterbuch lernen', d_active:'Aktiv: {n}', d_meta:'{n} {w} · gelernt {d} · in Wiederholung {r} · im Lernen {l}',
+  b_words:'Wörter', b_up:'Nach oben', b_down:'Nach unten', b_save:'Speichern', b_rename:'Umbenennen', b_export:'Exportieren', b_delete:'Löschen',
+  d_empty:'Noch keine Wörterbücher. Lade eine Tabelle oder füge eine Wortliste ein.', d_deleted:'Wörterbuch gelöscht',
+  w_back:'← Wörterbücher', w_search:'Suchen', w_add:'Wort hinzufügen', w_none:'Nichts gefunden.',
+  s_new:'neu', s_learning:'im Lernen', s_review:'Wiederholung', s_done:'gelernt',
+  f_word:'Wort (in der Sprache, die du lernst)', f_tr:'Übersetzung', f_ex:'Beispiel. Für die Übung „Lücke“ setz das Wort in geschweifte Klammern: Ich {nehme} an … {teil}.', f_exT:'Übersetzung des Beispiels',
+  f_exn:'Beispiel {n}', f_exTn:'Übersetzung von Beispiel {n}',
+  f_manual:'Die Lücke ist von Hand markiert.', f_auto:'Lücke automatisch gefunden: {s}', f_nf:'Das Wort wurde im Beispiel nicht gefunden. Setz es für „Lücke“ in geschweifte Klammern.', f_noex:'Ohne Beispiel erscheint das Wort nicht in „Lücke“ und „Satz“.',
+  b_cancel:'Abbrechen', b_reset_w:'Fortschritt zurücksetzen', b_del_w:'Wort löschen', t_need_wt:'Wort und Übersetzung sind nötig', t_saved:'Gespeichert', t_w_reset:'Fortschritt des Wortes zurückgesetzt',
+  ex_dictation:'Diktat', exh_dictation:'Hör zu und schreib', ex_article:'der/die/das', exh_article:'Wähle den Artikel',
+  lbl_listen:'Hör zu und schreib', b_play:'Anhören', b_slow:'Langsam', e_noaudio:'Für das Diktat braucht es Sprachausgabe, und dieser Browser hat keine.',
+  e_nonouns:'Keine Substantive mit Artikel.', e_nonouns2:'Schreib Substantive mit der, die oder das davor, z. B. das Haus.', lbl_article:'Artikel',
+  know:'Kenne ich schon', t_known:'Als bekannt markiert: {w}', undo:'Rückgängig', s_known:'bekannt', wp_known:'Bekannt', bx_known:'Bekannt', d_meta_k:' · bekannt {k}',
+  f_known:'Kenne ich schon', f_unknow:'Zurück ins Lernen', sel_known:'Bekannte markieren', sel_do:'Markieren ({n})', sel_note:'Hake die Wörter an, die du schon kennst. Sie kommen in den Übungen nicht mehr vor.', t_marked:'Als bekannt markiert: {n}',
+  dc_mode:'Was diktieren', dc_word:'das Wort', dc_phrase:'einen Satz aus den Beispielen', dc_mixed:'abwechselnd', dc_tr:'Übersetzung zeigen',
+  ar_conf:'Sicher nach richtigen Antworten in Folge', ar_note:'Die Artikelübung ändert die Punktzahl des Wortes nicht: sie prüft nur das Genus.', p_art:'Artikel: sicher {a} von {b}',
+  lib_title:'Fertige Wörterbücher', lib_note:'Listen, die zusammen mit der App veröffentlicht sind. Wähle eine für dein Niveau.', lib_all:'Alle', lib_choose:'Auswählen',
+  i_title:'Wörterbuch laden', i_name:'Name des Wörterbuchs', i_name_ph:'z. B. B1 — Kapitel 3', i_file:'Datei: Excel (.xlsx), CSV, TSV oder Text', i_paste:'Oder füge eine Liste ein, ein Wort pro Zeile',
+  i_note:'Spalten: Wort, Übersetzung, Beispiel, Übersetzung des Beispiels; danach können bis zu zwei weitere Beispiele mit Übersetzung folgen. Pflicht sind nur Wort und Übersetzung. Trennzeichen: Tab, Semikolon, Komma oder Gedankenstrich. Ein Quizlet-Export funktioniert direkt. Im nächsten Schritt kannst du die Spalten neu zuordnen.',
+  i_next:'Weiter', i_xlsx_fail:'Das Excel-Modul konnte nicht geladen werden. Speichere die Tabelle als CSV und versuch es noch einmal.', i_read_fail:'Die Datei konnte nicht gelesen werden.', i_need:'Wähle eine Datei oder füge eine Liste ein',
+  i_back:'← Zurück', i_check:'Spalten prüfen', i_head:'Die erste Zeile enthält Überschriften', i_col:'Spalte {i}',
+  fl_w:'Wort', fl_t:'Übersetzung', fl_ex:'Beispiel', fl_exT:'Übersetzung des Beispiels', fl_skip:'Überspringen',
+  i_rows:'Zeilen zum Laden: {n}. Zeilen ohne Wort oder Übersetzung werden übersprungen.', i_do:'{n} {r} laden', i_need_cols:'Markiere die Spalten „Wort“ und „Übersetzung“', i_newname:'Neues Wörterbuch',
+  i_done:'Geladen: {n}', i_merged:' (davon {m} schon in anderen Wörterbüchern — Fortschritt bleibt)',
+  file_note:'Falls die Datei nicht heruntergeladen wurde, kopiere den Text und speichere ihn, z. B. in Notizen oder als {n}.', b_copy:'Kopieren', t_copied:'Kopiert', t_selected:'Markiert — bitte manuell kopieren',
+  p_title:'Fortschritt', p_streak:'Tage in Folge', p_today:'heute {a} von {g}', p_best:'Rekord', p_won:'Besiegte schwere Wörter', p_boxes:'Kästen', p_learned:'gelernt {d} von {t}',
+  bx_new:'Neu', bx_learn:'Im Lernen', bx_rev:'Wdh. {i}', bx_done:'Gelernt', p_miles:'Meilensteine', p_togo:'noch {n}',
+  p_days:'Antworten der letzten 14 Tage', p_bydict:'Nach Wörterbuch', p_off:' (aus)', p_nodicts:'Noch keine Wörterbücher.',
+  wp_title:'Wörter', wp_learning:'Im Lernen', wp_review:'In Wiederholung', wp_done:'Gelernt', wp_desc:'absteigend', wp_asc:'aufsteigend', wp_alpha:'A–Z', wp_sort:'Sortierung',
+  wp_rev:'Wdh. {a}/{b} · {d}', wp_learned:'gelernt', wp_err:' · {n} Fehler', wp_empty:'Hier ist noch nichts.', wp_all:'Alle {n} zeigen',
+  set_title:'Einstellungen', set_lang:'Sprache der Oberfläche',
+  sec_ex:'Übungen', sec_gen:'Allgemein', sec_goal:'Ziel und Meilensteine', sec_rep:'Wiederholung gelernter Wörter', sec_forget:'Vergessen („Eisrutsche“)', sec_audio:'Aussprache', sec_data:'Daten und Sicherung',
+  g_cap:'Punkte pro Wort und Tag', g_cap_s:'0 = ohne Grenze. So reift ein Wort über mehrere Tage', g_gap:'Pause zwischen gewerteten Antworten, Min.', g_gap_s:'Ein Wort bekommt erst nach dieser Pause wieder Punkte. 0 = aus', n_cap:'Die Tagespunkte für dieses Wort sind erreicht, morgen geht es weiter.', n_gap:'Noch zu früh für Punkte: das Wort zählt wieder ab {h}.', pill_cap:'Tageslimit erreicht', pill_gap:'Pause bis {h}',
+  g_thr:'Gelernt, wenn die Punktzahl erreicht', g_thr_s:'Danach kommt das Wort in die Wiederholung', g_reset:'Punkte bei einem Fehler auf null setzen',
+  g_inl:'Wörter gleichzeitig im Lernen', g_inl_s:'Neue Wörter kommen nur hinzu, wenn Plätze frei sind', g_round:'Aufgaben pro Runde', g_share:'Anteil der Wiederholungen pro Runde, %',
+  g_new:'Neue Wörter', g_new_seq:'ein Wörterbuch nach dem anderen', g_new_all:'aus allen aktiven', g_new_s:'Nacheinander: das nächste Wörterbuch beginnt erst, wenn im aktuellen keine neuen Wörter mehr sind',
+  g_order:'In der Reihenfolge des Wörterbuchs lernen', g_order_s:'Sonst werden neue Wörter zufällig gewählt',
+  g_dir:'Richtung (Auswahl, Schreiben)', g_dir_f:'Übersetzung → Wort', g_dir_n:'Wort → Übersetzung', g_dir_b:'in beide Richtungen',
+  g_case:'Groß- und Kleinschreibung beachten', g_case_s:'Nützlich für deutsche Substantive', g_uml:'ae, oe, ue, ss statt ä, ö, ü, ß akzeptieren',
+  g_auto:'Exakte Antwort automatisch übernehmen', g_auto_s:'Die Antwort wird ohne „Prüfen“ angenommen. Frühere Lücken in einem Satz werden immer übernommen',
+  g_autod:'Pause vor der Übernahme, ms', g_lay:'Tastaturlayout korrigieren', g_lay_s:'Buchstaben im falschen Layout werden nach Tastenposition umgewandelt und zählen nicht als Fehler',
+  g_layk:'Layout der Lernsprache', g_layk_de:'Deutsch (QWERTZ)', g_layk_en:'Englisch (QWERTY)',
+  g_next:'Nach richtiger Antwort weiter', g_nextd:'Pause vor der nächsten Aufgabe, ms',
+  go_goal:'Tagesziel, Antworten', go_goal_s:'Der Ring um die Zahl der Tage füllt sich mit deinen Antworten', go_note:'Die Belohnung für jeden Meilenstein legst du selbst fest. Wenn du ihn erreichst, erinnert dich die App daran.', go_m:'{m} Wörter',
+  r_on:'Gelernte Wörter wiederholen', r_on_s:'Sonst gilt ein Wort sofort als endgültig gelernt', r_back:'Eine verpasste Wiederholung schickt das Wort zurück ins Lernen', r_back_s:'Mit der Hälfte der Punktzahl',
+  r_h1:'Wdh.', r_h2:'nach, Tagen', r_h3:'zeigen, Mal', r_h4:'Frist, Tage', r_add:'Wiederholung hinzufügen', r_del:'Wiederholung {i} löschen', r_note:'Die Frist zählt ab dem Tag, an dem das Wort diese Wiederholung erreicht hat. Nicht rechtzeitig wiederholt — das Wort geht zurück ins Lernen.',
+  fg_on:'Punkte für verpasste Tage abziehen', fg_grace:'Tage ohne Übung ohne Abzug', fg_per:'Abzug pro Tag', fg_per_s:'Von jedem Wort im Lernen',
+  sc_plus:'Punkte für eine richtige Antwort', sc_minus:'Abzug für einen Fehler', c_opts:'Antwortmöglichkeiten', m_pairs:'Paare auf dem Bildschirm',
+  w_len:'Wortlänge zeigen', w_cost:'— Abzug für diesen Hinweis', w_first:'Ersten Buchstaben zeigen', w_lerr:'Nach einem Fehler den richtigen Buchstaben zeigen', w_lerr_s:'Unter dem Feld erscheint der richtige Wortanfang',
+  w_lcost:'Abzug für einen Hinweisbuchstaben', w_lcost_s:'Auch für die Taste „Buchstabe“', w_werr:'Nach einem Fehler das ganze Wort zeigen',
+  l_lerr:'Nach einem Fehler den gesuchten Buchstaben hervorheben', cz_base:'Grundform und Übersetzung zeigen', cz_len:'Länge der Lücke zeigen', ph_werr:'Nach einem Fehler das gesuchte Wort hervorheben', ph_cost:'— Abzug für den Hinweis',
+  a_on:'Aussprechen', a_auto:'Nach der Antwort automatisch aussprechen', a_lang:'Lernsprache', a_lang_s:'Sprachcode: de-DE, en-GB, fr-FR…', a_voice:'Stimme', a_voice_s:'Auf dem iPhone lassen sich bessere Stimmen unter Einstellungen → Bedienungshilfen → Gesprochene Inhalte laden', a_def:'Standard', a_rate:'Sprechtempo', a_test:'Anhören',
+  dt_note:'Alle Daten liegen nur auf diesem Gerät, in diesem Browser. Mach ab und zu eine Sicherung — damit kannst du alles auf einem anderen Gerät wiederherstellen.',
+  dt_bk:'Sicherung erstellen', dt_file:'Aus einer Datei wiederherstellen', dt_paste:'oder den Text der Sicherung einfügen', dt_restore:'Wiederherstellen', dt_reset:'Gesamten Fortschritt zurücksetzen', dt_def:'Standardeinstellungen wiederherstellen',
+  t_notbk:'Das sieht nicht nach einer Sicherung aus', t_notwk:'Das sieht nicht nach einer Wortkasten-Sicherung aus', t_restored:'Daten wiederhergestellt', t_preset:'Fortschritt zurückgesetzt', t_sreset:'Einstellungen zurückgesetzt',
+  pl_words:['Wort','Wörter'], pl_days:['Tag','Tage'], pl_rows:['Zeile','Zeilen'],
+  sample_name:'Beispiel: Verben mit Präpositionen'
+},
+be:{
+  sub:'слоўнікавы трэнажор', nav_learn:'Вучыць', nav_dicts:'Слоўнікі', nav_progress:'Прагрэс', nav_settings:'Налады', nav_help:'Даведка', nav_aria:'Раздзелы',
+  ex_choice:'Варыянт', exh_choice:'Выберыце правільны адказ',
+  ex_mosaic:'Мазаіка', exh_mosaic:'Злучыце словы з перакладамі',
+  ex_writing:'Напісанне', exh_writing:'Напішыце слова',
+  ex_letters:'Літары', exh_letters:'Складзіце слова з літар',
+  ex_cloze:'Пропуск', exh_cloze:'Упішыце слова ў фразу',
+  ex_phrase:'Фраза', exh_phrase:'Складзіце фразу са слоў',
+  all_off:'Усе практыкаванні выключаны.', all_off2:'Уключыце хаця б адно ў наладах.', ex_aria:'Практыкаванне',
+  st_left:'Засталося', st_ok:'Дакладна', st_bad:'Памылак', pill_new:'новае', pill_score:'бал {s}/{t}', pill_rev:'паўтор {a}/{b}', pill_done:'вывучана',
+  lbl_tr:'Пераклад', lbl_word:'Слова', lbl_trs:'Пераклад фразы', say:'Вымавіць',
+  ev_learned:'Слова вывучана. Першы паўтор {d}.', ev_stage:'Паўтор пройдзены. Наступны {d}.', ev_done:'Усе паўторы пройдзены. Слова вывучана канчаткова.', ev_dropped:'Слова вярнулася ў вывучэнне.',
+  e_nodicts:'Слоўнікаў пакуль няма.', e_nodicts2:'Загрузіце свой слоўнік у раздзеле «Слоўнікі».',
+  e_noact:'Няма актыўных слоўнікаў.', e_noact2:'Уключыце патрэбны слоўнік у раздзеле «Слоўнікі».',
+  e_noex:'Для гэтага практыкавання патрэбныя прыклады.', e_noex_cloze:'У актыўных слоўніках няма прыкладаў, дзе слова можна знайсці ў фразе. Адзначце яго фігурнымі дужкамі, напрыклад: Ich {nehme} an einem Kongress {teil}.', e_noex_phrase:'У актыўных слоўніках няма прыкладаў выкарыстання.',
+  e_mosaic:'Для мазаікі патрэбныя хаця б два словы.', e_nothing:'Цяпер няма чаго вучыць.', e_nothing2:'Усе словы ў актыўных слоўніках вывучаны або чакаюць паўтору.', e_next:' Бліжэйшы паўтор: {d}.', open_dicts:'Адкрыць слоўнікі',
+  round_done:'Раўнд скончаны', round_res:'Адказаў: {n}, з іх дакладных {ok}.', round_learned:' Перайшлі ў паўтор: {n} {w}.', next_round:'Наступны раўнд',
+  correct:'Дакладна', wrong:'Памылка', next:'Далей', mosaic_lbl:'Злучыце слова з перакладам',
+  your_answer_aria:'Ваш адказ', btn_check:'Праверыць', btn_letter:'Літара', btn_skip:'Не ведаю', layout_fixed:'раскладка выпраўлена',
+  gap_n:'Пропуск {i} з {n}', hint_lbl:'Падказка', res_skip:'Не ведаю', res_err:'З памылкай', res_err_p:'З памылкай', round_retry:' Памылкі, якія вернуцца ў наступным раўндзе: {n}.',
+  your_answer:'Ваш адказ:', right_answer:'Правільна:', built_aria:'Складзенае слова',
+  t_won:'Пераможана цяжкае слова: {w}', t_mile:'Веха: вывучана {m} слоў!', t_prize:' Ваш прыз: {p}', streak_aria:'{n} {d} запар, сёння {a} з {g} адказаў',
+  save_fail:'Браўзер не дазваляе захоўваць дадзеныя. Зрабіце рэзервовую копію ў наладах.', tap_again:'Націсніце яшчэ раз',
+  d_title:'Слоўнікі', d_load:'Загрузіць слоўнік',
+  d_note:'Прагрэс захоўваецца ў слова, а не ў слоўніка: аднолькавыя словы з розных слоўнікаў аб’ядноўваюцца, і вывучанае залічваецца ўсюды.',
+  d_seq:'Новыя словы бяруцца па чарзе, спачатку з верхняга актыўнага слоўніка{cur}. Парадак мяняецца стрэлкамі.', d_seq_cur:' (цяпер: «{n}»)', d_all:'Новыя словы бяруцца адразу з усіх актыўных слоўнікаў.',
+  d_toggle:'Вучыць гэты слоўнік', d_active:'Актыўны: {n}', d_meta:'{n} {w} · вывучана {d} · у паўторы {r} · вывучаецца {l}',
+  b_words:'Словы', b_up:'Вышэй', b_down:'Ніжэй', b_save:'Захаваць', b_rename:'Перайменаваць', b_export:'Экспарт', b_delete:'Выдаліць',
+  d_empty:'Слоўнікаў пакуль няма. Загрузіце табліцу або ўстаўце спіс слоў.', d_deleted:'Слоўнік выдалены',
+  w_back:'← Слоўнікі', w_search:'Пошук', w_add:'Дадаць слова', w_none:'Нічога не знойдзена.',
+  s_new:'новае', s_learning:'вывучаецца', s_review:'паўтор', s_done:'вывучана',
+  f_word:'Слова (на мове, якую вывучаеце)', f_tr:'Пераклад', f_ex:'Прыклад. Для практыкавання «Пропуск» вазьміце слова ў фігурныя дужкі: Ich {nehme} an … {teil}.', f_exT:'Пераклад прыкладу',
+  f_exn:'Прыклад {n}', f_exTn:'Пераклад прыкладу {n}',
+  f_manual:'Пропуск адзначаны ўручную.', f_auto:'Пропуск знойдзены аўтаматычна: {s}', f_nf:'Слова не знойдзена ў прыкладзе. Для «Пропуску» вазьміце яго ў фігурныя дужкі.', f_noex:'Без прыкладу слова не трапіць у «Пропуск» і «Фразу».',
+  b_cancel:'Скасаваць', b_reset_w:'Скінуць прагрэс', b_del_w:'Выдаліць слова', t_need_wt:'Патрэбныя слова і пераклад', t_saved:'Захавана', t_w_reset:'Прагрэс слова скінуты',
+  ex_dictation:'Дыктоўка', exh_dictation:'Паслухайце і напішыце', ex_article:'der/die/das', exh_article:'Выберыце артыкль',
+  lbl_listen:'Паслухайце і напішыце', b_play:'Слухаць', b_slow:'Павольна', e_noaudio:'Для дыктоўкі патрэбнае агучванне, а гэты браўзер яго не мае.',
+  e_nonouns:'Няма назоўнікаў з артыклем.', e_nonouns2:'Запісвайце назоўнікі з der, die або das, напрыклад: das Haus.', lbl_article:'Артыкль',
+  know:'Ужо ведаю', t_known:'Адзначана як вядомае: {w}', undo:'Адмяніць', s_known:'ведаю', wp_known:'Ведаю', bx_known:'Ведаю', d_meta_k:' · ведаю {k}',
+  f_known:'Ужо ведаю', f_unknow:'Вярнуць у вывучэнне', sel_known:'Адзначыць вядомыя', sel_do:'Адзначыць ({n})', sel_note:'Адзначце словы, якія вы ўжо ведаеце. Яны больш не будуць трапляць у практыкаванні.', t_marked:'Адзначана як вядомыя: {n}',
+  dc_mode:'Што дыктаваць', dc_word:'слова', dc_phrase:'фразу з прыкладаў', dc_mixed:'па чарзе', dc_tr:'Паказваць пераклад',
+  ar_conf:'Упэўнена пасля дакладных адказаў запар', ar_note:'Практыкаванне на артыклі не мяняе бал слова: яно правярае толькі род.', p_art:'Артыклі: упэўнена {a} з {b}',
+  lib_title:'Гатовыя слоўнікі', lib_note:'Спісы, апублікаваныя разам з праграмай. Выберыце пад свой узровень.', lib_all:'Усе', lib_choose:'Выбраць',
+  i_title:'Загрузіць слоўнік', i_name:'Назва слоўніка', i_name_ph:'Напрыклад: B1 — Kapitel 3', i_file:'Файл: Excel (.xlsx), CSV, TSV або тэкст', i_paste:'Або ўстаўце спіс — па радку на слова',
+  i_note:'Слупкі: слова, пераклад, прыклад, пераклад прыкладу; далей могуць ісці яшчэ два прыклады з перакладамі. Абавязковыя толькі слова і пераклад. Раздзяляльнік — табуляцыя, кропка з коскай, коска або працяжнік. Экспарт з Quizlet падыходзіць як ёсць. На наступным кроку слупкі можна пераназначыць.',
+  i_next:'Далей', i_xlsx_fail:'Не ўдалося загрузіць модуль Excel. Захавайце табліцу як CSV і паспрабуйце зноў.', i_read_fail:'Не ўдалося прачытаць файл.', i_need:'Выберыце файл або ўстаўце спіс',
+  i_back:'← Назад', i_check:'Праверце слупкі', i_head:'Першы радок — загалоўкі', i_col:'Слупок {i}',
+  fl_w:'Слова', fl_t:'Пераклад', fl_ex:'Прыклад', fl_exT:'Пераклад прыкладу', fl_skip:'Прапусціць',
+  i_rows:'Радкоў для загрузкі: {n}. Радкі без слова або перакладу прапускаюцца.', i_do:'Загрузіць {n} {r}', i_need_cols:'Адзначце слупкі «Слова» і «Пераклад»', i_newname:'Новы слоўнік',
+  i_done:'Загружана: {n}', i_merged:' (з іх {m} ужо былі ў іншых слоўніках — прагрэс захаваны)',
+  file_note:'Калі файл не спампаваўся, скапіюйце тэкст і захавайце яго, напрыклад, у Нататках або ў файле {n}.', b_copy:'Скапіяваць', t_copied:'Скапіявана', t_selected:'Вылучана — скапіюйце ўручную',
+  p_title:'Прагрэс', p_streak:'Дзён запар', p_today:'сёння {a} з {g}', p_best:'Рэкорд', p_won:'Пераможана цяжкіх слоў', p_boxes:'Скрыні', p_learned:'вывучана {d} з {t}',
+  bx_new:'Новыя', bx_learn:'Вывучаю', bx_rev:'Паўтор {i}', bx_done:'Вывучана', p_miles:'Вехі', p_togo:'яшчэ {n}',
+  p_days:'Адказы за 14 дзён', p_bydict:'Па слоўніках', p_off:' (выключаны)', p_nodicts:'Слоўнікаў пакуль няма.',
+  wp_title:'Словы', wp_learning:'Вывучаюцца', wp_review:'У паўторы', wp_done:'Вывучана', wp_desc:'па змяншэнні', wp_asc:'па павелічэнні', wp_alpha:'па алфавіце', wp_sort:'Сартаванне',
+  wp_rev:'паўтор {a}/{b} · {d}', wp_learned:'вывучана', wp_err:' · пам. {n}', wp_empty:'Тут пакуль пуста.', wp_all:'Паказаць усе {n}',
+  set_title:'Налады', set_lang:'Мова інтэрфейсу',
+  sec_ex:'Практыкаванні', sec_gen:'Агульныя', sec_goal:'Мэта і вехі', sec_rep:'Паўтор вывучаных слоў', sec_forget:'Забыванне («ледзяная горка»)', sec_audio:'Агучванне', sec_data:'Дадзеныя і рэзервовая копія',
+  g_cap:'Балаў на слова за дзень', g_cap_s:'0 — без абмежавання. Так слова сталее за некалькі дзён', g_gap:'Паўза паміж залічанымі адказамі, хв', g_gap_s:'Слова зноў атрымлівае балы толькі пасля гэтай паўзы. 0 — выключана', n_cap:'Балы гэтага слова на сёння набраны, працяг заўтра.', n_gap:'Яшчэ зарана для балаў: слова зноў залічваецца з {h}.', pill_cap:'дзённы ліміт', pill_gap:'паўза да {h}',
+  g_thr:'Вывучана, калі бал дасягнуў', g_thr_s:'Пасля гэтага слова пераходзіць у паўтор', g_reset:'Скідаць балы пры памылцы',
+  g_inl:'Слоў адначасова ў вывучэнні', g_inl_s:'Новыя словы дадаюцца, толькі калі ёсць вольныя месцы', g_round:'Заданняў у раўндзе', g_share:'Доля паўтораў у раўндзе, %',
+  g_new:'Новыя словы', g_new_seq:'па чарзе слоўнікаў', g_new_all:'з усіх актыўных', g_new_s:'«Па чарзе» — наступны слоўнік пачынаецца, толькі калі ў бягучым скончыліся новыя словы',
+  g_order:'Вучыць па парадку слоўніка', g_order_s:'Інакш новыя словы бяруцца ўраскід',
+  g_dir:'Кірунак (Варыянт, Напісанне)', g_dir_f:'пераклад → слова', g_dir_n:'слова → пераклад', g_dir_b:'у абодва бакі',
+  g_case:'Адчувальнасць да рэгістра літар', g_case_s:'Карысна для нямецкіх назоўнікаў', g_uml:'Прымаць ae, oe, ue, ss замест ä, ö, ü, ß',
+  g_auto:'Аўтаўвод дакладнага слова', g_auto_s:'Адказ прымаецца без «Праверыць». Папярэднія пропускі ў фразе прымаюцца заўсёды',
+  g_autod:'Паўза перад аўтаўводам, мс', g_lay:'Выпраўляць раскладку', g_lay_s:'Літары, набраныя не ў той раскладцы, пераўтвараюцца па становішчы клавіш і не лічацца памылкай',
+  g_layk:'Раскладка мовы, якую вывучаеце', g_layk_de:'нямецкая (QWERTZ)', g_layk_en:'англійская (QWERTY)',
+  g_next:'Пераходзіць далей пасля дакладнага адказу', g_nextd:'Паўза перад наступным заданнем, мс',
+  go_goal:'Дзённая мэта, адказаў', go_goal_s:'Кольца вакол ліку дзён запаўняецца па меры адказаў', go_note:'Прыз за веху вы прыдумваеце самі. Калі вывучыце столькі слоў, праграма пра яго нагадае.', go_m:'{m} слоў',
+  r_on:'Паўтараць вывучаныя словы', r_on_s:'Інакш слова адразу лічыцца вывучаным канчаткова', r_back:'Пратэрмінаваны паўтор вяртае слова ў вывучэнне', r_back_s:'З паловай бала вывучанасці',
+  r_h1:'Паўтор', r_h2:'праз, дз.', r_h3:'паказаць, раз', r_h4:'тэрмін, дз.', r_add:'Дадаць паўтор', r_del:'Выдаліць паўтор {i}', r_note:'Тэрмін лічыцца ад дня, калі слова трапіла на гэты паўтор. Не паспелі паўтарыць — слова вяртаецца ў вывучэнне.',
+  fg_on:'Здымаць балы за прапушчаныя дні', fg_grace:'Дзён без заняткаў без штрафу', fg_per:'Колькі балаў здымаць за дзень', fg_per_s:'З кожнага слова ў вывучэнні',
+  sc_plus:'Бал за правільны адказ', sc_minus:'Штраф за памылку', c_opts:'Варыянтаў адказу', m_pairs:'Пар на экране',
+  w_len:'Паказваць даўжыню слова', w_cost:'— здымаць балаў за падказку', w_first:'Паказваць першую літару', w_lerr:'Падказваць літару пры памылцы', w_lerr_s:'Пад полем з’яўляецца правільны пачатак слова',
+  w_lcost:'Здымаць балаў за падказку літары', w_lcost_s:'І за кнопку «Літара»', w_werr:'Падказваць слова пры памылцы',
+  l_lerr:'Падсвечваць патрэбную літару пры памылцы', cz_base:'Паказваць слоўнікавую форму і пераклад', cz_len:'Паказваць даўжыню пропуску', ph_werr:'Падсвечваць патрэбнае слова пры памылцы', ph_cost:'— здымаць балаў за падказку',
+  a_on:'Агучваць', a_auto:'Вымаўляць аўтаматычна пасля адказу', a_lang:'Мова, якую вывучаеце', a_lang_s:'Код мовы: de-DE, en-GB, fr-FR…', a_voice:'Голас', a_voice_s:'На iPhone лепшыя галасы спампоўваюцца ў Наладах → Універсальны доступ → Прамаўленне', a_def:'Па змаўчанні', a_rate:'Хуткасць маўлення', a_test:'Праслухаць',
+  dt_note:'Усе дадзеныя захоўваюцца толькі на гэтай прыладзе, у гэтым браўзеры. Час ад часу рабіце рэзервовую копію — з яе можна аднавіць усё на іншай прыладзе.',
+  dt_bk:'Зрабіць рэзервовую копію', dt_file:'Аднавіць з файла', dt_paste:'або ўстаўце тэкст копіі', dt_restore:'Аднавіць', dt_reset:'Скінуць увесь прагрэс', dt_def:'Вярнуць налады па змаўчанні',
+  t_notbk:'Гэта не падобна на рэзервовую копію', t_notwk:'Гэта не падобна на рэзервовую копію Wortkasten', t_restored:'Дадзеныя адноўлены', t_preset:'Прагрэс скінуты', t_sreset:'Налады скінуты',
+  pl_words:['слова','словы','слоў'], pl_days:['дзень','дні','дзён'], pl_rows:['радок','радкі','радкоў'],
+  sample_name:'Прыклад: дзеясловы з прыназоўнікамі'
+}};
+let L='en';
+const detectLang=()=>{try{const l=(navigator.language||'en').slice(0,2).toLowerCase();return LANGS[l]?l:'en';}catch(e){return'en';}};
+function t(k,p={}){const s=(I18N[L]&&I18N[L][k]!=null)?I18N[L][k]:(I18N.en[k]!=null?I18N.en[k]:k);return String(s).replace(/\{(\w+)\}/g,(m,x)=>p[x]!=null?p[x]:m);}
+function pw(n,k){const f=(I18N[L]&&I18N[L]['pl_'+k])||I18N.en['pl_'+k];
+  if(f.length===3){const m10=n%10,m100=n%100;return (m10===1&&m100!==11)?f[0]:(m10>=2&&m10<=4&&(m100<10||m100>=20))?f[1]:f[2];}
+  return n===1?f[0]:f[1];}
+
+/* ===================== helpers ===================== */
+const KEY='wortkasten.v1', DAY=86400000;
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const dayKey=(t=Date.now())=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const dayStart=(n=0)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+n);return d.getTime();};
+const daysBetween=(a,b)=>Math.round((new Date(b+'T12:00').getTime()-new Date(a+'T12:00').getTime())/DAY);
+function fmtDate(ts){try{return new Date(ts).toLocaleDateString(LOCALE[L]||'en-GB',{day:'numeric',month:'long'});}catch(e){return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'long'});}}
+
+const EXIDS=['choice','mosaic','writing','dictation','letters','cloze','phrase','article'];
+const exName=id=>t('ex_'+id), exHint=id=>t('exh_'+id);
+
+function defaults(){return{
+  lang:'',
+  general:{threshold:120,dailyCap:50,minGap:60,resetOnError:false,inLearning:25,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:900,layoutFix:true,foreignLayout:'qwertz',dailyGoal:50},
+  repeat:{enabled:true,overdueBack:true,stages:[{after:1,times:2,deadline:4},{after:4,times:2,deadline:6},{after:8,times:2,deadline:10}]},
+  forget:{enabled:true,grace:2,perDay:5},
+  ex:{
+    choice:{on:true,plus:6,minus:8,options:4},
+    mosaic:{on:true,plus:4,minus:6,pairs:5},
+    writing:{on:true,plus:12,minus:8,showLength:false,showFirst:false,letterOnError:true,wordOnError:false,costLength:2,costFirst:3,costLetter:3},
+    letters:{on:true,plus:8,minus:6,letterOnError:true,costLetter:3},
+    cloze:{on:true,plus:12,minus:8,showBase:true,showLength:true,letterOnError:true,costBase:0,costLetter:3},
+    phrase:{on:true,plus:10,minus:6,wordOnError:true,costWord:3},
+    dictation:{on:true,plus:10,minus:8,mode:'word',showTr:false,letterOnError:true,wordOnError:false,costLetter:3},
+    article:{on:true,perRound:20,confident:3},
+  },
+  prizes:{'50':'','100':'','250':'','500':'','1000':'','2000':''},
+  audio:{on:true,autoSpeak:true,langF:'de-DE',langN:'en-GB',voiceF:'',rate:0.9},
+};}
+
+/* example dictionary: German words, translation in the interface language (English for the German interface) */
+const SAMPLE=[
+ ['teilnehmen an D','Ich {nehme} an einem Kongress {teil}.',['take part in','I am taking part in a congress.'],['удзельнічаць у','Я ўдзельнічаю ў кангрэсе.']],
+ ['sich interessieren für A','Sie {interessiert} sich für Geschichte.',['be interested in','She is interested in history.'],['цікавіцца (чым-н.)','Яна цікавіцца гісторыяй.']],
+ ['warten auf A','Wir {warten} seit einer Stunde auf den Bus.',['wait for','We have been waiting for the bus for an hour.'],['чакаць (каго-н., што-н.)','Мы ўжо гадзіну чакаем аўтобус.']],
+ ['sich erinnern an A','Ich {erinnere} mich gern an diese Reise.',['remember, recall','I like to remember this trip.'],['успамінаць, памятаць','Я з задавальненнем успамінаю гэтае падарожжа.']],
+ ['bitten um A','Ich möchte dich um einen kleinen Gefallen {bitten}.',['ask for','I would like to ask you a small favour.'],['прасіць (пра што-н.)','Я хацеў бы папрасіць у цябе невялікую ласку.']],
+ ['sich bewerben um A','Sie {bewirbt} sich um eine Stelle an der Universität.',['apply for','She is applying for a position at the university.'],['падаваць заяўку на, прэтэндаваць на','Яна падае заяўку на пасаду ва ўніверсітэце.']],
+ ['abhängen von D','Das {hängt} vom Wetter {ab}.',['depend on','That depends on the weather.'],['залежаць ад','Гэта залежыць ад надвор’я.']],
+ ['sich beschäftigen mit D','Er {beschäftigt} sich seit Jahren mit diesem Thema.',['work on, deal with','He has been working on this topic for years.'],['займацца (чым-н.)','Ён ужо шмат гадоў займаецца гэтай тэмай.']],
+ ['glauben an A','Wer {glaubt} heute noch an die wahre Liebe?',['believe in','Who still believes in true love today?'],['верыць у','Хто сёння яшчэ верыць у сапраўднае каханне?']],
+ ['stimmen gegen A','Eine knappe Mehrheit {stimmte} gegen den Vorschlag.',['vote against','A narrow majority voted against the proposal.'],['галасаваць супраць','Невялікая большасць прагаласавала супраць прапановы.']],
+ ['sich freuen auf A','Die Kinder {freuen} sich auf die Ferien.',['look forward to','The children are looking forward to the holidays.'],['радавацца (будучаму)','Дзеці радуюцца будучым канікулам.']],
+ ['sich gewöhnen an A','Ich habe mich an das Klima {gewöhnt}.',['get used to','I have got used to the climate.'],['прывыкаць да','Я прывыкла да клімату.']],
+ ['sprechen über A','Wir {sprechen} morgen über das Projekt.',['talk about','We will talk about the project tomorrow.'],['гаварыць пра','Мы пагаворым пра праект заўтра.']],
+ ['vorangehen D','Dem Treffen {ging} ein langes Gespräch {voran}.',['precede / go ahead','The meeting was preceded by a long conversation.'],['папярэднічаць / ісці наперадзе','Сустрэчы папярэднічала доўгая размова.']],
+ ['sich verlassen auf A','Du kannst dich auf mich {verlassen}.',['rely on','You can rely on me.'],['спадзявацца на','Ты можаш на мяне спадзявацца.']],
+ ['träumen von D','Sie {träumt} von einem Haus am Meer.',['dream of','She dreams of a house by the sea.'],['марыць пра','Яна марыць пра дом каля мора.']],
+];
+
+/* ===================== state ===================== */
+let S=null;
+function mkWord(w,tr,ex,exT,dictId){return{id:uid(),w:String(w).trim(),t:String(tr).trim(),ex:(ex||'').trim(),exT:(exT||'').trim(),dicts:[dictId],st:'new',sc:0,stage:0,hits:0,due:0,dl:0,err:0,ok:0,last:0};}
+function seed(lang){
+  const d={id:uid(),name:I18N[lang].sample_name,active:true,sample:true};const k=lang==='be'?3:2;
+  const st=defaults();st.lang=lang;st.audio.langN=lang==='be'?'be-BY':'en-GB';
+  return{v:1,dicts:[d],words:SAMPLE.map(r=>mkWord(r[0],r[k][0],r[1],r[k][1],d.id)),settings:st,log:{},miles:{},best:0,lastActiveDay:null,decay:null,ui:{view:'learn',ex:'writing'}};
+}
+function mergeDeep(def,cur){
+  if(Array.isArray(def)) return Array.isArray(cur)?cur:def;
+  if(def&&typeof def==='object'){const o={};for(const k in def)o[k]=mergeDeep(def[k],cur?cur[k]:undefined);return o;}
+  return (cur===undefined||cur===null||typeof cur!==typeof def)?def:cur;
+}
+function load(){
+  let raw=null;try{raw=localStorage.getItem(KEY);}catch(e){}
+  if(raw){try{S=JSON.parse(raw);}catch(e){S=null;}}
+  if(!S||!Array.isArray(S.words)||!Array.isArray(S.dicts)) S=seed(detectLang());
+  S.settings=mergeDeep(defaults(),S.settings);
+  if(!LANGS[S.settings.lang])S.settings.lang=detectLang();
+  L=S.settings.lang;
+  S.log=S.log||{}; S.miles=S.miles||{}; S.best=S.best||0; S.ui=Object.assign({view:'learn',ex:'writing'},S.ui||{});
+}
+let saveWarned=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){if(!saveWarned){saveWarned=true;toast(t('save_fail'));}}}
+const G=()=>S.settings.general;
+const activeDictIds=()=>S.dicts.filter(d=>d.active).map(d=>d.id);
+function activeWords(){const a=new Set(activeDictIds());return S.words.filter(w=>w.dicts.some(id=>a.has(id)));}
+
+/* ===================== text matching ===================== */
+const CASE_TAGS=/(^|\s)(A|D|G|N|Akk\.?|Dat\.?|Gen\.?|Nom\.?|jdn\.?|jdm\.?|jds\.?|etw\.?|sth\.?|sb\.?)(?=\s|$|[,;])/g;
+const stripTags=s=>String(s).replace(/\([^)]*\)/g,' ').replace(CASE_TAGS,' ').replace(CASE_TAGS,' ').replace(/\s+/g,' ').trim();
+const stripBraces=s=>String(s).replace(/[{}]/g,'');
+const splitParts=s=>String(s).split(/\s*[\/;,]\s*/).map(x=>x.trim()).filter(Boolean);
+function alts(s){
+  const out=new Set();const full=String(s).replace(/\s+/g,' ').trim();if(!full)return[];
+  out.add(full);const sf=stripTags(full);if(sf)out.add(sf);
+  for(const p of splitParts(full)){out.add(p);const st=stripTags(p);if(st)out.add(st);}
+  return[...out];
+}
+const primary=s=>stripTags(splitParts(s)[0]||s)||String(s).trim();
+let NP=false;
+function norm(s){
+  let x=String(s).replace(/\s+/g,' ').replace(/^ /,'');
+  if(!G().caseSensitive)x=x.toLowerCase();
+  if(G().umlautFallback)x=x.replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue');
+  if(NP&&S.ui.view==='learn')x=x.replace(/[.,!?;:„“”"«»‚‘’()–—]/g,'').replace(/\s+/g,' ').replace(/^ /,'');
+  return x.replace(/ё/g,'е').replace(/Ё/g,'Е');
+}
+function checkTyped(val,targets){
+  const v=norm(val);let pre=null;
+  for(const tg of targets){const n=norm(tg).trim();if(v.trim()&&v.trim()===n)return{state:'ok',alt:tg};if(!pre&&n.startsWith(v))pre={state:'prefix',alt:tg};}
+  if(pre)return pre;
+  let bl=-1,ba=targets[0];
+  for(const tg of targets){const n=norm(tg).trim();let i=0;while(i<v.length&&i<n.length&&v[i]===n[i])i++;if(i>bl){bl=i;ba=tg;}}
+  return{state:'wrong',alt:ba,lcp:bl};
+}
+function origPrefix(alt,k){for(let i=0;i<=alt.length;i++){if(norm(alt.slice(0,i)).length>=k)return alt.slice(0,i);}return alt;}
+function autoMark(w,exs=w.ex){
+  if(!exs)return null;
+  const heads=splitParts(w.w).map(p=>stripTags(p).replace(/^(der|die|das|ein|eine|sich)\s+/i,'').trim()).filter(Boolean);
+  const toks=exs.split(/(\s+)/);
+  for(const h of heads){
+    const lm=h.split(' ')[0].toLowerCase();if(lm.length<2)continue;
+    const c=new Set([lm,...['e','en','n','s','es','er','ern','ns'].map(x=>lm+x)]);
+    const stem=lm.endsWith('en')?lm.slice(0,-2):lm.endsWith('n')?lm.slice(0,-1):null;
+    if(stem&&stem.length>=3){['e','st','t','en','et','te','test','ten','tet'].forEach(x=>c.add(stem+x));c.add('ge'+stem+'t');c.add('ge'+stem+'et');}
+    for(let i=0;i<toks.length;i++){
+      const m=toks[i].match(/^([^\p{L}]*)([\p{L}\-]+)([^\p{L}]*)$/u);if(!m)continue;
+      if(c.has(m[2].toLowerCase())){toks[i]=m[1]+'{'+m[2]+'}'+m[3];return toks.join('');}
+    }
+  }
+  return null;
+}
+const exList=w=>[[w.ex,w.exT],[w.ex2,w.exT2],[w.ex3,w.exT3]].map(([e,tr],i)=>({i,ex:(e||'').trim(),exT:(tr||'').trim()})).filter(x=>x.ex);
+const clozeOf=(w,e)=>e&&e.includes('{')?e:autoMark(w,e);
+const clozeText=w=>{const x=exList(w).find(x=>clozeOf(w,x.ex));return x?clozeOf(w,x.ex):null;};
+const clozeOk=w=>!!clozeText(w);
+const phraseOk=e=>stripBraces(e).trim().split(/\s+/).length>=2;
+function pickEx(w,ok){const xs=exList(w).filter(x=>ok(x.ex));if(!xs.length)return null;const fresh=xs.filter(x=>x.i!==w.exLast);const x=(fresh.length?fresh:xs)[Math.floor(Math.random()*(fresh.length?fresh:xs).length)];w.exLast=x.i;return x;}
+function parseCloze(s){const parts=[];s.split(/\{([^}]*)\}/).forEach((x,i)=>{if(i%2)parts.push({gap:x});else if(x)parts.push({text:x});});return parts;}
+
+/* keyboard layout: a letter typed in the wrong layout is converted by key position and is not a mistake */
+const RU_KEYS='йцукенгшщзхфывапролджэячсмитьбю';
+const LAT_KEYS={qwertz:'qwertzuiopüasdfghjklöäyxcvbnm,.',qwerty:"qwertyuiop[asdfghjkl;'zxcvbnm,."};
+const CYR_ALIAS={'ў':'щ','і':'и','ї':'ъ','є':'э','ґ':'г'};
+const scriptOf=s=>/[а-яёіўєїґ]/i.test(s)?'cyr':/[a-zäöüß]/i.test(s)?'lat':'';
+function fixLayout(val,target){
+  if(!G().layoutFix)return val;const want=scriptOf(target||'');if(!want)return val;
+  const lat=LAT_KEYS[G().foreignLayout]||LAT_KEYS.qwertz;const beT=/[іў]/i.test(target||'');let out='';
+  for(const ch of val){const lo=ch.toLowerCase(),up=ch!==lo;let m=null;
+    if(want==='lat'&&/[а-яёіўєїґ]/i.test(ch)){const i=RU_KEYS.indexOf(CYR_ALIAS[lo]||lo);m=i>=0&&/\p{L}/u.test(lat[i])?lat[i]:'';}
+    else if(want==='cyr'&&/[a-zäöüß]/i.test(ch)){const i=lat.indexOf(lo);m=i>=0?RU_KEYS[i]:'';if(beT&&m==='щ')m='ў';if(beT&&m==='и')m='і';}
+    out+=m===null?ch:(up?m.toUpperCase():m);}
+  return out;
+}
+
+/* ===================== scheduling ===================== */
+function toReview(w){
+  const st=S.settings.repeat.stages;
+  if(S.settings.repeat.enabled&&st.length){w.st='review';w.stage=1;w.hits=0;w.due=dayStart(st[0].after);w.dl=dayStart(Math.max(st[0].deadline,st[0].after));return'learned';}
+  w.st='done';return'done';
+}
+function dropBack(w){w.st='learning';w.sc=Math.round(G().threshold/2);w.stage=0;w.hits=0;w.due=0;w.dl=0;}
+let lastNote=null;
+function restInfo(w,now=Date.now()){const g=G();if(w.st!=='learning')return null;
+  if(g.dailyCap>0&&w.dayK===dayKey(now)&&(w.dayPts||0)>=g.dailyCap)return{k:'cap'};
+  if(g.minGap>0&&w.lastPts&&now-w.lastPts<g.minGap*60000)return{k:'gap',until:w.lastPts+g.minGap*60000};return null;}
+const resting=(w,now)=>!!restInfo(w,now);
+const hhmm=ts=>{try{return new Date(ts).toLocaleTimeString(LOCALE[L]||'en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return new Date(ts).toTimeString().slice(0,5);}};
+function restLabel(w){const r=restInfo(w);return !r?'':r.k==='cap'?t('pill_cap'):t('pill_gap',{h:hhmm(r.until)});}
+function applyResult(w,type,correct,cost){
+  const e=S.settings.ex[type],g=G();let ev=null;lastNote=null;
+  w.last=Date.now();if(correct)w.ok++;else w.err++;
+  if(w.st==='new')w.st='learning';
+  if(w.st==='review'){
+    if(correct){w.hits++;const st=S.settings.repeat.stages,cur=st[w.stage-1];
+      if(!cur||w.hits>=cur.times){
+        if(w.stage<st.length){const nx=st[w.stage];w.stage++;w.hits=0;w.due=dayStart(nx.after);w.dl=dayStart(Math.max(nx.deadline,nx.after));ev='stage';}
+        else{w.st='done';ev='done';}
+      }
+    }else{dropBack(w);ev='dropped';}
+  }else if(w.st==='learning'){
+    if(correct){
+      const today=dayKey();if(w.dayK!==today){w.dayK=today;w.dayPts=0;}
+      let add=Math.max(0,e.plus-(cost||0));
+      if(g.minGap>0&&w.lastPts&&Date.now()-w.lastPts<g.minGap*60000){add=0;lastNote='gap';}
+      else if(g.dailyCap>0&&w.dayPts+add>g.dailyCap){add=Math.max(0,g.dailyCap-w.dayPts);if(!add)lastNote='cap';}
+      w.sc+=add;w.dayPts+=add;if(add>0)w.lastPts=Date.now();
+    }
+    else w.sc=g.resetOnError?0:Math.max(0,w.sc-e.minus);
+    if(w.sc>=g.threshold){w.sc=g.threshold;ev=toReview(w);}
+  }
+  const k=dayKey();const Lg=S.log[k]||(S.log[k]={n:0,ok:0});Lg.n++;if(correct)Lg.ok++;
+  S.lastActiveDay=k;return ev;
+}
+function maintain(){
+  const now=Date.now(),today=dayKey();
+  if(S.settings.repeat.overdueBack)for(const w of S.words)if(w.st==='review'&&w.dl&&now>w.dl)dropBack(w);
+  const f=S.settings.forget;
+  if(f.enabled&&S.lastActiveDay&&S.lastActiveDay<today){
+    const missed=daysBetween(S.lastActiveDay,today)-1,pdays=Math.max(0,missed-f.grace);
+    const prev=S.decay&&S.decay.from===S.lastActiveDay?S.decay.days:0,delta=pdays-prev;
+    if(delta>0){for(const w of S.words)if(w.st==='learning')w.sc=Math.max(0,w.sc-f.perDay*delta);S.decay={from:S.lastActiveDay,days:pdays};}
+  }
+  const keys=Object.keys(S.log).sort();if(keys.length>400)keys.slice(0,keys.length-400).forEach(k=>delete S.log[k]);
+  save();
+}
+function pickNew(pool,k){
+  if(k<=0)return[];const g=G();const ids=new Set(pool.filter(w=>w.st==='new').map(w=>w.id));
+  if(g.newMode==='sequential'){
+    for(const d of S.dicts.filter(d=>d.active)){
+      let ws=S.words.filter(w=>ids.has(w.id)&&w.dicts.includes(d.id));if(!ws.length)continue;
+      if(!g.learnInOrder)ws=shuffle(ws);return ws.slice(0,k).map(w=>w.id);
+    }return[];
+  }
+  let ws=S.words.filter(w=>ids.has(w.id));if(!g.learnInOrder)ws=shuffle(ws);return ws.slice(0,k).map(w=>w.id);
+}
+function nounOf(w){const x=String(w.w).trim();if(/\bPl\.?(\b|$)|\(pl\)/i.test(x))return null;const m=x.match(/^(der|die|das)\s+([^,;(\/]+)/i);return m&&m[2].trim()?{a:m[1].toLowerCase(),n:m[2].trim()}:null;}
+const artConf=w=>(w.aRun||0)>=S.settings.ex.article.confident;
+function buildArticleRound(){
+  const nouns=activeWords().filter(nounOf),n=S.settings.ex.article.perRound;
+  const weak=shuffle(nouns.filter(w=>!artConf(w))).sort((a,b)=>(b.aErr||0)-(a.aErr||0)||((a.st==='new')-(b.st==='new')));
+  const conf=shuffle(nouns.filter(artConf));
+  return shuffle([...weak.slice(0,n),...conf.slice(0,Math.max(0,n-weak.length))]).map(w=>w.id);
+}
+function poolFor(type){
+  let p=activeWords();
+  if(type==='article')return p.filter(nounOf);
+  if(type==='dictation'&&S.settings.ex.dictation.mode==='phrase')p=p.filter(w=>exList(w).some(x=>phraseOk(x.ex)));
+  if(type==='cloze')p=p.filter(clozeOk);
+  else if(type==='phrase')p=p.filter(w=>exList(w).some(x=>phraseOk(x.ex)));
+  return p;
+}
+function buildRound(type){
+  const g=G(),now=Date.now(),pool=poolFor(type),n=g.perRound;
+  const due=pool.filter(w=>w.st==='review'&&w.due<=now).sort((a,b)=>a.due-b.due).map(w=>w.id);
+  const learning=pool.filter(w=>w.st==='learning').sort((a,b)=>(resting(a,now)-resting(b,now))||a.sc-b.sc||b.err-a.err).map(w=>w.id);
+  const learningAll=activeWords().filter(w=>w.st==='learning').length;
+  const free=Math.max(0,g.inLearning-learningAll);
+  const newIds=pickNew(pool,free),out=[];
+  const take=(arr,k)=>{for(const id of arr){if(out.length>=n||k<=0)break;if(!out.includes(id)){out.push(id);k--;}}};
+  const retry=pool.filter(w=>w.retry&&w.st!=='done').map(w=>w.id);take(retry,n);
+  take(due,Math.round(n*g.reviewShare/100));
+  take(newIds,Math.min(free,Math.ceil(n*.34)));
+  take(learning,n);take(newIds,n);take(due,n);
+  const rs=new Set(retry);return [...shuffle(out.filter(id=>rs.has(id))),...shuffle(out.filter(id=>!rs.has(id)))];
+}
+function pickDir(){const d=G().direction;return d==='both'?(Math.random()<.5?'toForeign':'toNative'):d;}
+function distractors(w,field,k){
+  const val=w[field],nv=norm(val);
+  const sc=S.words.filter(x=>x.id!==w.id&&x[field]&&norm(x[field])!==nv)
+    .map(x=>({x,s:Math.abs(x[field].length-val.length)/Math.max(4,val.length)+(x.dicts.some(d=>w.dicts.includes(d))?0:.5)+Math.random()*.6}))
+    .sort((a,b)=>a.s-b.s);
+  const out=[],seen=new Set([nv]);
+  for(const{x}of sc){const n=norm(x[field]);if(seen.has(n))continue;seen.add(n);out.push(x[field]);if(out.length>=k)break;}
+  return out;
+}
+
+/* ===================== speech ===================== */
+let VOICES=[];
+function loadVoices(){try{VOICES=speechSynthesis.getVoices()||[];}catch(e){VOICES=[];}}
+function pickVoice(lang,name){const l=(lang||'').toLowerCase();if(name){const v=VOICES.find(v=>v.name===name);if(v)return v;}
+  return VOICES.find(v=>v.lang.toLowerCase().replace('_','-')===l)||VOICES.find(v=>v.lang.toLowerCase().startsWith(l.slice(0,2)));}
+function speak(text,foreign=true,o={}){
+  const a=S.settings.audio;if((!a.on&&!o.force)||!('speechSynthesis' in window)||!text)return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(stripTags(stripBraces(text)));u.lang=foreign?a.langF:a.langN;
+    const v=pickVoice(u.lang,foreign?a.voiceF:'');if(v)u.voice=v;u.rate=a.rate*(o.slow?0.65:1);speechSynthesis.speak(u);}catch(e){}
+}
+const autoSay=x=>{if(S.settings.audio.autoSpeak)speak(x,true);};
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+/* ===================== UI shell ===================== */
+const view=$('#view');let toastT=null;
+function toast(msg,ms=3200,act){const el=$('#toast');el.textContent='';const sp=document.createElement('span');sp.textContent=msg;el.appendChild(sp);
+  if(act){const b=document.createElement('button');b.className='tbtn';b.textContent=act.label;b.onclick=()=>{el.hidden=true;act.fn();};el.appendChild(b);}
+  el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,ms);}
+function setView(v){S.ui.view=v;save();render();}
+function renderChrome(){
+  document.documentElement.lang=L;
+  $('#sub').textContent=t('sub');
+  $('nav.views').setAttribute('aria-label',t('nav_aria'));
+  document.querySelectorAll('nav.views button').forEach(b=>{b.textContent=t('nav_'+b.dataset.view);});
+  drawStreak();
+}
+function render(){
+  view.onchange=null;if(R)clearTimeout(R.timer);
+  document.querySelectorAll('nav.views button').forEach(b=>{b.classList.toggle('on',b.dataset.view===S.ui.view);b.setAttribute('aria-current',b.dataset.view===S.ui.view?'page':'false');});
+  ({learn:renderLearn,dicts:renderDicts,progress:renderProgress,settings:renderSettings,help:renderHelp}[S.ui.view]||renderLearn)();
+}
+document.querySelector('nav.views').addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(b)setView(b.dataset.view);});
+$('#streak').addEventListener('click',()=>setView('progress'));
+function armed(btn,fn){
+  if(btn.dataset.armed){fn();return;}
+  const old=btn.textContent;btn.dataset.armed='1';btn.classList.add('armed');btn.textContent=t('tap_again');
+  setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.classList.remove('armed');btn.textContent=old;}},3000);
+}
+
+/* ===================== LEARN ===================== */
+let R=null;
+function renderLearn(){
+  const on=EXIDS.filter(id=>S.settings.ex[id].on);
+  if(!on.length){view.innerHTML=`<div class="task empty"><b>${t('all_off')}</b><span>${t('all_off2')}</span></div>`;return;}
+  if(!on.includes(S.ui.ex))S.ui.ex=on[0];
+  view.innerHTML=`<div class="chips" role="tablist" aria-label="${t('ex_aria')}">${on.map(id=>`<button class="chip${id===S.ui.ex?' on':''}" role="tab" aria-selected="${id===S.ui.ex}" data-ex="${id}">${exName(id)}</button>`).join('')}</div>
+  <div class="stat" id="stat"></div><section class="task" id="task" aria-live="polite"></section>`;
+  view.querySelector('.chips').addEventListener('click',e=>{const b=e.target.closest('[data-ex]');if(!b)return;S.ui.ex=b.dataset.ex;save();R=null;renderLearn();});
+  bindTask();
+  $('#stat').addEventListener('pointerdown',e=>{if(e.target.closest('[data-act="know"]'))e.preventDefault();});
+  $('#stat').addEventListener('click',e=>{if(e.target.closest('[data-act="know"]'))knowCurrent();});
+  if(!R||R.type!==S.ui.ex)startRound(S.ui.ex);else drawTask();
+}
+function markKnown(w){Object.assign(w,{st:'known',sc:0,stage:0,hits:0,due:0,dl:0,retry:false});}
+function knowCurrent(){
+  const c=R&&R.cur;if(!c||c.done||!c.w)return;clearTimeout(c.pend);clearTimeout(R.timer);
+  const w=c.w,prev=JSON.parse(JSON.stringify(w)),round=R;markKnown(w);save();
+  toast(t('t_known',{w:w.w}),5000,{label:t('undo'),fn:()=>{Object.assign(w,prev);save();if(R===round)R.queue.unshift(w.id);}});
+  nextTask();
+}
+function startRound(type){
+  const ids=type==='article'?buildArticleRound():buildRound(type);
+  R={type,queue:ids,total:ids.length,ok:0,bad:0,requeued:new Set(),learned:0,cur:null,timer:null};
+  nextTask();
+}
+const task=()=>$('#task');
+function nextTask(){
+  if(!R)return;clearTimeout(R.timer);
+  if(R.type==='mosaic'){
+    if(!R.queue.length){R.cur=null;return drawEnd();}
+    const n=S.settings.ex.mosaic.pairs,k=R.queue.length===n+1?n+1:n;
+    const ws=R.queue.splice(0,k).map(id=>S.words.find(w=>w.id===id)).filter(Boolean);const filler=new Set();ws.forEach(w=>{w.retry=false;});
+    if(ws.length===1){const f=shuffle(activeWords().filter(w=>w.id!==ws[0].id))[0]||shuffle(S.words.filter(w=>w.id!==ws[0].id))[0];if(f){ws.push(f);filler.add(f.id);}}
+    if(!ws.length){R.cur=null;return drawEnd();}
+    R.cur={kind:'mosaic',chunk:ws,filler,left:shuffle(ws.map(w=>w.id)),right:shuffle(ws.map(w=>w.id)),matched:new Set(),errs:new Set(),sel:null};
+    return drawTask();
+  }
+  if(!R.queue.length){R.cur=null;return drawEnd();}
+  const nid=R.queue.shift();const w=S.words.find(x=>x.id===nid);if(!w)return nextTask();
+  if(w.st==='known'&&R.type!=='article')return nextTask();
+  if(w.retry){w.retry=false;save();}
+  const c=R.cur={w,err:false,cost:0,done:false,fixes:[],answers:[]};
+  const ex=S.settings.ex[R.type];
+  NP=false;
+  if(R.type==='article'){c.art=nounOf(w);if(!c.art)return nextTask();}
+  else if(R.type==='dictation'){const m=ex.mode==='mixed'?(Math.random()<.5?'word':'phrase'):ex.mode;const x=m==='phrase'?pickEx(w,phraseOk):null;
+    if(x){c.phrase=true;c.say=stripBraces(x.ex).replace(/\s+/g,' ').trim();c.targets=[c.say];c.exT=x.exT;NP=true;}
+    else{c.say=primary(w.w);c.targets=[c.say,...alts(w.w).filter(a=>a!==c.say)];}}
+  else if(R.type==='choice'){c.dir=pickDir();const f=c.dir==='toForeign'?'w':'t';c.answer=w[f];c.prompt=c.dir==='toForeign'?w.t:w.w;c.options=shuffle([w[f],...distractors(w,f,ex.options-1)]);}
+  else if(R.type==='writing'){c.dir=pickDir();const fo=c.dir==='toForeign';c.targets=alts(fo?w.w:w.t);c.prompt=fo?w.t:w.w;c.primary=fo?primary(w.w):primary(w.t);
+    if(ex.showLength)c.cost+=ex.costLength;if(ex.showFirst)c.cost+=ex.costFirst;}
+  else if(R.type==='letters'){c.target=[...primary(w.w)];c.pos=0;while(c.target[c.pos]===' ')c.pos++;c.tiles=shuffle(c.target.map((ch,i)=>({ch,i})).filter(x=>x.ch!==' '));c.used=new Set();}
+  else if(R.type==='cloze'){const x=pickEx(w,e=>!!clozeOf(w,e));c.ex=x.ex;c.exT=x.exT;c.parts=parseCloze(clozeOf(w,x.ex));c.gaps=c.parts.filter(p=>p.gap!=null).map(p=>p.gap);c.gi=0;c.typed='';if(ex.showBase)c.cost+=ex.costBase;}
+  else if(R.type==='phrase'){const x=pickEx(w,phraseOk);c.ex=x.ex;c.exT=x.exT;c.tokens=stripBraces(x.ex).replace(/\s+/g,' ').trim().split(' ');c.pos=0;c.tiles=shuffle(c.tokens.map((x,i)=>({t:x,i})));c.used=new Set();}
+  drawTask();
+}
+function statusBar(){
+  const st=$('#stat');if(!st||!R)return;
+  const left=R.queue.length+(R.cur&&!R.cur.done&&R.cur.kind!=='mosaic'?1:0)+(R.cur&&R.cur.kind==='mosaic'?R.cur.chunk.length-R.cur.matched.size:0);
+  let chip='';const w=R.cur&&R.cur.w;
+  if(w){chip=w.st==='new'?`<span class="pill new">${t('pill_new')}</span>`:w.st==='learning'?`<span class="pill learning">${t('pill_score',{s:w.sc,t:G().threshold})}</span>`:w.st==='review'?`<span class="pill review">${t('pill_rev',{a:w.stage,b:S.settings.repeat.stages.length})}</span>`:`<span class="pill done">${t('pill_done')}</span>`;}
+  if(R.type==='article')chip='';
+  const kb=w&&R.cur&&!R.cur.done&&R.cur.kind!=='mosaic'&&R.type!=='article'&&w.st!=='done'&&w.st!=='known'?`<button class="knowbtn" data-act="know">${t('know')}</button>`:'';
+  st.innerHTML=`<span>${t('st_left')} <b>${left}</b></span><span>${t('st_ok')} <b>${R.ok}</b></span><span>${t('st_bad')} <b>${R.bad}</b></span>${chip}${kb}`;
+}
+function prompt(label,text,{sm=false,foreign=false,lang=''}={}){
+  return `<div class="prompt"><div class="prompt-body"><span class="label">${label}</span><div class="prompt-main${sm?' sm':''}"${lang?` lang="${lang}"`:''}>${esc(text)}</div></div>${foreign?`<button class="say" data-act="say" aria-label="${t('say')}">${SPK}</button>`:''}</div>`;
+}
+const exampleLine=w=>{const xs=exList(w);if(!xs.length)return '';const x=xs[Math.floor(Math.random()*xs.length)];return `<span class="ex"><i lang="de">${esc(stripBraces(x.ex))}</i>${x.exT?' — '+esc(x.exT):''}</span>`;};
+function evMsg(ev){const d=R&&R.cur&&R.cur.w?fmtDate(R.cur.w.due):'';const m=ev==='learned'?t('ev_learned',{d}):ev==='stage'?t('ev_stage',{d}):ev==='done'?t('ev_done'):ev==='dropped'?t('ev_dropped'):'';return m;}
+function finish(correct){
+  const c=R.cur;c.done=true;
+  const ev=applyResult(c.w,R.type,correct,c.cost);
+  if(correct)R.ok++;else{R.bad++;
+    if(R.type==='choice'){if(!R.requeued.has(c.w.id)){R.requeued.add(c.w.id);R.queue.push(c.w.id);}}
+    else if(!c.w.retry){c.w.retry=true;R.retry=(R.retry||0)+1;}}
+  if(ev==='learned')R.learned++;
+  afterResult(c.w,ev);save();statusBar();return ev;
+}
+const MILES=[50,100,250,500,1000,2000];
+function afterResult(w,ev){
+  if(ev==='learned'&&w.err>=10)toast(t('t_won',{w:w.w}),4000);
+  const done=S.words.filter(x=>x.st==='done').length;
+  for(const m of MILES)if(done>=m&&!S.miles[m]){S.miles[m]=dayKey();const pr=(S.settings.prizes[m]||'').trim();toast(t('t_mile',{m})+(pr?t('t_prize',{p:pr}):''),7000);}
+  drawStreak();
+}
+function streakInfo(){
+  let cur=0;for(let i=0;i<400;i++){const n=(S.log[dayKey(dayStart(-i))]||{}).n||0;if(n)cur++;else if(i>0)break;}
+  let best=0,run=0,prev=null;for(const k of Object.keys(S.log).sort()){if(!(S.log[k].n>0))continue;run=prev&&daysBetween(prev,k)===1?run+1:1;prev=k;best=Math.max(best,run);}
+  S.best=Math.max(S.best||0,best,cur);
+  return{cur,best:S.best,today:(S.log[dayKey()]||{}).n||0,goal:Math.max(1,G().dailyGoal)};
+}
+function ring(size,frac,label,sw=4){const r=size/2-sw/2-1,C=2*Math.PI*r,h=size/2;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${h}" cy="${h}" r="${r}" fill="none" style="stroke:var(--surface2)" stroke-width="${sw}"/><circle cx="${h}" cy="${h}" r="${r}" fill="none" style="stroke:var(--p-review)" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-Math.min(1,frac))).toFixed(1)}" transform="rotate(-90 ${h} ${h})"/><text x="${h}" y="${h}" text-anchor="middle" dominant-baseline="central" style="fill:var(--fg);font:600 ${Math.round(size*.36)}px var(--font-ui)">${label}</text></svg>`;}
+function drawStreak(){const el=$('#streak');if(!el||!S)return;const s=streakInfo();el.innerHTML=ring(38,s.today/s.goal,s.cur);const a=t('streak_aria',{n:s.cur,d:pw(s.cur,'days'),a:s.today,g:s.goal});el.setAttribute('aria-label',a);el.title=a;}
+function scheduleNext(correct){if(correct&&G().autoNext)R.timer=setTimeout(nextTask,G().nextDelay);}
+function drawTask(){
+  if(!task())return;statusBar();if(!R.cur)return drawEnd();
+  ({choice:drawChoice,mosaic:drawMosaic,writing:drawInput,dictation:drawInput,cloze:drawInput,letters:drawLetters,phrase:drawPhrase,article:drawArticle})[R.type]();
+}
+function drawEnd(){
+  const tk=task();if(!tk)return;tk.dataset.kind='';statusBar();
+  if(R.total===0){
+    let msg;const act=activeDictIds().length;
+    if(!S.dicts.length)msg=`<b>${t('e_nodicts')}</b><span>${t('e_nodicts2')}</span>`;
+    else if(!act)msg=`<b>${t('e_noact')}</b><span>${t('e_noact2')}</span>`;
+    else if(R.type==='article'&&!poolFor('article').length)msg=`<b>${t('e_nonouns')}</b><span>${t('e_nonouns2')}</span>`;
+    else if((R.type==='cloze'||R.type==='phrase'||R.type==='dictation')&&!poolFor(R.type).length)msg=`<b>${t('e_noex')}</b><span>${R.type==='cloze'?t('e_noex_cloze'):t('e_noex_phrase')}</span>`;
+    else if(R.type==='mosaic'&&poolFor('mosaic').length<2)msg=`<b>${t('e_mosaic')}</b>`;
+    else{const nx=activeWords().filter(w=>w.st==='review').sort((a,b)=>a.due-b.due)[0];
+      msg=`<b>${t('e_nothing')}</b><span>${t('e_nothing2')}${nx?t('e_next',{d:fmtDate(nx.due)}):''}</span>`;}
+    tk.innerHTML=`<div class="empty">${msg}<button class="btn" data-act="dicts">${t('open_dicts')}</button></div>`;return;
+  }
+  tk.innerHTML=`<div class="summary"><h2>${t('round_done')}</h2>
+  <p>${t('round_res',{n:R.ok+R.bad,ok:R.ok})}${R.learned?t('round_learned',{n:R.learned,w:pw(R.learned,'words')}):''}</p>
+  <div class="actions"><button class="btn primary" data-act="again">${t('next_round')}</button></div></div>`;
+  tk.querySelector('[data-act="again"]').focus();
+}
+function bindTask(){
+  const tk=task();
+  tk.addEventListener('pointerdown',e=>{if(e.target.closest('[data-keep]'))e.preventDefault();});
+  tk.addEventListener('click',onTaskClick);
+}
+function onTaskClick(e){
+  const b=e.target.closest('[data-act]');if(!b||!R)return;const act=b.dataset.act,c=R.cur;
+  if(act==='again'){startRound(R.type);return;}
+  if(act==='dicts'){setView('dicts');return;}
+  if(act==='next'){nextTask();return;}
+  if(act==='say'){if(c&&c.w)speak(R.type==='phrase'||R.type==='cloze'?c.ex:c.w.w,true);return;}
+  if(act==='play'||act==='slow'){if(c&&c.say)speak(c.say,true,{force:true,slow:act==='slow'});const i=$('#answer');if(i)try{i.focus({preventScroll:true});}catch(e){}return;}
+  if(act==='art')return pickArticle(+b.dataset.i,b);
+  if(act==='opt')return pickOption(+b.dataset.i,b);
+  if(act==='mt')return mosaicTap(b);
+  if(act==='tile')return R.type==='letters'?letterTap(+b.dataset.i,b):phraseTap(+b.dataset.i,b);
+  if(act==='key'){const inp=$('#answer');if(inp){const s=inp.selectionStart??inp.value.length,en=inp.selectionEnd??s;inp.value=inp.value.slice(0,s)+b.dataset.k+inp.value.slice(en);inp.setSelectionRange(s+1,s+1);inp.dispatchEvent(new Event('input'));}return;}
+  if(act==='check')return checkInput();
+  if(act==='hint')return hintInput();
+  if(act==='skip')return skipInput();
+  if(act==='skip-l'){if(c&&!c.done){c.err=true;c.pos=c.target.length;letterDone();}return;}
+  if(act==='skip-p'){if(c&&!c.done){c.err=true;c.pos=c.tokens.length;phraseDone();}return;}
+}
+
+/* ---- choice ---- */
+function drawChoice(){
+  const c=R.cur,tk=task();tk.dataset.kind='choice';const fo=c.dir==='toNative';
+  tk.innerHTML=prompt(fo?t('lbl_word'):t('lbl_tr'),c.prompt,{foreign:fo,lang:fo?'de':''})+
+   `<div class="options">${c.options.map((o,i)=>`<button class="opt" data-act="opt" data-i="${i}"${c.dir==='toForeign'?' lang="de"':''}><span class="n">${i+1}</span><span>${esc(o)}</span></button>`).join('')}</div><div class="feedback" id="fb"></div>`;
+  if(fo)autoSay(c.w.w);
+}
+function pickOption(i,btn){
+  const c=R.cur;if(c.done)return;const ok=c.options[i]===c.answer;
+  task().querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(c.options[j]===c.answer)b.classList.add('right');});
+  if(!ok)btn.classList.add('wrong');
+  const ev=finish(ok);if(c.dir==='toForeign'||!ok)autoSay(c.w.w);
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:`<span class="err">${t('wrong')}</span>`)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+exampleLine(c.w)+(ok&&G().autoNext?'':`<div class="actions"><button class="btn primary" data-act="next">${t('next')}</button></div>`);
+  if(!(ok&&G().autoNext))$('#fb [data-act="next"]').focus();
+  scheduleNext(ok);
+}
+
+/* ---- mosaic ---- */
+function drawMosaic(){
+  const c=R.cur,tk=task();tk.dataset.kind='mosaic';const W=id=>c.chunk.find(w=>w.id===id);
+  const btn=(id,side)=>`<button class="mt${side==='l'?' f':''}${c.matched.has(id)?' done':''}${c.sel&&c.sel.id===id&&c.sel.side===side?' sel':''}" data-act="mt" data-side="${side}" data-id="${id}"${side==='l'?' lang="de"':''}>${esc(side==='l'?W(id).w:W(id).t)}</button>`;
+  tk.innerHTML=`<span class="label">${t('mosaic_lbl')}</span><div class="mosaic"><div class="mcol">${c.left.map(id=>btn(id,'l')).join('')}</div><div class="mcol">${c.right.map(id=>btn(id,'r')).join('')}</div></div><div class="feedback" id="fb"></div>`;
+}
+function mosaicTap(b){
+  const c=R.cur,id=b.dataset.id,side=b.dataset.side;if(c.matched.has(id))return;
+  if(!c.sel||c.sel.side===side){c.sel=(c.sel&&c.sel.id===id&&c.sel.side===side)?null:{id,side};if(side==='l'&&c.sel)speak(c.chunk.find(w=>w.id===id).w);return drawMosaic();}
+  const a=c.sel;c.sel=null;
+  if(a.id===id){
+    c.matched.add(id);const w=c.chunk.find(x=>x.id===id);
+    if(!c.filler.has(id)){R.cur.w=w;const ok=!c.errs.has(id);const mev=applyResult(w,'mosaic',ok,0);afterResult(w,mev);if(ok)R.ok++;else{R.bad++;if(!R.requeued.has(id)){R.requeued.add(id);R.queue.push(id);}}save();}
+    autoSay(w.w);drawMosaic();statusBar();
+    if(c.matched.size===c.chunk.length)R.timer=setTimeout(nextTask,600);
+  }else{
+    const lid=a.side==='l'?a.id:id;c.errs.add(lid);drawMosaic();
+    task().querySelectorAll(`[data-id="${a.id}"][data-side="${a.side}"],[data-id="${id}"][data-side="${side}"]`).forEach(x=>x.classList.add('bad'));
+  }
+}
+
+/* ---- writing & cloze (shared input, kept between tasks so the iPhone keyboard stays open) ---- */
+function drawInput(){
+  const c=R.cur,tk=task(),ex=S.settings.ex[R.type];
+  if(!c.fixes){c.fixes=[];c.answers=[];}
+  if(tk.dataset.kind!==R.type){
+    tk.dataset.kind=R.type;
+    tk.innerHTML=`<div id="pr"></div><div id="sent"></div><div class="hintline" id="hl"></div>
+    <div class="ansbox"><input class="answer" id="answer" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-label="${t('your_answer_aria')}">
+    <div class="under"><div class="corr" id="corr" lang="de" aria-live="polite"></div><span class="lay" id="lay" hidden>${t('layout_fixed')}</span></div></div>
+    <div class="keys" id="keys">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(k=>`<button class="key" data-act="key" data-keep data-k="${k}" tabindex="-1">${k}</button>`).join('')}</div>
+    <div class="actions" id="acts"></div><div class="feedback" id="fb"></div>`;
+    const inp=$('#answer');inp.addEventListener('input',onInput);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();if(R.cur&&R.cur.done)nextTask();else checkInput();}});
+  }
+  const inp=$('#answer');inp.value='';inp.classList.remove('bad','good');
+  let foreignAns=true;
+  if(R.type==='dictation'){
+    const can='speechSynthesis' in window;
+    $('#pr').innerHTML=can?`<div class="listen"><span class="label">${t('lbl_listen')}</span><div class="row"><button class="btn primary play" data-act="play" data-keep>${SPK}${t('b_play')}</button><button class="btn" data-act="slow" data-keep>${t('b_slow')}</button></div>${ex.showTr?`<span class="sub-inline">${esc(c.phrase?c.exT:c.w.t)}</span>`:''}</div>`:`<div class="empty"><b>${t('e_noaudio')}</b></div>`;
+    $('#sent').innerHTML='';$('#hl').textContent='';
+    if(can)speak(c.say,true,{force:true});
+  }else if(R.type==='writing'){
+    foreignAns=c.dir==='toForeign';
+    $('#pr').innerHTML=prompt(foreignAns?t('lbl_tr'):t('lbl_word'),c.prompt,{foreign:!foreignAns,lang:foreignAns?'':'de'});
+    $('#sent').innerHTML='';
+    $('#hl').textContent=(ex.showFirst?c.primary[0]:'')+(ex.showLength?' '+[...c.primary].slice(ex.showFirst?1:0).map(ch=>ch===' '?'  ':'_').join(' '):'');
+    if(!foreignAns)autoSay(c.w.w);
+  }else{
+    $('#pr').innerHTML=prompt(t('lbl_trs'),c.exT||'—',{sm:true});
+    $('#hl').innerHTML=ex.showBase?`<span class="base">(${esc(c.w.w)} — ${esc(c.w.t)})</span>`:'';
+    drawSentence();
+  }
+  inp.lang=foreignAns?'de':L;
+  $('#corr').lang=foreignAns?'de':L;
+  $('#keys').hidden=!(foreignAns&&/^de/i.test(S.settings.audio.langF));
+  $('#acts').innerHTML=`<button class="btn primary" data-act="check" data-keep>${t('btn_check')}</button><button class="btn" data-act="hint" data-keep>${t('btn_letter')}</button><button class="btn" data-act="skip" data-keep>${t('btn_skip')}</button>`;
+  $('#fb').innerHTML='';corr('');
+  if(document.activeElement!==inp)try{inp.focus({preventScroll:true});}catch(e){}
+}
+function corr(text){const m=$('#corr');if(m)m.textContent=text||'';}
+let layT=null;
+function flashLayout(){const l=$('#lay');if(!l)return;l.hidden=false;clearTimeout(layT);layT=setTimeout(()=>{l.hidden=true;},1600);}
+function marked(text,g){
+  const fx=R.cur.fixes.filter(f=>f.g===g);
+  return [...String(text)].map((x,i)=>{const f=fx.find(f=>f.i===i);return f?`<mark class="${f.hint?'hint':'fix'}">${esc(x)}</mark>`:esc(x);}).join('');
+}
+function drawSentence(){
+  const c=R.cur,ex=S.settings.ex.cloze;let gi=0;const n=c.gaps.length;
+  $('#sent').innerHTML=(n>1?`<span class="label">${t('gap_n',{i:Math.min(c.gi+1,n),n})}</span>`:'')+`<div class="sentence" lang="de">${c.parts.map(p=>{
+    if(p.text!=null)return esc(p.text);const i=gi++;
+    if(i<c.gi||c.done){
+      if(c.answers[i]!=null){const warn=c.fixes.some(f=>f.g===i);return `<span class="gap done${warn?' warn':''}">${marked(c.answers[i],i)}</span>`;}
+      return `<span class="gap shown">${esc(p.gap)}</span>`;
+    }
+    if(i===c.gi){const typed=c.typed||'';const rest=Math.max(0,[...p.gap].length-[...typed].length);return `<span class="gap cur">${esc(typed)}${ex.showLength?`<span class="rest">${'_'.repeat(rest)}</span>`:(typed?'':'&nbsp;')}</span>`;}
+    return `<span class="gap">${ex.showLength?'<span class="rest">'+'_'.repeat([...p.gap].length)+'</span>':'&nbsp;'}</span>`;}).join('')}</div>`;
+}
+const curTargets=()=>R.type==='cloze'?[R.cur.gaps[R.cur.gi]]:R.cur.targets;
+const gIdx=()=>R.type==='cloze'?R.cur.gi:0;
+function reveal(lbl){const c=R.cur;const ans=R.type==='cloze'?c.gaps[c.gi]:c.targets[0];const fb=$('#fb');if(fb&&!fb.querySelector('.rv'))fb.insertAdjacentHTML('afterbegin',`<span class="rv">${lbl}: <b lang="de">${esc(ans)}</b></span>`);}
+function noteFix(i,got){const c=R.cur;if(!c.fixes.some(f=>f.g===gIdx()&&f.i===i))c.fixes.push({g:gIdx(),i,got});c.err=true;}
+function onInput(e){
+  const c=R.cur;if(!c||c.done)return;const inp=e.target,ex=S.settings.ex[R.type];
+  clearTimeout(c.pend);
+  const lf=fixLayout(inp.value,curTargets()[0]);if(lf!==inp.value){inp.value=lf;flashLayout();}
+  const r=checkTyped(inp.value,curTargets());
+  if(r.state==='wrong'){
+    noteFix(r.lcp,norm(inp.value)[r.lcp]||'');
+    corr(ex.letterOnError?origPrefix(r.alt,r.lcp+1):'');
+    if(ex.wordOnError)reveal(t('hint_lbl'));
+  }else corr('');
+  inp.classList.toggle('bad',r.state==='wrong');inp.classList.toggle('good',r.state==='ok');
+  if(R.type==='cloze'){c.typed=inp.value;drawSentence();}
+  if(r.state==='ok'){
+    const lastGap=R.type!=='cloze'||c.gi>=c.gaps.length-1;
+    if(!lastGap||G().autoEnter)c.pend=setTimeout(()=>{if(R&&R.cur===c&&!c.done)accept();},G().autoEnterDelay);
+  }
+}
+function hintInput(){
+  const c=R.cur;if(!c||c.done)return;const inp=$('#answer'),ex=S.settings.ex[R.type];
+  const r=checkTyped(inp.value,curTargets());
+  if(r.state==='ok'){clearTimeout(c.pend);accept();return;}
+  const k=r.state==='wrong'?r.lcp+1:norm(inp.value).length+1;
+  const fx=origPrefix(r.alt,k);inp.value=fx;c.cost+=(ex.costLetter||3);
+  c.fixes.push({g:gIdx(),i:[...fx].length-1,hint:true});
+  inp.dispatchEvent(new Event('input'));
+  try{inp.focus({preventScroll:true});}catch(e){}
+}
+function checkInput(){
+  const c=R.cur;if(!c||c.done)return;const inp=$('#answer'),ex=S.settings.ex[R.type];
+  clearTimeout(c.pend);
+  if(!inp.value.trim())return;
+  const r=checkTyped(inp.value,curTargets());
+  if(r.state==='ok')return accept();
+  if(r.state==='prefix'){const fx=origPrefix(r.alt,norm(inp.value).length+1);noteFix([...fx].length-1,'');corr(ex.letterOnError?fx:'');}
+  else{noteFix(r.lcp,norm(inp.value)[r.lcp]||'');corr(ex.letterOnError?origPrefix(r.alt,r.lcp+1):'');}
+  inp.classList.add('bad');
+  if(ex.wordOnError)reveal(t('hint_lbl'));
+}
+function skipInput(){const c=R.cur;if(!c||c.done)return;clearTimeout(c.pend);c.err=true;c.skipped=true;complete();}
+function accept(){
+  const c=R.cur,inp=$('#answer');clearTimeout(c.pend);corr('');
+  if(R.type==='cloze'){
+    c.answers[c.gi]=inp.value;c.gi++;c.typed='';inp.value='';inp.classList.remove('good','bad');
+    if(c.gi<c.gaps.length){drawSentence();return;}
+  }else c.answers[0]=inp.value;
+  complete();
+}
+function complete(){
+  const c=R.cur,inp=$('#answer');const ok=!c.err;
+  inp.classList.remove('bad','good');inp.classList.add(ok?'good':'bad');corr('');
+  if(R.type==='cloze'){c.typed='';inp.value='';c.done=true;drawSentence();}
+  else if(c.skipped)inp.value='';
+  const ev=finish(ok);
+  autoSay(R.type==='cloze'?c.ex:R.type==='dictation'?c.say:c.w.w);
+  const isW=R.type!=='cloze';
+  let h=ok?`<span class="ok">${t('correct')}</span>`:c.skipped?`<span class="err">${t('res_skip')}</span>`:'';
+  if(!ok&&!c.skipped&&isW)h+=`<span>${t('your_answer')} <b lang="${(R.type==='dictation'||c.dir==='toForeign')?'de':L}" class="mk">${marked(c.answers[0]||'',0)}</b></span>`;
+  if(c.skipped&&isW)h+=`<span>${t('right_answer')} <b>${esc(c.targets[0])}</b></span>`;
+  if(R.type==='dictation'&&c.phrase)h+=`<span><i lang="de">${esc(c.say)}</i>${c.exT?' — '+esc(c.exT):''}</span>`;
+  h+=`<span><b lang="de">${esc(c.w.w)}</b> — ${esc(c.w.t)}</span>`+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+(R.type==='writing'||(R.type==='dictation'&&!c.phrase)?exampleLine(c.w):'');
+  $('#fb').innerHTML=h;
+  $('#acts').innerHTML=ok&&G().autoNext?'':`<button class="btn primary" data-act="next" data-keep>${t('next')}</button>`;
+  scheduleNext(ok);
+}
+
+/* ---- der/die/das (does not change the word score) ---- */
+const ARTS=['der','die','das'];
+function drawArticle(){
+  const c=R.cur,tk=task();tk.dataset.kind='article';
+  tk.innerHTML=`<div class="prompt"><div class="prompt-body"><span class="label">${t('lbl_article')}</span><div class="prompt-main" lang="de">${esc(c.art.n)}</div><span class="sub-inline">${esc(c.w.t)}</span></div></div>
+  <div class="arts">${ARTS.map((a,i)=>`<button class="art" data-act="art" data-i="${i}" lang="de">${a}</button>`).join('')}</div><div class="feedback" id="fb"></div>`;
+}
+function pickArticle(i,btn){
+  const c=R.cur;if(!c||c.done)return;c.done=true;const ok=ARTS[i]===c.art.a,w=c.w;
+  task().querySelectorAll('.art').forEach((b,j)=>{b.disabled=true;if(ARTS[j]===c.art.a)b.classList.add('right');});
+  if(!ok)btn.classList.add('wrong');
+  if(ok){w.aRun=(w.aRun||0)+1;w.aOk=(w.aOk||0)+1;R.ok++;}
+  else{w.aRun=0;w.aErr=(w.aErr||0)+1;R.bad++;if(!R.requeued.has(w.id)){R.requeued.add(w.id);R.queue.push(w.id);}}
+  const k=dayKey();const Lg=S.log[k]||(S.log[k]={n:0,ok:0});Lg.n++;if(ok)Lg.ok++;S.lastActiveDay=k;
+  save();drawStreak();statusBar();speak(c.art.a+' '+c.art.n,true);
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:`<span class="err">${t('wrong')}</span>`)+`<span><b lang="de">${esc(c.art.a+' '+c.art.n)}</b> — ${esc(w.t)}</span>`+(ok&&G().autoNext?'':`<div class="actions"><button class="btn primary" data-act="next">${t('next')}</button></div>`);
+  if(!(ok&&G().autoNext))$('#fb [data-act="next"]').focus();
+  scheduleNext(ok);
+}
+
+/* ---- letters ---- */
+function drawLetters(){
+  const c=R.cur,tk=task();tk.dataset.kind='letters';
+  tk.innerHTML=prompt(t('lbl_tr'),c.w.t)+
+  `<div class="slots" lang="de" aria-label="${t('built_aria')}">${c.target.map((ch,i)=>ch===' '?'<span class="slot space"></span>':`<span class="slot${i<c.pos?' filled':''}">${i<c.pos?esc(ch):''}</span>`).join('')}</div>
+  <div class="tiles" lang="de">${c.tiles.map((x,k)=>`<button class="tile${c.used.has(k)?' used':''}" data-act="tile" data-i="${k}">${esc(x.ch)}</button>`).join('')}</div>
+  <div class="actions" id="acts"><button class="btn" data-act="skip-l">${t('btn_skip')}</button></div><div class="feedback" id="fb"></div>`;
+}
+const same=(a,b)=>G().caseSensitive?a===b:a.toLowerCase()===b.toLowerCase();
+function letterTap(k,btn){
+  const c=R.cur;if(c.done||c.used.has(k))return;const need=c.target[c.pos];
+  if(same(c.tiles[k].ch,need)){
+    c.used.add(k);c.pos++;while(c.target[c.pos]===' ')c.pos++;
+    if(c.pos>=c.target.length)return letterDone();drawLetters();
+  }else{
+    c.err=true;btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
+    if(S.settings.ex.letters.letterOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&same(x.ch,need));const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb)hb.classList.add('hinted');}
+  }
+}
+function letterTapKey(key){const c=R.cur;if(!c||c.done)return;key=fixLayout(key,c.target.join(''))||key;const k=c.tiles.findIndex((x,i)=>!c.used.has(i)&&same(x.ch,key));
+  if(k>=0&&same(key,c.target[c.pos]))letterTap(k,task().querySelector(`.tile[data-i="${k}"]`));else if(key.trim()){c.err=true;}}
+function letterDone(){
+  const c=R.cur;drawLetters();c.done=true;const ok=!c.err;const ev=finish(ok);autoSay(c.w.w);
+  task().querySelectorAll('.slot').forEach((s,i)=>{if(c.target[i]!==' ')s.textContent=c.target[i];});
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:'')+`<span><b lang="de">${esc(c.w.w)}</b> — ${esc(c.w.t)}</span>`+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+exampleLine(c.w);
+  $('#acts').innerHTML=ok&&G().autoNext?'':`<button class="btn primary" data-act="next">${t('next')}</button>`;
+  scheduleNext(ok);
+}
+
+/* ---- phrase ---- */
+function drawPhrase(){
+  const c=R.cur,tk=task();tk.dataset.kind='phrase';
+  tk.innerHTML=prompt(t('lbl_trs'),c.exT||'—',{sm:true})+
+  `<div class="built" lang="de">${c.tokens.slice(0,c.pos).map(x=>`<span>${esc(x)}</span>`).join('')}${c.pos<c.tokens.length?'<span class="ph">…</span>':''}</div>
+  <div class="tiles" lang="de">${c.tiles.map((x,k)=>`<button class="tile${c.used.has(k)?' used':''}" data-act="tile" data-i="${k}">${esc(x.t)}</button>`).join('')}</div>
+  <div class="actions" id="acts"><button class="btn" data-act="skip-p">${t('btn_skip')}</button></div><div class="feedback" id="fb"></div>`;
+}
+function phraseTap(k,btn){
+  const c=R.cur;if(c.done||c.used.has(k))return;
+  if(c.tiles[k].t===c.tokens[c.pos]){c.used.add(k);c.pos++;if(c.pos>=c.tokens.length)return phraseDone();drawPhrase();}
+  else{c.err=true;btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
+    if(S.settings.ex.phrase.wordOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&x.t===c.tokens[c.pos]);const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb){hb.classList.add('hinted');c.cost+=S.settings.ex.phrase.costWord;}}}
+}
+function phraseDone(){
+  const c=R.cur;drawPhrase();c.done=true;const ok=!c.err;const ev=finish(ok);autoSay(c.ex);
+  task().querySelector('.built').innerHTML=c.tokens.map(x=>`<span>${esc(x)}</span>`).join('');
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:'')+`<span><b lang="de">${esc(c.w.w)}</b> — ${esc(c.w.t)}</span>`+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'');
+  $('#acts').innerHTML=ok&&G().autoNext?'':`<button class="btn primary" data-act="next">${t('next')}</button>`;
+  scheduleNext(ok);
+}
+document.addEventListener('keydown',e=>{
+  if(S.ui.view!=='learn'||!R)return;const tag=(e.target.tagName||'').toLowerCase();
+  if(['input','textarea','select'].includes(tag))return;
+  if(e.key==='Enter'&&R.cur&&R.cur.done){e.preventDefault();nextTask();return;}
+  if((R.type==='choice'||R.type==='article')&&/^[1-9]$/.test(e.key)){const b=task()&&task().querySelector(`[data-i="${+e.key-1}"]`);if(b)b.click();}
+  if(R.type==='letters'&&e.key.length===1&&!e.metaKey&&!e.ctrlKey)letterTapKey(e.key);
+});
+
+/* ===================== DICTIONARIES ===================== */
+let DV={open:null,edit:null,q:'',imp:null,rename:null,sel:null};
+function counts(ws){const c={new:0,learning:0,review:0,done:0,known:0};ws.forEach(w=>{if(c[w.st]!=null)c[w.st]++;});return c;}
+function pbar(c,total,big){return `<div class="pbar${big?' big':''}">${['done','known','review','learning'].map(k=>`<span class="seg ${k}" style="width:${total?c[k]/total*100:0}%"></span>`).join('')}</div>`;}
+const dictWords=id=>S.words.filter(w=>w.dicts.includes(id));
+function renderDicts(){
+  if(DV.imp)return renderImport();
+  if(DV.open)return renderWords();
+  const curSeq=G().newMode==='sequential'?S.dicts.find(d=>d.active&&dictWords(d.id).some(w=>w.st==='new')):null;
+  view.innerHTML=`<div class="stack">
+  <div class="row" style="justify-content:space-between"><h2 class="h">${t('d_title')}</h2><button class="btn primary" id="imp">${t('d_load')}</button></div>
+  <p class="note">${t('d_note')} ${G().newMode==='sequential'?t('d_seq',{cur:curSeq?t('d_seq_cur',{n:esc(curSeq.name)}):''}):t('d_all')}</p>
+  <div class="panel">${S.dicts.length?S.dicts.map((d,i)=>{const ws=dictWords(d.id),c=counts(ws);
+    return `<div class="dict"><div class="dict-head">
+      <label class="switch" title="${t('d_toggle')}"><input type="checkbox" data-a="toggle" data-id="${d.id}" ${d.active?'checked':''} aria-label="${t('d_active',{n:esc(d.name)})}"><span></span></label>
+      <div class="dict-name">${DV.rename===d.id?`<input id="rn" value="${esc(d.name)}" style="font:inherit;font-size:16px;width:100%;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)">`:esc(d.name)}
+        <div class="dict-meta">${t('d_meta',{n:ws.length,w:pw(ws.length,'words'),d:c.done,r:c.review,l:c.learning})}${c.known?t('d_meta_k',{k:c.known}):''}</div></div></div>
+      ${pbar(c,ws.length)}
+      <div class="row">
+        <button class="btn sm" data-a="open" data-id="${d.id}">${t('b_words')}</button>
+        <button class="btn sm" data-a="up" data-id="${d.id}" ${i===0?'disabled':''} aria-label="${t('b_up')}">↑</button>
+        <button class="btn sm" data-a="down" data-id="${d.id}" ${i===S.dicts.length-1?'disabled':''} aria-label="${t('b_down')}">↓</button>
+        ${DV.rename===d.id?`<button class="btn sm primary" data-a="rnsave" data-id="${d.id}">${t('b_save')}</button>`:`<button class="btn sm" data-a="rename" data-id="${d.id}">${t('b_rename')}</button>`}
+        <button class="btn sm" data-a="export" data-id="${d.id}">${t('b_export')}</button>
+        <button class="btn sm danger" data-a="del" data-id="${d.id}">${t('b_delete')}</button>
+      </div></div>`;}).join(''):`<p class="note">${t('d_empty')}</p>`}</div>
+  <div id="exportbox"></div></div>`;
+  $('#imp').onclick=()=>{DV.imp={step:1};renderDicts();};
+  const panel=view.querySelector('.panel');
+  panel.addEventListener('change',e=>{const x=e.target;if(x.dataset.a==='toggle'){const d=S.dicts.find(d=>d.id===x.dataset.id);d.active=x.checked;R=null;save();renderDicts();}});
+  panel.addEventListener('click',e=>{
+    const b=e.target.closest('button[data-a]');if(!b)return;const id=b.dataset.id,i=S.dicts.findIndex(d=>d.id===id),d=S.dicts[i];
+    const a=b.dataset.a;
+    if(a==='open'){DV.open=id;DV.q='';DV.edit=null;DV.sel=null;renderDicts();}
+    else if(a==='up'||a==='down'){const j=a==='up'?i-1:i+1;[S.dicts[i],S.dicts[j]]=[S.dicts[j],S.dicts[i]];R=null;save();renderDicts();}
+    else if(a==='rename'){DV.rename=id;renderDicts();$('#rn').focus();}
+    else if(a==='rnsave'){const v=$('#rn').value.trim();if(v)d.name=v;DV.rename=null;save();renderDicts();}
+    else if(a==='export'){const txt=dictWords(id).map(w=>[w.w,w.t,w.ex,w.exT,w.ex2,w.exT2,w.ex3,w.exT3].map(x=>(x||'').replace(/[\t\n]/g,' ')).join('\t').replace(/\t+$/,'')).join('\n');offerFile(d.name.replace(/[^\p{L}\p{N}]+/gu,'_')+'.tsv',txt,'text/tab-separated-values',$('#exportbox'));}
+    else if(a==='del')armed(b,()=>{S.words.forEach(w=>w.dicts=w.dicts.filter(x=>x!==id));S.words=S.words.filter(w=>w.dicts.length);S.dicts.splice(i,1);R=null;save();toast(t('d_deleted'));renderDicts();});
+  });
+}
+function renderWords(){
+  const d=S.dicts.find(x=>x.id===DV.open);if(!d){DV.open=null;return renderDicts();}
+  const q=DV.q.toLowerCase();const ws=dictWords(d.id).filter(w=>!q||(w.w+' '+w.t).toLowerCase().includes(q));
+  const exNote=w=>{const xs=exList(w);if(!xs.length)return t('f_noex');return xs.map(x=>{const ct=clozeOf(w,x.ex);return (xs.length>1?(x.i+1)+': ':'')+(x.ex.includes('{')?t('f_manual'):ct?t('f_auto',{s:esc(ct)}):t('f_nf'));}).join('<br>');};
+  const form=w=>{return `<div class="form" id="wf">
+    <label>${t('f_word')}<input id="f-w" value="${esc(w.w)}" lang="de" autocapitalize="off" autocorrect="off"></label>
+    <label>${t('f_tr')}<input id="f-t" value="${esc(w.t)}"></label>
+    <label>${t('f_ex')}<textarea id="f-ex" rows="2" lang="de" autocapitalize="off" autocorrect="off">${esc(w.ex)}</textarea></label>
+    <label>${t('f_exT')}<textarea id="f-exT" rows="2">${esc(w.exT)}</textarea></label>
+    ${[2,3].map(n=>`<label>${t('f_exn',{n})}<textarea id="f-ex${n}" rows="2" lang="de" autocapitalize="off" autocorrect="off">${esc(w['ex'+n]||'')}</textarea></label>
+    <label>${t('f_exTn',{n})}<textarea id="f-exT${n}" rows="2">${esc(w['exT'+n]||'')}</textarea></label>`).join('')}
+    <span class="note">${exNote(w)}</span>
+    <div class="row"><button class="btn primary sm" data-a="save">${t('b_save')}</button><button class="btn sm" data-a="cancel">${t('b_cancel')}</button>
+    ${w.id?(w.st==='known'?`<button class="btn sm" data-a="unknow">${t('f_unknow')}</button>`:w.st!=='done'?`<button class="btn sm" data-a="known">${t('f_known')}</button>`:'')+`<button class="btn sm" data-a="reset">${t('b_reset_w')}</button><button class="btn sm danger" data-a="wdel">${t('b_del_w')}</button>`:''}</div></div>`;};
+  view.innerHTML=`<div class="stack"><div class="row"><button class="btn sm" id="back">${t('w_back')}</button></div>
+  <h2 class="h">${esc(d.name)}</h2>
+  <div class="row"><input id="q" type="search" placeholder="${t('w_search')}" value="${esc(DV.q)}" style="flex:1;min-width:0;font-size:16px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)"><button class="btn" id="add">${t('w_add')}</button><button class="btn" id="selk">${t('sel_known')}</button></div>
+  ${DV.sel?`<div class="selbar"><button class="btn primary" id="seldo">${t('sel_do',{n:DV.sel.size})}</button><button class="btn" id="selno">${t('b_cancel')}</button></div><p class="note">${t('sel_note')}</p>`:''}
+  <div class="panel"><div class="words">
+  ${DV.edit==='new'?form({w:'',t:'',ex:'',exT:''}):''}
+  ${DV.sel?ws.filter(w=>w.st!=='done'&&w.st!=='known').map(w=>`<label class="selrow"><input type="checkbox" data-sid="${w.id}" ${DV.sel.has(w.id)?'checked':''}><span class="wf" lang="de">${esc(w.w)}</span><span class="wt">${esc(w.t)}</span></label>`).join('')||`<p class="note">${t('w_none')}</p>`:ws.map(w=>DV.edit===w.id?form(w):`<button class="w" data-a="edit" data-id="${w.id}"><span class="wf" lang="de">${esc(w.w)}</span><span class="wt">${esc(w.t)}</span><span class="pill ${w.st}">${w.st==='learning'?w.sc:t('s_'+w.st)}</span></button>`).join('')||`<p class="note">${t('w_none')}</p>`}
+  </div></div></div>`;
+  $('#back').onclick=()=>{DV.open=null;DV.edit=null;renderDicts();};
+  $('#add').onclick=()=>{DV.sel=null;DV.edit='new';renderWords();$('#f-w').focus();};
+  $('#selk').onclick=()=>{DV.edit=null;DV.sel=DV.sel?null:new Set();renderWords();};
+  if(DV.sel){
+    $('#selno').onclick=()=>{DV.sel=null;renderWords();};
+    $('#seldo').onclick=()=>{let n=0;for(const id of DV.sel){const w=S.words.find(x=>x.id===id);if(w&&w.st!=='done'){markKnown(w);n++;}}DV.sel=null;R=null;save();toast(t('t_marked',{n}));renderWords();};
+    view.querySelector('.words').addEventListener('change',e=>{const id=e.target.dataset.sid;if(!id)return;if(e.target.checked)DV.sel.add(id);else DV.sel.delete(id);$('#seldo').textContent=t('sel_do',{n:DV.sel.size});});
+  }
+  const qi=$('#q');qi.oninput=()=>{DV.q=qi.value;const p=qi.selectionStart;renderWords();const n=$('#q');n.focus();n.setSelectionRange(p,p);};
+  view.querySelector('.words').addEventListener('click',e=>{
+    const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+    if(a==='edit'){DV.edit=b.dataset.id;renderWords();return;}
+    if(a==='cancel'){DV.edit=null;renderWords();return;}
+    const w=DV.edit==='new'?null:S.words.find(x=>x.id===DV.edit);
+    if(a==='save'){const v={w:$('#f-w').value.trim(),t:$('#f-t').value.trim(),ex:$('#f-ex').value.trim(),exT:$('#f-exT').value.trim(),ex2:$('#f-ex2').value.trim(),exT2:$('#f-exT2').value.trim(),ex3:$('#f-ex3').value.trim(),exT3:$('#f-exT3').value.trim()};
+      if(!v.w||!v.t){toast(t('t_need_wt'));return;}
+      if(w)Object.assign(w,v);else{const nw=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(nw,{ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(nw);}
+      DV.edit=null;R=null;save();renderWords();toast(t('t_saved'));}
+    if(a==='known'&&w){markKnown(w);R=null;save();DV.edit=null;renderWords();toast(t('t_known',{w:w.w}));return;}
+    if(a==='unknow'&&w){Object.assign(w,{st:'new',sc:0});R=null;save();DV.edit=null;renderWords();return;}
+    if(a==='reset'&&w){Object.assign(w,{st:'new',sc:0,stage:0,hits:0,due:0,dl:0,err:0,ok:0});R=null;save();DV.edit=null;renderWords();toast(t('t_w_reset'));}
+    if(a==='wdel'&&w)armed(b,()=>{w.dicts=w.dicts.filter(x=>x!==d.id);if(!w.dicts.length)S.words=S.words.filter(x=>x!==w);DV.edit=null;R=null;save();renderWords();});
+  });
+}
+/* ---- import ---- */
+function csvLine(l,d){const out=[];let cur='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];
+  if(q){if(ch==='"'){if(l[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+  else if(ch==='"'&&cur.trim()===''){q=true;cur='';}else if(ch===d){out.push(cur.trim());cur='';}else cur+=ch;}
+  out.push(cur.trim());return out;}
+function parseText(txt){
+  txt=txt.replace(/^﻿/,'').replace(/\r\n?/g,'\n');const lines=txt.split('\n').filter(l=>l.trim());
+  const s=lines.slice(0,30),cnt=ch=>s.filter(l=>l.includes(ch)).length,half=Math.max(1,s.length*.5);
+  let d=',';if(cnt('\t')>=half)d='\t';else if(cnt(';')>=half)d=';';else if(cnt('|')>=half)d='|';else if(s.filter(l=>/\s[-–—]\s/.test(l)).length>=half)d='dash';
+  return lines.map(l=>d==='dash'?((m=>m?[m[1].trim(),m[2].trim()]:[l.trim()])(l.match(/^(.*?)\s[-–—]\s(.*)$/))):(d===','||d===';')?csvLine(l,d):l.split(d).map(x=>x.trim()));
+}
+function loadXLSX(){return new Promise((res,rej)=>{if(window.XLSX)return res(window.XLSX);const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>res(window.XLSX);s.onerror=()=>rej(new Error('xlsx'));document.head.appendChild(s);});}
+async function readFile(f){
+  if(/\.(xlsx|xls|ods)$/i.test(f.name)){const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];
+    return X.utils.sheet_to_json(ws,{header:1,raw:false,defval:''}).map(r=>r.map(x=>String(x).trim())).filter(r=>r.some(Boolean));}
+  return parseText(await f.text());
+}
+const FIELDS=()=>[['w',t('fl_w')],['t',t('fl_t')],['ex',t('fl_ex')],['exT',t('fl_exT')],['ex2',t('fl_ex')+' 2'],['exT2',t('fl_exT')+' 2'],['ex3',t('fl_ex')+' 3'],['exT3',t('fl_exT')+' 3'],['-',t('fl_skip')]];
+function setImportRows(rows,name){
+  const ncol=Math.min(8,Math.max(...rows.map(r=>r.length)));
+  const head=/^(word|term|слово|термин|тэрмін|wort|begriff|front)$/i.test((rows[0]&&rows[0][0]||'').trim());
+  DV.imp={step:2,rows,name:name||DV.imp.name||t('i_newname'),map:Array.from({length:ncol},(_,i)=>['w','t','ex','exT','ex2','exT2','ex3','exT3'][i]||'-'),head};
+  renderImport();
+}
+function renderImport(){
+  const I=DV.imp;
+  if(I.step===1){
+    view.innerHTML=`<div class="stack"><div class="row"><button class="btn sm" id="back">${t('w_back')}</button></div><h2 class="h">${t('i_title')}</h2>
+    <div class="panel">
+      <label class="field">${t('i_name')}<input id="iname" value="${esc(I.name||'')}" placeholder="${t('i_name_ph')}"></label>
+      <label class="field">${t('i_file')}<input id="ifile" type="file" accept=".xlsx,.xls,.ods,.csv,.tsv,.txt,text/plain,text/csv"></label>
+      <label class="field">${t('i_paste')}<textarea class="big" id="itext" placeholder="teilnehmen an D&#9;…&#9;Ich {nehme} an einem Kongress {teil}.&#9;…"></textarea></label>
+      <p class="note">${t('i_note')}</p>
+      <div class="row"><button class="btn primary" id="inext">${t('i_next')}</button></div></div><div id="lib"></div></div>`;
+    $('#back').onclick=()=>{DV.imp=null;renderDicts();};
+    $('#ifile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const rows=await readFile(f);if(!rows.length)throw 0;setImportRows(rows,$('#iname').value.trim()||f.name.replace(/\.[^.]+$/,''));}catch(err){toast(err&&err.message==='xlsx'?t('i_xlsx_fail'):t('i_read_fail'));}};
+    loadLib().then(drawLib);
+    $('#lib').addEventListener('click',async e=>{
+      const lv=e.target.closest('[data-lv]');if(lv){LIBF=lv.dataset.lv;drawLib();return;}
+      const b=e.target.closest('[data-lib]');if(!b)return;const it=LIB[+b.dataset.lib];
+      try{const r=await fetch('dicts/'+it.file,{cache:'no-cache'});if(!r.ok)throw 0;const rows=parseText(await r.text());if(!rows.length)throw 0;
+        DV.imp.name=it.name;setImportRows(rows,it.name);}catch(err){toast(t('i_read_fail'));}
+    });
+    $('#inext').onclick=()=>{const x=$('#itext').value;if(!x.trim()){toast(t('i_need'));return;}setImportRows(parseText(x),$('#iname').value.trim());};
+    return;
+  }
+  const rows=I.head?I.rows.slice(1):I.rows;const prev=rows.slice(0,6);
+  view.innerHTML=`<div class="stack"><div class="row"><button class="btn sm" id="back">${t('i_back')}</button></div><h2 class="h">${t('i_check')}</h2>
+  <div class="panel">
+    <label class="field">${t('i_name')}<input id="iname" value="${esc(I.name)}"></label>
+    <label class="row" style="font-size:.93rem"><input type="checkbox" id="ihead" ${I.head?'checked':''} style="width:20px;height:20px;accent-color:var(--accent)"> ${t('i_head')}</label>
+    <div class="tablewrap"><table class="prev"><thead><tr>${I.map.map((m,i)=>`<th><select data-col="${i}" aria-label="${t('i_col',{i:i+1})}">${FIELDS().map(([k,l])=>`<option value="${k}" ${m===k?'selected':''}>${l}</option>`).join('')}</select></th>`).join('')}</tr></thead>
+    <tbody>${prev.map(r=>`<tr>${I.map.map((_,i)=>`<td>${esc(r[i]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="note">${t('i_rows',{n:rows.length})}</p>
+    <div class="row"><button class="btn primary" id="ido">${t('i_do',{n:rows.length,r:pw(rows.length,'rows')})}</button></div></div></div>`;
+  $('#back').onclick=()=>{DV.imp={step:1,name:I.name};renderImport();};
+  $('#ihead').onchange=e=>{I.head=e.target.checked;I.name=$('#iname').value;renderImport();};
+  view.querySelectorAll('select[data-col]').forEach(s=>s.onchange=()=>{I.map[+s.dataset.col]=s.value;I.name=$('#iname').value;});
+  $('#ido').onclick=()=>{
+    const col=k=>I.map.indexOf(k);if(col('w')<0||col('t')<0){toast(t('i_need_cols'));return;}
+    const d={id:uid(),name:$('#iname').value.trim()||t('i_newname'),active:true};S.dicts.push(d);
+    const key=w=>(w.w+'|'+w.t).toLowerCase().replace(/\s+/g,' ').trim();const idx=new Map(S.words.map(w=>[key(w),w]));
+    let added=0,merged=0;
+    for(const r of rows){const g=k=>col(k)>=0?(r[col(k)]||'').trim():'';const v={w:g('w'),t:g('t'),ex:g('ex'),exT:g('exT'),ex2:g('ex2'),exT2:g('exT2'),ex3:g('ex3'),exT3:g('exT3')};if(!v.w||!v.t)continue;
+      const ex=idx.get(key(v));
+      if(ex){if(!ex.dicts.includes(d.id)){ex.dicts.push(d.id);merged++;}
+        const have=new Set(exList(ex).map(x=>stripBraces(x.ex)));
+        for(const [e,tr] of [[v.ex,v.exT],[v.ex2,v.exT2],[v.ex3,v.exT3]]){if(!e||have.has(stripBraces(e)))continue;const slot=['','2','3'].find(n=>!(ex['ex'+n]||'').trim());if(slot===undefined)break;ex['ex'+slot]=e;ex['exT'+slot]=tr;have.add(stripBraces(e));}}
+      else{const w=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(w,{ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(w);idx.set(key(w),w);added++;}}
+    DV.imp=null;R=null;save();toast(t('i_done',{n:added+merged})+(merged?t('i_merged',{m:merged}):''));renderDicts();
+  };
+}
+let LIB=null,LIBF='all';
+async function loadLib(){if(LIB!==null)return LIB;try{const r=await fetch('dicts/index.json',{cache:'no-cache'});if(!r.ok)throw 0;const j=await r.json();LIB=(Array.isArray(j)?j:(j.dictionaries||[])).filter(x=>x&&x.file&&x.name);}catch(e){LIB=[];}return LIB;}
+function drawLib(){
+  const box=$('#lib');if(!box)return;if(!LIB||!LIB.length){box.innerHTML='';return;}
+  const levels=[...new Set(LIB.map(x=>x.level).filter(Boolean))].sort();if(LIBF!=='all'&&!levels.includes(LIBF))LIBF='all';
+  const list=LIB.filter(x=>LIBF==='all'||x.level===LIBF);
+  box.innerHTML=`<div class="panel"><span class="label">${t('lib_title')}</span><p class="note">${t('lib_note')}</p>
+  ${levels.length>1?`<div class="seg-tabs">${['all',...levels].map(l=>`<button class="${LIBF===l?'on':''}" data-lv="${esc(l)}">${l==='all'?t('lib_all'):esc(l)}</button>`).join('')}</div>`:''}
+  <div class="libl">${list.map(x=>`<div class="libi"><div class="wtxt"><b>${esc(x.name)}</b><span class="wt">${[x.level,x.pair,x.words?x.words+' '+pw(+x.words,'words'):''].filter(Boolean).map(esc).join(' · ')}</span>${x.desc?`<span class="wt">${esc(x.desc)}</span>`:''}</div><button class="btn sm" data-lib="${LIB.indexOf(x)}">${t('lib_choose')}</button></div>`).join('')}</div></div>`;
+}
+function offerFile(name,text,mime,box){
+  try{const b=new Blob([text],{type:mime});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}catch(e){}
+  box.innerHTML=`<div class="panel"><p class="note">${t('file_note',{n:'<b>'+esc(name)+'</b>'})}</p><textarea class="big" readonly id="fbox">${esc(text)}</textarea><div class="row"><button class="btn" id="fcopy">${t('b_copy')}</button></div></div>`;
+  $('#fcopy').onclick=async()=>{try{await navigator.clipboard.writeText(text);toast(t('t_copied'));}catch(e){const x=$('#fbox');x.focus();x.select();toast(t('t_selected'));}};
+}
+
+/* ===================== PROGRESS ===================== */
+function boxesChart(ws){
+  const n=S.settings.repeat.stages.length;
+  const b=[{l:t('bx_new'),c:'var(--line)',v:0},{l:t('bx_learn'),c:'var(--p-learn)',v:0}];
+  for(let i=1;i<=n;i++)b.push({l:t('bx_rev',{i}),c:'var(--p-review)',o:.5+.5*i/n,v:0});
+  b.push({l:t('bx_done'),c:'var(--p-done)',v:0});b.push({l:t('bx_known'),c:'var(--p-known)',v:0});
+  ws.forEach(w=>{if(w.st==='new')b[0].v++;else if(w.st==='learning')b[1].v++;else if(w.st==='review')b[1+Math.min(n,Math.max(1,w.stage))].v++;else if(w.st==='known')b[b.length-1].v++;else b[b.length-2].v++;});
+  const mx=Math.max(1,...b.map(x=>x.v));
+  return `<div class="boxes" style="grid-template-columns:repeat(${b.length},minmax(0,1fr))">${b.map(x=>`<div class="box"><div class="bwrap"><span class="bv">${x.v}</span><div class="bb" style="height:${x.v?Math.max(3,x.v/mx*100):1.5}%;background:${x.c};opacity:${x.o||1}"></div></div><span class="bl">${x.l}</span></div>`).join('')}</div>`;
+}
+function renderProgress(){
+  const ws=activeWords(),c=counts(ws),T=ws.length,st=streakInfo();
+  const days=[...Array(14)].map((_,i)=>{const ts=dayStart(i-13);const k=dayKey(ts);return{k,n:(S.log[k]||{}).n||0,d:new Date(ts).getDate()};});
+  const mx=Math.max(1,...days.map(x=>x.n));
+  const won=S.words.filter(w=>w.err>=10&&(w.st==='review'||w.st==='done')).length;
+  const doneAll=S.words.filter(w=>w.st==='done').length;
+  view.innerHTML=`<div class="stack"><h2 class="h">${t('p_title')}</h2>
+  <div class="panel"><div class="kpis">
+    <div class="kpi">${ring(64,st.today/st.goal,st.cur,6)}<div><span class="label">${t('p_streak')}</span><div class="kv">${st.cur}</div><span class="ks">${t('p_today',{a:st.today,g:st.goal})}</span></div></div>
+    <div class="kpi"><div><span class="label">${t('p_best')}</span><div class="kv">${st.best}</div></div></div>
+    <div class="kpi"><div><span class="label">${t('p_won')}</span><div class="kv">${won}</div></div></div>
+  </div></div>
+  <div class="panel"><div class="row" style="justify-content:space-between"><span class="label">${t('p_boxes')}</span><span class="dict-meta">${t('p_learned',{d:c.done,t:T-c.known})}</span></div>${boxesChart(ws)}${(()=>{const nn=ws.filter(nounOf);return nn.length&&S.settings.ex.article.on?`<p class="note">${t('p_art',{a:nn.filter(artConf).length,b:nn.length})}</p>`:'';})()}</div>
+  <div class="panel"><span class="label">${t('p_miles')}</span><div class="miles">${MILES.map(m=>{const r=S.miles[m],pr=(S.settings.prizes[m]||'').trim();
+    return `<div class="mile${r?' on':''}"><b>${m}</b><span>${r?fmtDate(new Date(r+'T12:00').getTime()):(doneAll<m?t('p_togo',{n:m-doneAll}):'')}</span>${pr?`<span class="prize">${esc(pr)}</span>`:''}</div>`;}).join('')}</div></div>
+  <div class="panel"><span class="label">${t('p_days')}</span>
+    <div class="days">${days.map(x=>`<div class="day${x.n?'':' zero'}" style="height:${x.n?Math.max(4,x.n/mx*100):3}%" title="${x.k}: ${x.n}"></div>`).join('')}</div>
+    <div class="dayl">${days.map(x=>`<span>${x.d}</span>`).join('')}</div></div>
+  <div class="panel"><span class="label">${t('p_bydict')}</span>${S.dicts.map(d=>{const dw=dictWords(d.id),dc=counts(dw);return `<div class="stack" style="gap:6px"><div class="row" style="justify-content:space-between"><span style="${d.active?'':'color:var(--muted)'}">${esc(d.name)}${d.active?'':t('p_off')}</span><span class="dict-meta">${dc.done}/${dw.length}</span></div>${pbar(dc,dw.length)}</div>`;}).join('')||`<p class="note">${t('p_nodicts')}</p>`}</div>
+  <div class="panel" id="wp">${wordsPanel(ws)}</div>
+  </div>`;
+  bindWordsPanel();
+}
+let PV={tab:'learning',sort:'asc',all:false};
+function wordsPanel(ws){
+  const th=G().threshold,nst=S.settings.repeat.stages.length;
+  const tabs=[['learning',t('wp_learning')],['review',t('wp_review')],['done',t('wp_done')],['known',t('wp_known')]];
+  const key=w=>PV.tab==='learning'?w.sc:PV.tab==='review'?w.stage*1000+w.hits:PV.tab==='known'?0:w.err;
+  const alpha=(a,b)=>a.w.localeCompare(b.w,'de',{sensitivity:'base'});
+  const sorts={desc:[t('wp_desc'),(a,b)=>key(b)-key(a)||alpha(a,b)],asc:[t('wp_asc'),(a,b)=>key(a)-key(b)||alpha(a,b)],alpha:[t('wp_alpha'),alpha]};
+  if(!sorts[PV.sort])PV.sort='asc';
+  const list=ws.filter(w=>w.st===PV.tab).sort(sorts[PV.sort][1]);
+  const shown=PV.all?list:list.slice(0,30);
+  const row=w=>{let pct,col,lbl;
+    if(w.st==='learning'){pct=w.sc/th*100;col='var(--p-learn)';lbl=`${w.sc}/${th}`;}
+    else if(w.st==='review'){pct=(w.stage-1+w.hits/Math.max(1,(S.settings.repeat.stages[w.stage-1]||{times:1}).times))/nst*100;col='var(--p-review)';lbl=t('wp_rev',{a:w.stage,b:nst,d:fmtDate(w.due)});}
+    else if(w.st==='known'){pct=100;col='var(--p-known)';lbl=t('s_known');}
+    else{pct=100;col='var(--p-done)';lbl=t('wp_learned');}
+    return `<div class="wr"><div class="wtxt"><span class="wf" lang="de">${esc(w.w)}</span><span class="wt">${esc(w.t)}</span></div>
+      <div class="wm"><div class="meter"><span style="width:${Math.max(3,Math.min(100,pct))}%;background:${col}"></span></div><span class="wn">${lbl}${w.err?t('wp_err',{n:w.err}):''}</span></div></div>`;};
+  return `<span class="label">${t('wp_title')}</span>
+  <div class="row" style="justify-content:space-between">
+    <div class="seg-tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${PV.tab===k}" class="${PV.tab===k?'on':''}" data-pvtab="${k}">${l} ${ws.filter(w=>w.st===k).length}</button>`).join('')}</div>
+    <select id="pvsort" aria-label="${t('wp_sort')}" style="font-size:16px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)">${Object.entries(sorts).map(([k,[l]])=>`<option value="${k}" ${PV.sort===k?'selected':''}>${l}</option>`).join('')}</select>
+  </div>
+  <div>${shown.map(row).join('')||`<p class="note" style="padding-top:8px">${t('wp_empty')}</p>`}</div>
+  ${list.length>shown.length?`<div class="row"><button class="btn sm" data-pvall="1">${t('wp_all',{n:list.length})}</button></div>`:''}`;
+}
+function bindWordsPanel(){
+  const wp=$('#wp');if(!wp)return;
+  wp.addEventListener('click',e=>{const x=e.target.closest('[data-pvtab]');if(x){PV.tab=x.dataset.pvtab;PV.all=false;}else if(e.target.closest('[data-pvall]'))PV.all=true;else return;wp.innerHTML=wordsPanel(activeWords());});
+  wp.addEventListener('change',e=>{if(e.target.id==='pvsort'){PV.sort=e.target.value;wp.innerHTML=wordsPanel(activeWords());}});
+}
+
+/* ===================== SETTINGS ===================== */
+const getP=p=>p.split('.').reduce((o,k)=>o[k],S.settings);
+function setP(p,v){const ks=p.split('.'),last=ks.pop();ks.reduce((o,k)=>o[k],S.settings)[last]=v;}
+const sub_=s=>s?`<span class="sub">${s}</span>`:'';
+const num=(p,l,s='',min=0,max=1000,step=1)=>`<label class="sr"><span>${l}${sub_(s)}</span><input type="number" inputmode="decimal" data-p="${p}" min="${min}" max="${max}" step="${step}" value="${getP(p)}"></label>`;
+const chk=(p,l,s='')=>`<label class="sr"><span>${l}${sub_(s)}</span><input type="checkbox" data-p="${p}" ${getP(p)?'checked':''}></label>`;
+const sel=(p,l,opts,s='')=>`<label class="sr"><span>${l}${sub_(s)}</span><select data-p="${p}">${opts.map(([v,x])=>`<option value="${v}" ${getP(p)===v?'selected':''}>${x}</option>`).join('')}</select></label>`;
+const txt=(p,l,s='')=>`<label class="sr"><span>${l}${sub_(s)}</span><input type="text" data-p="${p}" value="${esc(getP(p))}" autocapitalize="off" autocorrect="off"></label>`;
+const sect=(id,title,body)=>`<details class="set" data-s="${id}" ${S.ui.openSet===id?'open':''}><summary>${title}</summary><div class="setbody">${body}</div></details>`;
+const scoring=k=>num(`ex.${k}.plus`,t('sc_plus'))+num(`ex.${k}.minus`,t('sc_minus'));
+function renderSettings(){
+  const st=S.settings.repeat.stages;
+  view.innerHTML=`<div class="stack"><h2 class="h">${t('set_title')}</h2>
+  <div class="panel" style="padding-block:6px">${sel('lang',t('set_lang')+(L!=='en'?' · Language':''),Object.entries(LANGS))}</div>
+  ${sect('ex',t('sec_ex'),EXIDS.map(id=>chk(`ex.${id}.on`,exName(id),exHint(id))).join(''))}
+  ${sect('gen',t('sec_gen'),
+    num('general.threshold',t('g_thr'),t('g_thr_s'),10,1000)+
+    num('general.dailyCap',t('g_cap'),t('g_cap_s'),0,1000)+
+    num('general.minGap',t('g_gap'),t('g_gap_s'),0,720,5)+
+    chk('general.resetOnError',t('g_reset'))+
+    num('general.inLearning',t('g_inl'),t('g_inl_s'),1,500)+
+    num('general.perRound',t('g_round'),'',2,100)+
+    num('general.reviewShare',t('g_share'),'',0,100)+
+    sel('general.newMode',t('g_new'),[['sequential',t('g_new_seq')],['all',t('g_new_all')]],t('g_new_s'))+
+    chk('general.learnInOrder',t('g_order'),t('g_order_s'))+
+    sel('general.direction',t('g_dir'),[['toForeign',t('g_dir_f')],['toNative',t('g_dir_n')],['both',t('g_dir_b')]])+
+    chk('general.caseSensitive',t('g_case'),t('g_case_s'))+
+    chk('general.umlautFallback',t('g_uml'))+
+    chk('general.autoEnter',t('g_auto'),t('g_auto_s'))+
+    num('general.autoEnterDelay',t('g_autod'),'',0,3000,50)+
+    chk('general.layoutFix',t('g_lay'),t('g_lay_s'))+
+    sel('general.foreignLayout',t('g_layk'),[['qwertz',t('g_layk_de')],['qwerty',t('g_layk_en')]])+
+    chk('general.autoNext',t('g_next'))+
+    num('general.nextDelay',t('g_nextd'),'',0,5000,100))}
+  ${sect('goal',t('sec_goal'),
+    num('general.dailyGoal',t('go_goal'),t('go_goal_s'),1,2000)+
+    `<p class="note" style="padding-block:8px">${t('go_note')}</p>`+
+    MILES.map(m=>txt('prizes.'+m,t('go_m',{m}))).join(''))}
+  ${sect('rep',t('sec_rep'),
+    chk('repeat.enabled',t('r_on'),t('r_on_s'))+
+    chk('repeat.overdueBack',t('r_back'),t('r_back_s'))+
+    `<div style="overflow-x:auto;padding-block:8px"><table class="stages"><thead><tr><th>${t('r_h1')}</th><th>${t('r_h2')}</th><th>${t('r_h3')}</th><th>${t('r_h4')}</th><th></th></tr></thead><tbody>
+    ${st.map((s,i)=>`<tr><td>${i+1}</td><td><input type="number" min="0" data-st="${i}.after" value="${s.after}" aria-label="${t('r_h1')} ${i+1}: ${t('r_h2')}"></td><td><input type="number" min="1" data-st="${i}.times" value="${s.times}" aria-label="${t('r_h1')} ${i+1}: ${t('r_h3')}"></td><td><input type="number" min="0" data-st="${i}.deadline" value="${s.deadline}" aria-label="${t('r_h1')} ${i+1}: ${t('r_h4')}"></td><td>${st.length>1?`<button class="btn sm" data-strm="${i}" aria-label="${t('r_del',{i:i+1})}">×</button>`:''}</td></tr>`).join('')}
+    </tbody></table></div><div class="row"><button class="btn sm" id="stadd">${t('r_add')}</button></div>
+    <p class="note">${t('r_note')}</p>`)}
+  ${sect('forget',t('sec_forget'),
+    chk('forget.enabled',t('fg_on'))+
+    num('forget.grace',t('fg_grace'),'',0,60)+
+    num('forget.perDay',t('fg_per'),t('fg_per_s'),0,100))}
+  ${sect('s-choice',exName('choice'),scoring('choice')+num('ex.choice.options',t('c_opts'),'',2,8))}
+  ${sect('s-mosaic',exName('mosaic'),scoring('mosaic')+num('ex.mosaic.pairs',t('m_pairs'),'',2,8))}
+  ${sect('s-writing',exName('writing'),scoring('writing')+
+    chk('ex.writing.showLength',t('w_len'))+num('ex.writing.costLength',t('w_cost'))+
+    chk('ex.writing.showFirst',t('w_first'))+num('ex.writing.costFirst',t('w_cost'))+
+    chk('ex.writing.letterOnError',t('w_lerr'),t('w_lerr_s'))+
+    num('ex.writing.costLetter',t('w_lcost'),t('w_lcost_s'))+
+    chk('ex.writing.wordOnError',t('w_werr')))}
+  ${sect('s-dictation',exName('dictation'),scoring('dictation')+
+    sel('ex.dictation.mode',t('dc_mode'),[['word',t('dc_word')],['phrase',t('dc_phrase')],['mixed',t('dc_mixed')]])+
+    chk('ex.dictation.showTr',t('dc_tr'))+
+    chk('ex.dictation.letterOnError',t('w_lerr'),t('w_lerr_s'))+num('ex.dictation.costLetter',t('w_lcost'),t('w_lcost_s'))+
+    chk('ex.dictation.wordOnError',t('w_werr')))}
+  ${sect('s-letters',exName('letters'),scoring('letters')+chk('ex.letters.letterOnError',t('l_lerr')))}
+  ${sect('s-cloze',exName('cloze'),scoring('cloze')+
+    chk('ex.cloze.showBase',t('cz_base'))+num('ex.cloze.costBase',t('w_cost'))+
+    chk('ex.cloze.showLength',t('cz_len'))+
+    chk('ex.cloze.letterOnError',t('w_lerr'),t('w_lerr_s'))+num('ex.cloze.costLetter',t('w_lcost'),t('w_lcost_s')))}
+  ${sect('s-phrase',exName('phrase'),scoring('phrase')+chk('ex.phrase.wordOnError',t('ph_werr'))+num('ex.phrase.costWord',t('ph_cost')))}
+  ${sect('s-article',exName('article'),num('ex.article.perRound',t('g_round'),'',5,100)+num('ex.article.confident',t('ar_conf'),'',1,20)+`<p class="note" style="padding-block:8px">${t('ar_note')}</p>`)}
+  ${sect('audio',t('sec_audio'),
+    chk('audio.on',t('a_on'))+chk('audio.autoSpeak',t('a_auto'))+
+    txt('audio.langF',t('a_lang'),t('a_lang_s'))+
+    `<label class="sr"><span>${t('a_voice')}${sub_(t('a_voice_s'))}</span><select id="voice"></select></label>`+
+    num('audio.rate',t('a_rate'),'',0.5,1.5,0.05)+
+    `<div class="row" style="padding-top:8px"><button class="btn sm" id="vtest">${t('a_test')}</button></div>`)}
+  ${sect('data',t('sec_data'),
+    `<p class="note" style="padding-block:6px">${t('dt_note')}</p>
+    <div class="row"><button class="btn" id="bk">${t('dt_bk')}</button></div>
+    <label class="field" style="padding-top:10px">${t('dt_file')}<input type="file" id="rfile" accept=".json,application/json,text/plain"></label>
+    <label class="field">${t('dt_paste')}<textarea class="big" id="rtext" placeholder='{"app":"wortkasten", …}'></textarea></label>
+    <div class="row"><button class="btn" id="rdo">${t('dt_restore')}</button></div>
+    <div class="row" style="padding-top:12px;border-top:1px solid var(--line);margin-top:10px"><button class="btn danger" id="resetall">${t('dt_reset')}</button><button class="btn danger" id="defset">${t('dt_def')}</button></div>
+    <div id="bkbox"></div>`)}
+  </div>`;
+  view.querySelectorAll('details.set').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){S.ui.openSet=d.dataset.s;view.querySelectorAll('details.set').forEach(x=>{if(x!==d)x.open=false;});}else if(S.ui.openSet===d.dataset.s)S.ui.openSet=null;save();}));
+  view.onchange=onSetChange;
+  fillVoices();
+  $('#vtest').onclick=()=>speak('Ich nehme an einem Kongress teil.',true);
+  $('#stadd').onclick=()=>{const l=st[st.length-1]||{after:1,times:2,deadline:4};st.push({after:l.after*2,times:l.times,deadline:l.after*2+2});R=null;save();renderSettings();};
+  view.querySelectorAll('[data-strm]').forEach(b=>b.onclick=()=>{st.splice(+b.dataset.strm,1);R=null;save();renderSettings();});
+  $('#bk').onclick=()=>offerFile('wortkasten-'+dayKey()+'.json',JSON.stringify({app:'wortkasten',v:1,exported:new Date().toISOString(),dicts:S.dicts,words:S.words,settings:S.settings,log:S.log,lastActiveDay:S.lastActiveDay,decay:S.decay,miles:S.miles,best:S.best}),'application/json',$('#bkbox'));
+  $('#rfile').onchange=async e=>{const f=e.target.files[0];if(f)$('#rtext').value=await f.text();};
+  $('#rdo').onclick=e=>{let d;try{d=JSON.parse($('#rtext').value);}catch(err){toast(t('t_notbk'));return;}
+    if(!d||d.app!=='wortkasten'||!Array.isArray(d.words)){toast(t('t_notwk'));return;}
+    armed(e.target,()=>{S={v:1,dicts:d.dicts||[],words:d.words,settings:mergeDeep(defaults(),d.settings),log:d.log||{},lastActiveDay:d.lastActiveDay||null,decay:d.decay||null,miles:d.miles||{},best:d.best||0,ui:S.ui};
+      if(!LANGS[S.settings.lang])S.settings.lang=L;L=S.settings.lang;R=null;save();renderChrome();toast(t('t_restored'));render();});};
+  $('#resetall').onclick=e=>armed(e.target,()=>{S.words.forEach(w=>Object.assign(w,{st:'new',sc:0,stage:0,hits:0,due:0,dl:0,err:0,ok:0,last:0}));S.log={};S.miles={};S.best=0;S.lastActiveDay=null;S.decay=null;R=null;save();drawStreak();toast(t('t_preset'));renderSettings();});
+  $('#defset').onclick=e=>armed(e.target,()=>{const lang=S.settings.lang;S.settings=defaults();S.settings.lang=lang;R=null;save();toast(t('t_sreset'));renderSettings();});
+}
+function onSetChange(e){
+  const x=e.target;
+  if(x.id==='voice'){S.settings.audio.voiceF=x.value;save();return;}
+  if(x.dataset.st){const[i,k]=x.dataset.st.split('.');const v=Math.max(k==='times'?1:0,Math.round(+x.value||0));S.settings.repeat.stages[+i][k]=v;R=null;save();return;}
+  const p=x.dataset.p;if(!p)return;let v;
+  if(x.type==='checkbox')v=x.checked;else if(x.type==='number'){v=parseFloat(x.value);if(!isFinite(v))return;v=Math.min(+x.max||1e9,Math.max(+x.min||0,v));}else v=x.value;
+  setP(p,v);
+  if(p==='lang'){L=v;R=null;save();renderChrome();renderSettings();return;}
+  R=null;save();
+  if(p==='general.dailyGoal')drawStreak();
+}
+function fillVoices(){
+  const s=$('#voice');if(!s)return;const l=(S.settings.audio.langF||'').slice(0,2).toLowerCase();
+  const vs=VOICES.filter(v=>v.lang.toLowerCase().startsWith(l));
+  s.innerHTML=`<option value="">${t('a_def')}</option>`+vs.map(v=>`<option value="${esc(v.name)}" ${S.settings.audio.voiceF===v.name?'selected':''}>${esc(v.name)}</option>`).join('');
+}
+
+/* ===================== help (manual) ===================== */
+const HELP={
+en:`<h2 class="h">How to use Wortkasten</h2>
+<section><h3>Getting started</h3><ol>
+<li>Open <b>Dictionaries</b> and load your own list: an Excel or CSV file, or text pasted from Quizlet. The example dictionary is there to try things out; delete it whenever you like.</li>
+<li>Switch on the dictionaries you want to learn.</li>
+<li>Go to <b>Learn</b>, pick an exercise at the top and answer. A round has 12 tasks. In Choice and Mosaic, words you get wrong come back at the end of the round; in the other exercises they open the next round.</li></ol></section>
+<section><h3>How memorising works</h3>
+<p>A correct answer adds points to the word, a mistake takes points off, and hints cost a few points. When a word reaches the threshold (120 by default), it counts as learned and moves to review: after 1, 4 and 8 days it comes back twice. Once it passes all reviews, the word is fully learned. If a review deadline is missed, the word goes back to learning.</p>
+<p>A word earns at most 50 points a day, and only if at least an hour has passed since it last earned points. Practising three or four times a day, you learn a word in about three days; several rounds in a row do not rush it.</p>
+<p>If you skip practice for more than two days, words in learning slowly lose points. This is the “ice slide”.</p>
+<p>Only 25 words are in learning at once; new ones are added as others are learned. With <b>one dictionary at a time</b>, new words come only from the top active dictionary until it has none left, so switching between dictionaries does not scatter your attention. All numbers can be changed in Settings.</p></section>
+<section><h3>Exercises</h3><ul>
+<li><b>Choice</b>: pick the right answer out of four.</li>
+<li><b>Mosaic</b>: match words with their translations.</li>
+<li><b>Writing</b>: type the word. After a wrong letter the field turns red and the correct beginning of the word appears under it. A correct answer is accepted by itself.</li>
+<li><b>Dictation</b>: listen and type the word (or a sentence from the examples, see Settings). <b>Listen</b> plays it again, <b>Slowly</b> plays it slower.</li>
+<li><b>Letters</b>: tap the letters in the right order.</li>
+<li><b>Gap</b>: type the word into a sentence. Separable verbs have two gaps (<i lang="de">Ich nehme … teil</i>).</li>
+<li><b>Sentence</b>: tap the words in the right order.</li>
+<li><b>der/die/das</b>: pick the article of a noun. Nouns must be written with their article (<i lang="de">das Haus</i>). This exercise only checks the gender and does not change the word's score.</li></ul>
+<p><b>Letter</b> gives you the next letter. <b>Don't know</b> shows the answer and counts as a mistake. The ä ö ü ß keys are under the field. Letters typed in the wrong keyboard layout are fixed automatically and do not count as mistakes.</p>
+<p><b>I know it</b>, above the task, takes a word out of learning straight away. To mark many words at once, open a dictionary → Words → Mark known words. Known words do not count towards “learned” and can be returned to learning in the word editor.</p></section>
+<section><h3>Dictionaries</h3>
+<p>Columns: word, translation, example, example translation; up to two more examples with translations can follow. With several examples, Gap and Sentence use a different one each time. Only the first two columns are required, and you can reassign the columns before loading. Ready-made dictionaries published with the app are listed under Load dictionary.</p>
+<p>For a word to appear in <b>Gap</b>, its form in the example has to be in curly braces: <i lang="de">Ich {nehme} an einem Kongress {teil}.</i> Often the app finds the word by itself; the word editor shows whether it did.</p>
+<p>Progress belongs to the word: if a word is in two dictionaries, learning it once counts for both.</p></section>
+<section><h3>Progress</h3>
+<p>The ring next to the app name shows how many days in a row you have practised; it fills up towards your daily goal. <b>Progress</b> shows the boxes (how many words are at each stage), your record, conquered hard words (10+ mistakes, then learned), milestones, and all words with their scores. You choose a prize for each milestone yourself in Settings → Goal and milestones.</p></section>
+<section><h3>On iPhone, and backups</h3>
+<p>Open the app's address in Safari and tap Share → Add to Home Screen. It then opens like a normal app and also works offline.</p>
+<p>Your data lives only on this device. Make a backup now and then in Settings → Data and backup; you can restore it on any other device.</p></section>`,
+de:`<h2 class="h">So funktioniert Wortkasten</h2>
+<section><h3>Erste Schritte</h3><ol>
+<li>Öffne <b>Wörterbücher</b> und lade deine eigene Liste: eine Excel- oder CSV-Datei oder Text aus Quizlet. Das Beispiel-Wörterbuch ist zum Ausprobieren da, du kannst es jederzeit löschen.</li>
+<li>Schalte die Wörterbücher ein, die du lernen willst.</li>
+<li>Geh zu <b>Lernen</b>, wähle oben eine Übung und antworte. Eine Runde hat 12 Aufgaben. Bei Auswahl und Mosaik kommen falsch beantwortete Wörter am Ende der Runde wieder, bei den anderen Übungen zu Beginn der nächsten Runde.</li></ol></section>
+<section><h3>So funktioniert das Einprägen</h3>
+<p>Eine richtige Antwort bringt dem Wort Punkte, ein Fehler kostet Punkte, und Hinweise kosten ein paar Punkte. Erreicht ein Wort die Schwelle (standardmäßig 120), gilt es als gelernt und kommt in die Wiederholung: nach 1, 4 und 8 Tagen erscheint es je zweimal. Hat es alle Wiederholungen geschafft, ist das Wort endgültig gelernt. Wird eine Frist verpasst, geht das Wort zurück ins Lernen.</p>
+<p>Ein Wort bekommt höchstens 50 Punkte am Tag, und nur, wenn seit seinen letzten Punkten mindestens eine Stunde vergangen ist. Wer drei- bis viermal am Tag übt, lernt ein Wort so in etwa drei Tagen; mehrere Runden hintereinander beschleunigen das nicht.</p>
+<p>Wenn du länger als zwei Tage pausierst, verlieren Wörter im Lernen langsam Punkte. Das ist die „Eisrutsche“.</p>
+<p>Es sind immer nur 25 Wörter gleichzeitig im Lernen; neue kommen hinzu, sobald andere gelernt sind. Mit <b>ein Wörterbuch nach dem anderen</b> kommen neue Wörter nur aus dem obersten aktiven Wörterbuch, bis es keine mehr hat. So verzettelst du dich nicht zwischen mehreren Wörterbüchern. Alle Zahlen lassen sich in den Einstellungen ändern.</p></section>
+<section><h3>Übungen</h3><ul>
+<li><b>Auswahl</b>: wähle die richtige von vier Antworten.</li>
+<li><b>Mosaik</b>: ordne Wörter ihren Übersetzungen zu.</li>
+<li><b>Schreiben</b>: tippe das Wort. Nach einem falschen Buchstaben wird das Feld rot, und darunter erscheint der richtige Wortanfang. Eine richtige Antwort wird von selbst übernommen.</li>
+<li><b>Diktat</b>: hör zu und schreib das Wort (oder einen Satz aus den Beispielen, siehe Einstellungen). <b>Anhören</b> spielt es noch einmal ab, <b>Langsam</b> langsamer.</li>
+<li><b>Buchstaben</b>: tippe die Buchstaben in der richtigen Reihenfolge.</li>
+<li><b>Lücke</b>: setz das Wort in einen Satz ein. Trennbare Verben haben zwei Lücken (<i lang="de">Ich nehme … teil</i>).</li>
+<li><b>Satz</b>: tippe die Wörter in der richtigen Reihenfolge.</li>
+<li><b>der/die/das</b>: wähle den Artikel eines Substantivs. Substantive müssen mit Artikel eingetragen sein (<i lang="de">das Haus</i>). Die Übung prüft nur das Genus und ändert die Punktzahl des Wortes nicht.</li></ul>
+<p><b>Buchstabe</b> gibt dir den nächsten Buchstaben. <b>Weiß nicht</b> zeigt die Antwort und zählt als Fehler. Unter dem Feld findest du ä ö ü ß. Buchstaben im falschen Tastaturlayout werden automatisch korrigiert und zählen nicht als Fehler.</p>
+<p><b>Kenne ich schon</b> über der Aufgabe nimmt ein Wort sofort aus dem Lernen. Viele Wörter auf einmal markierst du im Wörterbuch → Wörter → Bekannte markieren. Bekannte Wörter zählen nicht als „gelernt“ und lassen sich im Wort-Editor zurück ins Lernen schicken.</p></section>
+<section><h3>Wörterbücher</h3>
+<p>Spalten: Wort, Übersetzung, Beispiel, Übersetzung des Beispiels; danach können bis zu zwei weitere Beispiele mit Übersetzung folgen. Bei mehreren Beispielen nehmen „Lücke“ und „Satz“ jedes Mal ein anderes. Nur die ersten zwei Spalten sind Pflicht, und vor dem Laden kannst du die Spalten neu zuordnen. Fertige Wörterbücher, die mit der App veröffentlicht sind, findest du unter „Wörterbuch laden“.</p>
+<p>Damit ein Wort in <b>Lücke</b> vorkommt, muss seine Form im Beispiel in geschweiften Klammern stehen: <i lang="de">Ich {nehme} an einem Kongress {teil}.</i> Oft findet die App das Wort selbst; im Wort-Editor siehst du, ob es geklappt hat.</p>
+<p>Der Fortschritt gehört zum Wort: Steht ein Wort in zwei Wörterbüchern, zählt es nach einmaligem Lernen in beiden.</p></section>
+<section><h3>Fortschritt</h3>
+<p>Der Ring neben dem Namen zeigt, wie viele Tage in Folge du geübt hast; er füllt sich bis zu deinem Tagesziel. Unter <b>Fortschritt</b> siehst du die Kästen (wie viele Wörter in welcher Stufe sind), deinen Rekord, besiegte schwere Wörter (10+ Fehler, dann gelernt), Meilensteine und alle Wörter mit ihren Punkten. Eine Belohnung für jeden Meilenstein legst du selbst fest: Einstellungen → Ziel und Meilensteine.</p></section>
+<section><h3>Auf dem iPhone und Sicherung</h3>
+<p>Öffne die Adresse der App in Safari und tippe auf Teilen → Zum Home-Bildschirm. Dann startet sie wie eine normale App und funktioniert auch offline.</p>
+<p>Deine Daten liegen nur auf diesem Gerät. Mach ab und zu eine Sicherung unter Einstellungen → Daten und Sicherung; damit kannst du alles auf einem anderen Gerät wiederherstellen.</p></section>`,
+be:`<h2 class="h">Як карыстацца Wortkasten</h2>
+<section><h3>З чаго пачаць</h3><ol>
+<li>Адкрыйце <b>Слоўнікі</b> і загрузіце свой спіс: файл Excel або CSV ці тэкст з Quizlet. Слоўнік-прыклад — каб паспрабаваць; яго можна выдаліць у любы момант.</li>
+<li>Уключыце слоўнікі, якія хочаце вучыць.</li>
+<li>Перайдзіце ў <b>Вучыць</b>, выберыце ўверсе практыкаванне і адказвайце. У раўндзе 12 заданняў. У Варыянце і Мазаіцы словы з памылкамі вяртаюцца ў канцы раўнда, у астатніх практыкаваннях — у пачатку наступнага.</li></ol></section>
+<section><h3>Як працуе запамінанне</h3>
+<p>За правільны адказ слова атрымлівае балы, за памылку губляе, а падказкі каштуюць некалькі балаў. Калі слова дасягае парога (па змаўчанні 120), яно лічыцца вывучаным і пераходзіць у паўтор: праз 1, 4 і 8 дзён яно вяртаецца па два разы. Пасля ўсіх паўтораў слова вывучана канчаткова. Калі тэрмін паўтору прапушчаны, слова вяртаецца ў вывучэнне.</p>
+<p>Слова атрымлівае не больш за 50 балаў за дзень, і толькі калі з апошніх балаў прайшла хаця б гадзіна. Калі займацца тры-чатыры разы на дзень, слова вывучаецца прыкладна за тры дні; некалькі раўндаў запар гэта не паскараюць.</p>
+<p>Калі вы не займаецеся больш за два дні, словы ў вывучэнні паступова губляюць балы. Гэта «ледзяная горка».</p>
+<p>Адначасова вывучаецца толькі 25 слоў; новыя дадаюцца, калі іншыя вывучаны. У рэжыме <b>па чарзе слоўнікаў</b> новыя словы бяруцца толькі з верхняга актыўнага слоўніка, пакуль у ім не скончацца, таму пераключэнне паміж слоўнікамі не распыляе ўвагу. Усе лічбы можна змяніць у наладах.</p></section>
+<section><h3>Практыкаванні</h3><ul>
+<li><b>Варыянт</b>: выберыце правільны адказ з чатырох.</li>
+<li><b>Мазаіка</b>: злучыце словы з перакладамі.</li>
+<li><b>Напісанне</b>: надрукуйце слова. Пасля няправільнай літары поле чырванее, а пад ім з’яўляецца правільны пачатак слова. Правільны адказ прымаецца сам.</li>
+<li><b>Дыктоўка</b>: паслухайце і напішыце слова (або фразу з прыкладаў, гл. налады). <b>Слухаць</b> агучвае яшчэ раз, <b>Павольна</b> — павольней.</li>
+<li><b>Літары</b>: націскайце літары ў правільным парадку.</li>
+<li><b>Пропуск</b>: упішыце слова ў фразу. У дзеясловаў з аддзяляльнай прыстаўкай два пропускі (<i lang="de">Ich nehme … teil</i>).</li>
+<li><b>Фраза</b>: націскайце словы ў правільным парадку.</li>
+<li><b>der/die/das</b>: выберыце артыкль назоўніка. Назоўнікі павінны быць запісаны з артыклем (<i lang="de">das Haus</i>). Практыкаванне правярае толькі род і не мяняе бал слова.</li></ul>
+<p><b>Літара</b> падказвае наступную літару. <b>Не ведаю</b> паказвае адказ і лічыцца памылкай. Пад полем ёсць ä ö ü ß. Літары, набраныя не ў той раскладцы, выпраўляюцца аўтаматычна і не лічацца памылкай.</p>
+<p><b>Ужо ведаю</b> над заданнем адразу выводзіць слова з вывучэння. Каб адзначыць шмат слоў адразу, адкрыйце слоўнік → Словы → Адзначыць вядомыя. Вядомыя словы не лічацца «вывучанымі», і іх можна вярнуць у вывучэнне ў рэдактары слова.</p></section>
+<section><h3>Слоўнікі</h3>
+<p>Слупкі: слова, пераклад, прыклад, пераклад прыкладу; далей могуць ісці яшчэ два прыклады з перакладамі. Калі прыкладаў некалькі, «Пропуск» і «Фраза» кожны раз бяруць іншы. Абавязковыя толькі першыя два слупкі, а перад загрузкай слупкі можна пераназначыць. Гатовыя слоўнікі, апублікаваныя разам з праграмай, ёсць у раздзеле «Загрузіць слоўнік».</p>
+<p>Каб слова трапіла ў <b>Пропуск</b>, яго форма ў прыкладзе павінна быць у фігурных дужках: <i lang="de">Ich {nehme} an einem Kongress {teil}.</i> Часта праграма знаходзіць слова сама; у рэдактары слова відаць, ці атрымалася.</p>
+<p>Прагрэс належыць слову: калі слова ёсць у двух слоўніках, яно залічваецца ў абодвух.</p></section>
+<section><h3>Прагрэс</h3>
+<p>Кольца побач з назвай паказвае, колькі дзён запар вы займаецеся, і запаўняецца да дзённай мэты. У раздзеле <b>Прагрэс</b> — скрыні (колькі слоў на кожнай стадыі), рэкорд, пераможаныя цяжкія словы (10+ памылак, потым вывучана), вехі і ўсе словы з баламі. Прыз за кожную веху вы прызначаеце самі: Налады → Мэта і вехі.</p></section>
+<section><h3>На iPhone і рэзервовая копія</h3>
+<p>Адкрыйце адрас праграмы ў Safari і націсніце «Абагуліць» → «На экран „Дадому“». Пасля гэтага яна адкрываецца як звычайная праграма і працуе без інтэрнэту.</p>
+<p>Дадзеныя захоўваюцца толькі на гэтай прыладзе. Час ад часу рабіце рэзервовую копію ў Наладах → Дадзеныя і рэзервовая копія; з яе можна аднавіць усё на іншай прыладзе.</p></section>`
+};
+function renderHelp(){view.innerHTML=`<article class="help">${HELP[L]||HELP.en}</article>`;}
+
+/* ===================== boot ===================== */
+load();maintain();renderChrome();
+if('speechSynthesis' in window){loadVoices();try{speechSynthesis.onvoiceschanged=()=>{loadVoices();fillVoices();};}catch(e){}}
+if(window.WK_STANDALONE&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+render();
+</script>
+
+</body>
+</html>
