@@ -1354,7 +1354,7 @@ function renderImport(){
     $('#lib').addEventListener('click',async e=>{
       const lv=e.target.closest('[data-lv]');if(lv){LIBF=lv.dataset.lv;drawLib();return;}
       const b=e.target.closest('[data-lib]');if(!b)return;const it=LIB[+b.dataset.lib];
-      try{const r=await fetch('dicts/'+it.file,{cache:'no-cache'});if(!r.ok)throw 0;const rows=parseText(await r.text());if(!rows.length)throw 0;
+      try{const r=await fetch(LIBDIR+it.file,{cache:'no-cache'});if(!r.ok)throw 0;const rows=parseText(await r.text());if(!rows.length)throw 0;
         DV.imp.name=it.name;setImportRows(rows,it.name);}catch(err){toast(t('i_read_fail'));}
     });
     $('#inext').onclick=()=>{const x=$('#itext').value;if(!x.trim()){toast(t('i_need'));return;}setImportRows(parseText(x),$('#iname').value.trim());};
@@ -1387,7 +1387,8 @@ function renderImport(){
   };
 }
 let LIB=null,LIBF='all';
-async function loadLib(){if(LIB!==null)return LIB;try{const r=await fetch('dicts/index.json',{cache:'no-cache'});if(!r.ok)throw 0;const j=await r.json();LIB=(Array.isArray(j)?j:(j.dictionaries||[])).filter(x=>x&&x.file&&x.name);}catch(e){LIB=[];}return LIB;}
+let LIBDIR='dicts/';
+async function loadLib(){if(LIB!==null)return LIB;try{let r=null;for(const dir of ['dicts/','dict/']){try{r=await fetch(dir+'index.json',{cache:'no-cache'});}catch(e){r=null;}if(r&&r.ok){LIBDIR=dir;break;}}if(!r||!r.ok)throw 0;const j=await r.json();LIB=(Array.isArray(j)?j:(j.dictionaries||[])).filter(x=>x&&x.file&&x.name);}catch(e){LIB=[];}return LIB;}
 function drawLib(){
   const box=$('#lib');if(!box)return;if(!LIB||!LIB.length){box.innerHTML='';return;}
   const levels=[...new Set(LIB.map(x=>x.level).filter(Boolean))].sort();if(LIBF!=='all'&&!levels.includes(LIBF))LIBF='all';
