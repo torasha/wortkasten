@@ -1,18 +1,26 @@
 [
   {
-    "file": "de-en-b1-verbs-prepositions.tsv",
-    "name": "Verbs with prepositions",
+    "file": "Deutsch_B1_1.tsv",
+    "name": "Deutsch B1",
     "level": "B1",
-    "pair": "DE → EN",
-    "words": 16,
-    "desc": "Example list: verbs with fixed prepositions, with example sentences"
+    "pair": "DE → RU",
+    "words": 787,
+    "desc": "Глаголы, существительные и выражения уровня B1, по три примера с переводом"
   },
   {
-    "file": "de-be-b1-verbs-prepositions.tsv",
-    "name": "Дзеясловы з прыназоўнікамі",
+    "file": "Verben_mit_Praepositionen.tsv",
+    "name": "Verben mit Präpositionen",
     "level": "B1",
-    "pair": "DE → BE",
-    "words": 16,
-    "desc": "Прыклад: дзеясловы з устойлівымі прыназоўнікамі і прыкладамі"
+    "pair": "DE → RU",
+    "words": 193,
+    "desc": "Глаголы с предлогами и управлением, по три примера с переводом"
+  },
+  {
+    "file": "EnglishB2plus.tsv",
+    "name": "English B2+",
+    "level": "B2+",
+    "pair": "EN → RU",
+    "words": 1137,
+    "desc": "Лексика B2–C1 с транскрипцией и примерами"
   }
 ]
