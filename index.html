@@ -142,7 +142,11 @@ input.answer.good{border-color:var(--ok);background:var(--ok-soft)}
 .gap.cur{border-color:var(--accent);background:var(--accent-soft)}
 .gap.done{border-color:var(--ok);color:var(--ok)}
 .gap .rest{color:var(--muted);letter-spacing:.1em}
-.base{font-size:.95rem;color:var(--hint)}
+.trn{font-family:-apple-system,"Segoe UI","Noto Sans","DejaVu Sans","Lucida Sans Unicode",sans-serif;color:var(--muted);font-weight:400;font-size:.85em;letter-spacing:0;font-style:normal}
+.trn.blk{display:block;font-size:.78em}
+.prompt-body .trn{font-size:1.02rem}
+.dlang{font-size:14px;padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);max-width:100%}
+.base{font-size:.95rem;color:var(--hint);letter-spacing:normal;font-family:var(--font-ui)}
 .msg{font-size:.93rem;min-height:1.35em;color:var(--muted)}
 .msg.warn{color:var(--hint)} .msg.err{color:var(--err)}
 mark.fix{background:var(--err-soft);color:var(--err);border-radius:3px;padding:0 1px;text-decoration:underline}
@@ -161,6 +165,19 @@ mark.hint{background:var(--hint-soft);color:var(--hint);border-radius:3px;paddin
 .meter{width:100%;height:6px;background:var(--surface2);border-radius:999px;overflow:hidden}
 .meter span{display:block;height:100%;border-radius:999px}
 .brandrow{display:flex;align-items:center;gap:12px}
+.addbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);font-size:1.6rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 2px}
+.addbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(10,15,13,.38);display:flex;align-items:flex-end;justify-content:center}
+.sheet-in{background:var(--bg);width:100%;max-width:560px;max-height:calc(100% - env(safe-area-inset-top,0px) - 24px);overflow:auto;border-radius:16px 16px 0 0;padding-top:16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px;box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+@media (min-width:700px){.sheet{align-items:center}.sheet-in{border-radius:16px}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sheet .field input,.sheet .field textarea,.sheet .field select{font-family:var(--font-ui);font-size:16px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
+.sheet details summary{cursor:pointer;color:var(--accent);font-size:.9rem}
+.sheet details[open]{display:flex;flex-direction:column;gap:10px}
+.recent{display:flex;flex-wrap:wrap;gap:6px}
+.recent span{font-size:.85rem;background:var(--surface2);padding:3px 8px;border-radius:999px}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-size:.88rem;cursor:pointer;text-decoration:underline;align-self:flex-start}
+.wr[data-wid]{cursor:pointer}
 .streak{border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:50%}
 .kpis{display:flex;gap:14px 28px;flex-wrap:wrap;align-items:center}
 .kpi{display:flex;gap:12px;align-items:center}
@@ -272,7 +289,7 @@ details.set[open]>summary::after{content:"−"}
 
 <div class="wrap">
   <header class="top">
-    <div class="brandrow"><div class="brand">Wortkasten<small id="sub"></small></div><button class="streak" id="streak"></button></div>
+    <div class="brandrow"><div class="brand">Wortkasten<small id="sub"></small></div><button class="streak" id="streak"></button><button class="addbtn" id="addw">+</button></div>
     <nav class="views">
       <button data-view="learn"></button>
       <button data-view="dicts"></button>
@@ -284,6 +301,7 @@ details.set[open]>summary::after{content:"−"}
   <main id="view"></main>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="sheet" id="sheet" hidden><div class="sheet-in" id="sheetin" role="dialog" aria-modal="true"></div></div>
 <script>
 'use strict';
 /* ===================== interface languages ===================== */
@@ -333,6 +351,11 @@ en:{
   f_known:'I know it', f_unknow:'Back to learning', sel_known:'Mark known words', sel_do:'Mark ({n})', sel_note:'Tick the words you already know. They will not appear in exercises.', t_marked:'Marked as known: {n}',
   dc_mode:'What to dictate', dc_word:'the word', dc_phrase:'a sentence from the examples', dc_mixed:'alternate', dc_tr:'Show the translation',
   ar_conf:'Confident after correct answers in a row', ar_note:'Article practice does not change the word score: it only checks the gender.', p_art:'Articles: confident {a} of {b}',
+  fl_tr:'Transcription', f_trn:'Transcription (shown next to the word, never typed)', d_lang:'Language', d_lang_def:'default ({l})',
+  g_tr:'Transcription', g_tr_s:'Shown next to the word only where the word itself is not the answer', g_tr_always:'show with the word', g_tr_after:'only after the answer', g_tr_never:'do not show',
+  add_title:'Add words', add_aria:'Add words', add_dict:'Dictionary', add_newdict:'New dictionary…', add_newname:'Name of the new dictionary', add_def_name:'Lessons',
+  add_one:'One by one', add_list:'As a list', add_btn:'Add', add_list_btn:'Add the list', add_list_ph:'one word per line, e.g.\nreliable [rɪˈlaɪəbl] — надёжный\ndie Stelle — место', add_done:'Added: {n}', add_ex:'+ example', add_close:'Close',
+  add_note:'Words added here come first among new words for the next two weeks.', add_dup:'Already in your dictionaries — added to this one too', edit:'Edit the word', edit_title:'Edit word',
   lib_title:'Ready-made dictionaries', lib_note:'Lists published together with the app. Pick one for your level.', lib_all:'All', lib_choose:'Choose',
   i_title:'Load dictionary', i_name:'Dictionary name', i_name_ph:'e.g. B1 — Kapitel 3', i_file:'File: Excel (.xlsx), CSV, TSV or text', i_paste:'Or paste a list, one word per line',
   i_note:'Columns: word, translation, example, example translation; up to two more examples with translations can follow. Only word and translation are required. Separator: tab, semicolon, comma or dash. A Quizlet export works as it is. You can reassign the columns in the next step.',
@@ -370,7 +393,7 @@ en:{
   w_len:'Show the word length', w_cost:'— points taken off for this hint', w_first:'Show the first letter', w_lerr:'Show the correct letter after a mistake', w_lerr_s:'The correct beginning of the word appears under the field',
   w_lcost:'Points taken off for a hint letter', w_lcost_s:'Also for the Letter button', w_werr:'Show the whole word after a mistake',
   l_lerr:'Highlight the needed letter after a mistake', cz_base:'Show the dictionary form and translation', cz_len:'Show the gap length', ph_werr:'Highlight the needed word after a mistake', ph_cost:'— points taken off for the hint',
-  a_on:'Speak', a_auto:'Speak automatically after an answer', a_lang:'Language you are learning', a_lang_s:'Language code: de-DE, en-GB, fr-FR…', a_voice:'Voice', a_voice_s:'On iPhone, better voices can be downloaded in Settings → Accessibility → Spoken Content', a_def:'Default', a_rate:'Speech rate', a_test:'Listen',
+  a_on:'Speak', a_auto:'Speak automatically after an answer', a_lang:'Default language you are learning', a_lang_s:'Language code: de-DE, en-GB, fr-FR… A dictionary can have its own language (Dictionaries → Language)', a_voice:'Voice', a_voice_s:'On iPhone, better voices can be downloaded in Settings → Accessibility → Spoken Content', a_def:'Default', a_rate:'Speech rate', a_test:'Listen',
   dt_note:'All data is stored only on this device, in this browser. Make a backup from time to time — it lets you restore everything on another device.',
   dt_bk:'Make a backup', dt_file:'Restore from a file', dt_paste:'or paste the backup text', dt_restore:'Restore', dt_reset:'Reset all progress', dt_def:'Restore default settings',
   t_notbk:"This doesn't look like a backup", t_notwk:"This doesn't look like a Wortkasten backup", t_restored:'Data restored', t_preset:'Progress reset', t_sreset:'Settings reset',
@@ -419,6 +442,11 @@ de:{
   f_known:'Kenne ich schon', f_unknow:'Zurück ins Lernen', sel_known:'Bekannte markieren', sel_do:'Markieren ({n})', sel_note:'Hake die Wörter an, die du schon kennst. Sie kommen in den Übungen nicht mehr vor.', t_marked:'Als bekannt markiert: {n}',
   dc_mode:'Was diktieren', dc_word:'das Wort', dc_phrase:'einen Satz aus den Beispielen', dc_mixed:'abwechselnd', dc_tr:'Übersetzung zeigen',
   ar_conf:'Sicher nach richtigen Antworten in Folge', ar_note:'Die Artikelübung ändert die Punktzahl des Wortes nicht: sie prüft nur das Genus.', p_art:'Artikel: sicher {a} von {b}',
+  fl_tr:'Transkription', f_trn:'Transkription (wird beim Wort gezeigt, nie getippt)', d_lang:'Sprache', d_lang_def:'Standard ({l})',
+  g_tr:'Transkription', g_tr_s:'Wird beim Wort nur gezeigt, wenn das Wort selbst nicht die Antwort ist', g_tr_always:'mit dem Wort zeigen', g_tr_after:'nur nach der Antwort', g_tr_never:'nicht zeigen',
+  add_title:'Wörter hinzufügen', add_aria:'Wörter hinzufügen', add_dict:'Wörterbuch', add_newdict:'Neues Wörterbuch…', add_newname:'Name des neuen Wörterbuchs', add_def_name:'Lektionen',
+  add_one:'Einzeln', add_list:'Als Liste', add_btn:'Hinzufügen', add_list_btn:'Liste hinzufügen', add_list_ph:'ein Wort pro Zeile, z. B.\nreliable [rɪˈlaɪəbl] — zuverlässig\ndie Stelle — Stelle, Ort', add_done:'Hinzugefügt: {n}', add_ex:'+ Beispiel', add_close:'Schließen',
+  add_note:'Hier hinzugefügte Wörter kommen in den nächsten zwei Wochen als Erste unter den neuen Wörtern dran.', add_dup:'Schon in deinen Wörterbüchern — auch hier hinzugefügt', edit:'Wort bearbeiten', edit_title:'Wort bearbeiten',
   lib_title:'Fertige Wörterbücher', lib_note:'Listen, die zusammen mit der App veröffentlicht sind. Wähle eine für dein Niveau.', lib_all:'Alle', lib_choose:'Auswählen',
   i_title:'Wörterbuch laden', i_name:'Name des Wörterbuchs', i_name_ph:'z. B. B1 — Kapitel 3', i_file:'Datei: Excel (.xlsx), CSV, TSV oder Text', i_paste:'Oder füge eine Liste ein, ein Wort pro Zeile',
   i_note:'Spalten: Wort, Übersetzung, Beispiel, Übersetzung des Beispiels; danach können bis zu zwei weitere Beispiele mit Übersetzung folgen. Pflicht sind nur Wort und Übersetzung. Trennzeichen: Tab, Semikolon, Komma oder Gedankenstrich. Ein Quizlet-Export funktioniert direkt. Im nächsten Schritt kannst du die Spalten neu zuordnen.',
@@ -454,7 +482,7 @@ de:{
   w_len:'Wortlänge zeigen', w_cost:'— Abzug für diesen Hinweis', w_first:'Ersten Buchstaben zeigen', w_lerr:'Nach einem Fehler den richtigen Buchstaben zeigen', w_lerr_s:'Unter dem Feld erscheint der richtige Wortanfang',
   w_lcost:'Abzug für einen Hinweisbuchstaben', w_lcost_s:'Auch für die Taste „Buchstabe“', w_werr:'Nach einem Fehler das ganze Wort zeigen',
   l_lerr:'Nach einem Fehler den gesuchten Buchstaben hervorheben', cz_base:'Grundform und Übersetzung zeigen', cz_len:'Länge der Lücke zeigen', ph_werr:'Nach einem Fehler das gesuchte Wort hervorheben', ph_cost:'— Abzug für den Hinweis',
-  a_on:'Aussprechen', a_auto:'Nach der Antwort automatisch aussprechen', a_lang:'Lernsprache', a_lang_s:'Sprachcode: de-DE, en-GB, fr-FR…', a_voice:'Stimme', a_voice_s:'Auf dem iPhone lassen sich bessere Stimmen unter Einstellungen → Bedienungshilfen → Gesprochene Inhalte laden', a_def:'Standard', a_rate:'Sprechtempo', a_test:'Anhören',
+  a_on:'Aussprechen', a_auto:'Nach der Antwort automatisch aussprechen', a_lang:'Standard-Lernsprache', a_lang_s:'Sprachcode: de-DE, en-GB, fr-FR… Ein Wörterbuch kann eine eigene Sprache haben (Wörterbücher → Sprache)', a_voice:'Stimme', a_voice_s:'Auf dem iPhone lassen sich bessere Stimmen unter Einstellungen → Bedienungshilfen → Gesprochene Inhalte laden', a_def:'Standard', a_rate:'Sprechtempo', a_test:'Anhören',
   dt_note:'Alle Daten liegen nur auf diesem Gerät, in diesem Browser. Mach ab und zu eine Sicherung — damit kannst du alles auf einem anderen Gerät wiederherstellen.',
   dt_bk:'Sicherung erstellen', dt_file:'Aus einer Datei wiederherstellen', dt_paste:'oder den Text der Sicherung einfügen', dt_restore:'Wiederherstellen', dt_reset:'Gesamten Fortschritt zurücksetzen', dt_def:'Standardeinstellungen wiederherstellen',
   t_notbk:'Das sieht nicht nach einer Sicherung aus', t_notwk:'Das sieht nicht nach einer Wortkasten-Sicherung aus', t_restored:'Daten wiederhergestellt', t_preset:'Fortschritt zurückgesetzt', t_sreset:'Einstellungen zurückgesetzt',
@@ -503,6 +531,11 @@ be:{
   f_known:'Ужо ведаю', f_unknow:'Вярнуць у вывучэнне', sel_known:'Адзначыць вядомыя', sel_do:'Адзначыць ({n})', sel_note:'Адзначце словы, якія вы ўжо ведаеце. Яны больш не будуць трапляць у практыкаванні.', t_marked:'Адзначана як вядомыя: {n}',
   dc_mode:'Што дыктаваць', dc_word:'слова', dc_phrase:'фразу з прыкладаў', dc_mixed:'па чарзе', dc_tr:'Паказваць пераклад',
   ar_conf:'Упэўнена пасля дакладных адказаў запар', ar_note:'Практыкаванне на артыклі не мяняе бал слова: яно правярае толькі род.', p_art:'Артыклі: упэўнена {a} з {b}',
+  fl_tr:'Транскрыпцыя', f_trn:'Транскрыпцыя (паказваецца побач са словам, друкаваць не трэба)', d_lang:'Мова', d_lang_def:'па змаўчанні ({l})',
+  g_tr:'Транскрыпцыя', g_tr_s:'Паказваецца побач са словам толькі тады, калі само слова не з’яўляецца адказам', g_tr_always:'паказваць са словам', g_tr_after:'толькі пасля адказу', g_tr_never:'не паказваць',
+  add_title:'Дадаць словы', add_aria:'Дадаць словы', add_dict:'Слоўнік', add_newdict:'Новы слоўнік…', add_newname:'Назва новага слоўніка', add_def_name:'Урокі',
+  add_one:'Па адным', add_list:'Спісам', add_btn:'Дадаць', add_list_btn:'Дадаць спіс', add_list_ph:'па слове ў радку, напрыклад:\nreliable [rɪˈlaɪəbl] — надзейны\ndie Stelle — месца', add_done:'Дададзена: {n}', add_ex:'+ прыклад', add_close:'Закрыць',
+  add_note:'Словы, дададзеныя тут, наступныя два тыдні ідуць першымі сярод новых.', add_dup:'Ужо ёсць у вашых слоўніках — дададзена і сюды', edit:'Змяніць слова', edit_title:'Змяніць слова',
   lib_title:'Гатовыя слоўнікі', lib_note:'Спісы, апублікаваныя разам з праграмай. Выберыце пад свой узровень.', lib_all:'Усе', lib_choose:'Выбраць',
   i_title:'Загрузіць слоўнік', i_name:'Назва слоўніка', i_name_ph:'Напрыклад: B1 — Kapitel 3', i_file:'Файл: Excel (.xlsx), CSV, TSV або тэкст', i_paste:'Або ўстаўце спіс — па радку на слова',
   i_note:'Слупкі: слова, пераклад, прыклад, пераклад прыкладу; далей могуць ісці яшчэ два прыклады з перакладамі. Абавязковыя толькі слова і пераклад. Раздзяляльнік — табуляцыя, кропка з коскай, коска або працяжнік. Экспарт з Quizlet падыходзіць як ёсць. На наступным кроку слупкі можна пераназначыць.',
@@ -538,7 +571,7 @@ be:{
   w_len:'Паказваць даўжыню слова', w_cost:'— здымаць балаў за падказку', w_first:'Паказваць першую літару', w_lerr:'Падказваць літару пры памылцы', w_lerr_s:'Пад полем з’яўляецца правільны пачатак слова',
   w_lcost:'Здымаць балаў за падказку літары', w_lcost_s:'І за кнопку «Літара»', w_werr:'Падказваць слова пры памылцы',
   l_lerr:'Падсвечваць патрэбную літару пры памылцы', cz_base:'Паказваць слоўнікавую форму і пераклад', cz_len:'Паказваць даўжыню пропуску', ph_werr:'Падсвечваць патрэбнае слова пры памылцы', ph_cost:'— здымаць балаў за падказку',
-  a_on:'Агучваць', a_auto:'Вымаўляць аўтаматычна пасля адказу', a_lang:'Мова, якую вывучаеце', a_lang_s:'Код мовы: de-DE, en-GB, fr-FR…', a_voice:'Голас', a_voice_s:'На iPhone лепшыя галасы спампоўваюцца ў Наладах → Універсальны доступ → Прамаўленне', a_def:'Па змаўчанні', a_rate:'Хуткасць маўлення', a_test:'Праслухаць',
+  a_on:'Агучваць', a_auto:'Вымаўляць аўтаматычна пасля адказу', a_lang:'Мова вывучэння па змаўчанні', a_lang_s:'Код мовы: de-DE, en-GB, fr-FR… У слоўніка можа быць свая мова (Слоўнікі → Мова)', a_voice:'Голас', a_voice_s:'На iPhone лепшыя галасы спампоўваюцца ў Наладах → Універсальны доступ → Прамаўленне', a_def:'Па змаўчанні', a_rate:'Хуткасць маўлення', a_test:'Праслухаць',
   dt_note:'Усе дадзеныя захоўваюцца толькі на гэтай прыладзе, у гэтым браўзеры. Час ад часу рабіце рэзервовую копію — з яе можна аднавіць усё на іншай прыладзе.',
   dt_bk:'Зрабіць рэзервовую копію', dt_file:'Аднавіць з файла', dt_paste:'або ўстаўце тэкст копіі', dt_restore:'Аднавіць', dt_reset:'Скінуць увесь прагрэс', dt_def:'Вярнуць налады па змаўчанні',
   t_notbk:'Гэта не падобна на рэзервовую копію', t_notwk:'Гэта не падобна на рэзервовую копію Wortkasten', t_restored:'Дадзеныя адноўлены', t_preset:'Прагрэс скінуты', t_sreset:'Налады скінуты',
@@ -567,8 +600,8 @@ const EXIDS=['choice','mosaic','writing','dictation','letters','cloze','phrase',
 const exName=id=>t('ex_'+id), exHint=id=>t('exh_'+id);
 
 function defaults(){return{
-  lang:'',
-  general:{threshold:120,dailyCap:50,minGap:60,resetOnError:false,inLearning:25,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:900,layoutFix:true,foreignLayout:'qwertz',dailyGoal:50},
+  lang:'',mig:1,
+  general:{threshold:120,dailyCap:50,minGap:60,resetOnError:false,inLearning:25,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:900,layoutFix:true,foreignLayout:'qwertz',showTr:'always',dailyGoal:50},
   repeat:{enabled:true,overdueBack:true,stages:[{after:1,times:2,deadline:4},{after:4,times:2,deadline:6},{after:8,times:2,deadline:10}]},
   forget:{enabled:true,grace:2,perDay:5},
   ex:{
@@ -576,7 +609,7 @@ function defaults(){return{
     mosaic:{on:true,plus:4,minus:6,pairs:5},
     writing:{on:true,plus:12,minus:8,showLength:false,showFirst:false,letterOnError:true,wordOnError:false,costLength:2,costFirst:3,costLetter:3},
     letters:{on:true,plus:8,minus:6,letterOnError:true,costLetter:3},
-    cloze:{on:true,plus:12,minus:8,showBase:true,showLength:true,letterOnError:true,costBase:0,costLetter:3},
+    cloze:{on:true,plus:12,minus:8,showBase:false,showLength:true,letterOnError:true,costBase:0,costLetter:3},
     phrase:{on:true,plus:10,minus:6,wordOnError:true,costWord:3},
     dictation:{on:true,plus:10,minus:8,mode:'word',showTr:false,letterOnError:true,wordOnError:false,costLetter:3},
     article:{on:true,perRound:20,confident:3},
@@ -607,7 +640,19 @@ const SAMPLE=[
 
 /* ===================== state ===================== */
 let S=null;
-function mkWord(w,tr,ex,exT,dictId){return{id:uid(),w:String(w).trim(),t:String(tr).trim(),ex:(ex||'').trim(),exT:(exT||'').trim(),dicts:[dictId],st:'new',sc:0,stage:0,hits:0,due:0,dl:0,err:0,ok:0,last:0};}
+const IPA=/[ˈˌːəæɪʊʌɔɑɒɜθðʃʒŋɛɐ]/;
+function splitTr(o){
+  o.tr=String(o.tr||'').trim();
+  if(!o.tr){let m=String(o.w).match(/\s*\[([^\]]+)\]\s*/);
+    if(!m){const m2=String(o.w).match(/\s*\/([^\/]+)\/\s*/);if(m2&&IPA.test(m2[1]))m=m2;}
+    if(m){o.tr=m[1].trim();o.w=String(o.w).replace(m[0],' ').replace(/\s+/g,' ').trim();}}
+  if(!o.tr){const m=String(o.t).match(/^\s*\[([^\]]+)\]\s*/);if(m){o.tr=m[1].trim();o.t=String(o.t).slice(m[0].length).trim();}}
+  o.tr=o.tr.replace(/^[\[\/]+|[\]\/]+$/g,'').trim();return o;
+}
+const LANGS_F=[['de-DE','Deutsch'],['en-GB','English (UK)'],['en-US','English (US)'],['fr-FR','Français'],['es-ES','Español'],['it-IT','Italiano'],['nl-NL','Nederlands'],['pl-PL','Polski'],['sv-SE','Svenska']];
+function wl(w){const own=S.dicts.filter(d=>w.dicts.includes(d.id)&&d.lang);const d=own.find(d=>d.active)||own[0];return d?d.lang:S.settings.audio.langF;}
+let CURLANG='';
+function mkWord(w,tr,ex,exT,dictId){return{id:uid(),tr:'',w:String(w).trim(),t:String(tr).trim(),ex:(ex||'').trim(),exT:(exT||'').trim(),dicts:[dictId],st:'new',sc:0,stage:0,hits:0,due:0,dl:0,err:0,ok:0,last:0};}
 function seed(lang){
   const d={id:uid(),name:I18N[lang].sample_name,active:true,sample:true};const k=lang==='be'?3:2;
   const st=defaults();st.lang=lang;st.audio.langN=lang==='be'?'be-BY':'en-GB';
@@ -622,9 +667,13 @@ function load(){
   let raw=null;try{raw=localStorage.getItem(KEY);}catch(e){}
   if(raw){try{S=JSON.parse(raw);}catch(e){S=null;}}
   if(!S||!Array.isArray(S.words)||!Array.isArray(S.dicts)) S=seed(detectLang());
+  const mig=(S.settings&&S.settings.mig)||0;
   S.settings=mergeDeep(defaults(),S.settings);
+  if(mig<1){S.settings.ex.cloze.showBase=false;}
+  S.settings.mig=1;
   if(!LANGS[S.settings.lang])S.settings.lang=detectLang();
   L=S.settings.lang;
+  for(const w of S.words)if(w.tr==null)splitTr(w);
   S.log=S.log||{}; S.miles=S.miles||{}; S.best=S.best||0; S.ui=Object.assign({view:'learn',ex:'writing'},S.ui||{});
 }
 let saveWarned=false;
@@ -664,11 +713,12 @@ function checkTyped(val,targets){
 function origPrefix(alt,k){for(let i=0;i<=alt.length;i++){if(norm(alt.slice(0,i)).length>=k)return alt.slice(0,i);}return alt;}
 function autoMark(w,exs=w.ex){
   if(!exs)return null;
-  const heads=splitParts(w.w).map(p=>stripTags(p).replace(/^(der|die|das|ein|eine|sich)\s+/i,'').trim()).filter(Boolean);
+  const heads=splitParts(w.w).map(p=>stripTags(p).replace(/^(der|die|das|ein|eine|sich|to|a|an|the)\s+/i,'').trim()).filter(Boolean);
   const toks=exs.split(/(\s+)/);
   for(const h of heads){
     const lm=h.split(' ')[0].toLowerCase();if(lm.length<2)continue;
-    const c=new Set([lm,...['e','en','n','s','es','er','ern','ns'].map(x=>lm+x)]);
+    const c=new Set([lm,...['e','en','n','s','es','er','ern','ns','ing','ed','d'].map(x=>lm+x)]);
+    if(lm.endsWith('e')){c.add(lm.slice(0,-1)+'ing');}if(lm.endsWith('y')){c.add(lm.slice(0,-1)+'ies');c.add(lm.slice(0,-1)+'ied');}
     const stem=lm.endsWith('en')?lm.slice(0,-2):lm.endsWith('n')?lm.slice(0,-1):null;
     if(stem&&stem.length>=3){['e','st','t','en','et','te','test','ten','tet'].forEach(x=>c.add(stem+x));c.add('ge'+stem+'t');c.add('ge'+stem+'et');}
     for(let i=0;i<toks.length;i++){
@@ -693,7 +743,7 @@ const CYR_ALIAS={'ў':'щ','і':'и','ї':'ъ','є':'э','ґ':'г'};
 const scriptOf=s=>/[а-яёіўєїґ]/i.test(s)?'cyr':/[a-zäöüß]/i.test(s)?'lat':'';
 function fixLayout(val,target){
   if(!G().layoutFix)return val;const want=scriptOf(target||'');if(!want)return val;
-  const lat=LAT_KEYS[G().foreignLayout]||LAT_KEYS.qwertz;const beT=/[іў]/i.test(target||'');let out='';
+  const lat=LAT_KEYS[/^en/i.test(CURLANG)?'qwerty':/^de/i.test(CURLANG)?'qwertz':G().foreignLayout]||LAT_KEYS.qwertz;const beT=/[іў]/i.test(target||'');let out='';
   for(const ch of val){const lo=ch.toLowerCase(),up=ch!==lo;let m=null;
     if(want==='lat'&&/[а-яёіўєїґ]/i.test(ch)){const i=RU_KEYS.indexOf(CYR_ALIAS[lo]||lo);m=i>=0&&/\p{L}/u.test(lat[i])?lat[i]:'';}
     else if(want==='cyr'&&/[a-zäöüß]/i.test(ch)){const i=lat.indexOf(lo);m=i>=0?RU_KEYS[i]:'';if(beT&&m==='щ')m='ў';if(beT&&m==='и')m='і';}
@@ -753,6 +803,12 @@ function maintain(){
   save();
 }
 function pickNew(pool,k){
+  if(k<=0)return[];const ids0=new Set(pool.filter(w=>w.st==='new').map(w=>w.id));
+  const fresh=S.words.filter(w=>ids0.has(w.id)&&w.added&&Date.now()-w.added<14*DAY).sort((a,b)=>a.added-b.added).map(w=>w.id);
+  const fs=new Set(fresh);const rest=pickNew0(pool.filter(w=>!fs.has(w.id)),k);
+  return [...fresh,...rest].slice(0,k);
+}
+function pickNew0(pool,k){
   if(k<=0)return[];const g=G();const ids=new Set(pool.filter(w=>w.st==='new').map(w=>w.id));
   if(g.newMode==='sequential'){
     for(const d of S.dicts.filter(d=>d.active)){
@@ -810,8 +866,8 @@ function pickVoice(lang,name){const l=(lang||'').toLowerCase();if(name){const v=
   return VOICES.find(v=>v.lang.toLowerCase().replace('_','-')===l)||VOICES.find(v=>v.lang.toLowerCase().startsWith(l.slice(0,2)));}
 function speak(text,foreign=true,o={}){
   const a=S.settings.audio;if((!a.on&&!o.force)||!('speechSynthesis' in window)||!text)return;
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(stripTags(stripBraces(text)));u.lang=foreign?a.langF:a.langN;
-    const v=pickVoice(u.lang,foreign?a.voiceF:'');if(v)u.voice=v;u.rate=a.rate*(o.slow?0.65:1);speechSynthesis.speak(u);}catch(e){}
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(stripTags(stripBraces(text)));u.lang=foreign?(o.lang||CURLANG||a.langF):a.langN;
+    const v=pickVoice(u.lang,foreign&&u.lang.slice(0,2).toLowerCase()===String(a.langF).slice(0,2).toLowerCase()?a.voiceF:'');if(v)u.voice=v;u.rate=a.rate*(o.slow?0.65:1);speechSynthesis.speak(u);}catch(e){}
 }
 const autoSay=x=>{if(S.settings.audio.autoSpeak)speak(x,true);};
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
@@ -823,6 +879,7 @@ function toast(msg,ms=3200,act){const el=$('#toast');el.textContent='';const sp=
   el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,ms);}
 function setView(v){S.ui.view=v;save();render();}
 function renderChrome(){
+  $('#addw').setAttribute('aria-label',t('add_aria'));$('#addw').title=t('add_aria');
   document.documentElement.lang=L;
   $('#sub').textContent=t('sub');
   $('nav.views').setAttribute('aria-label',t('nav_aria'));
@@ -883,6 +940,7 @@ function nextTask(){
   if(!R.queue.length){R.cur=null;return drawEnd();}
   const nid=R.queue.shift();const w=S.words.find(x=>x.id===nid);if(!w)return nextTask();
   if(w.st==='known'&&R.type!=='article')return nextTask();
+  CURLANG=wl(w);
   if(w.retry){w.retry=false;save();}
   const c=R.cur={w,err:false,cost:0,done:false,fixes:[],answers:[]};
   const ex=S.settings.ex[R.type];
@@ -908,8 +966,11 @@ function statusBar(){
   const kb=w&&R.cur&&!R.cur.done&&R.cur.kind!=='mosaic'&&R.type!=='article'&&w.st!=='done'&&w.st!=='known'?`<button class="knowbtn" data-act="know">${t('know')}</button>`:'';
   st.innerHTML=`<span>${t('st_left')} <b>${left}</b></span><span>${t('st_ok')} <b>${R.ok}</b></span><span>${t('st_bad')} <b>${R.bad}</b></span>${chip}${kb}`;
 }
-function prompt(label,text,{sm=false,foreign=false,lang=''}={}){
-  return `<div class="prompt"><div class="prompt-body"><span class="label">${label}</span><div class="prompt-main${sm?' sm':''}"${lang?` lang="${lang}"`:''}>${esc(text)}</div></div>${foreign?`<button class="say" data-act="say" aria-label="${t('say')}">${SPK}</button>`:''}</div>`;
+const trShow=w=>w&&w.tr&&G().showTr!=='never';
+const trHTML=w=>trShow(w)?` <span class="trn">[${esc(w.tr)}]</span>`:'';
+const wordLine=w=>`<span><b lang="${wl(w).slice(0,2)}">${esc(w.w)}</b>${trHTML(w)} — ${esc(w.t)}</span>`;
+function prompt(label,text,{sm=false,foreign=false,lang='',tr=''}={}){
+  return `<div class="prompt"><div class="prompt-body"><span class="label">${label}</span><div class="prompt-main${sm?' sm':''}"${lang?` lang="${lang}"`:''}>${esc(text)}</div>${tr?`<span class="trn">[${esc(tr)}]</span>`:''}</div>${foreign?`<button class="say" data-act="say" aria-label="${t('say')}">${SPK}</button>`:''}</div>`;
 }
 const exampleLine=w=>{const xs=exList(w);if(!xs.length)return '';const x=xs[Math.floor(Math.random()*xs.length)];return `<span class="ex"><i lang="de">${esc(stripBraces(x.ex))}</i>${x.exT?' — '+esc(x.exT):''}</span>`;};
 function evMsg(ev){const d=R&&R.cur&&R.cur.w?fmtDate(R.cur.w.due):'';const m=ev==='learned'?t('ev_learned',{d}):ev==='stage'?t('ev_stage',{d}):ev==='done'?t('ev_done'):ev==='dropped'?t('ev_dropped'):'';return m;}
@@ -938,7 +999,7 @@ function streakInfo(){
 function ring(size,frac,label,sw=4){const r=size/2-sw/2-1,C=2*Math.PI*r,h=size/2;
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${h}" cy="${h}" r="${r}" fill="none" style="stroke:var(--surface2)" stroke-width="${sw}"/><circle cx="${h}" cy="${h}" r="${r}" fill="none" style="stroke:var(--p-review)" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-Math.min(1,frac))).toFixed(1)}" transform="rotate(-90 ${h} ${h})"/><text x="${h}" y="${h}" text-anchor="middle" dominant-baseline="central" style="fill:var(--fg);font:600 ${Math.round(size*.36)}px var(--font-ui)">${label}</text></svg>`;}
 function drawStreak(){const el=$('#streak');if(!el||!S)return;const s=streakInfo();el.innerHTML=ring(38,s.today/s.goal,s.cur);const a=t('streak_aria',{n:s.cur,d:pw(s.cur,'days'),a:s.today,g:s.goal});el.setAttribute('aria-label',a);el.title=a;}
-function scheduleNext(correct){if(correct&&G().autoNext)R.timer=setTimeout(nextTask,G().nextDelay);}
+function scheduleNext(correct){const fb=$('#fb');if(fb&&R&&R.cur&&R.cur.w&&!fb.querySelector('[data-act="editw"]'))fb.insertAdjacentHTML('beforeend',`<button class="linkbtn" data-act="editw" data-keep>${t('edit')}</button>`);if(correct&&G().autoNext)R.timer=setTimeout(nextTask,G().nextDelay);}
 function drawTask(){
   if(!task())return;statusBar();if(!R.cur)return drawEnd();
   ({choice:drawChoice,mosaic:drawMosaic,writing:drawInput,dictation:drawInput,cloze:drawInput,letters:drawLetters,phrase:drawPhrase,article:drawArticle})[R.type]();
@@ -971,6 +1032,7 @@ function onTaskClick(e){
   if(act==='again'){startRound(R.type);return;}
   if(act==='dicts'){setView('dicts');return;}
   if(act==='next'){nextTask();return;}
+  if(act==='editw'){if(c&&c.w){clearTimeout(R.timer);openEdit(c.w,()=>{if(R&&R.cur===c&&c.done&&!document.querySelector('#task [data-act="next"]'))nextTask();});}return;}
   if(act==='say'){if(c&&c.w)speak(R.type==='phrase'||R.type==='cloze'?c.ex:c.w.w,true);return;}
   if(act==='play'||act==='slow'){if(c&&c.say)speak(c.say,true,{force:true,slow:act==='slow'});const i=$('#answer');if(i)try{i.focus({preventScroll:true});}catch(e){}return;}
   if(act==='art')return pickArticle(+b.dataset.i,b);
@@ -988,7 +1050,7 @@ function onTaskClick(e){
 /* ---- choice ---- */
 function drawChoice(){
   const c=R.cur,tk=task();tk.dataset.kind='choice';const fo=c.dir==='toNative';
-  tk.innerHTML=prompt(fo?t('lbl_word'):t('lbl_tr'),c.prompt,{foreign:fo,lang:fo?'de':''})+
+  tk.innerHTML=prompt(fo?t('lbl_word'):t('lbl_tr'),c.prompt,{foreign:fo,lang:fo?'de':'',tr:fo&&G().showTr==='always'?c.w.tr:''})+
    `<div class="options">${c.options.map((o,i)=>`<button class="opt" data-act="opt" data-i="${i}"${c.dir==='toForeign'?' lang="de"':''}><span class="n">${i+1}</span><span>${esc(o)}</span></button>`).join('')}</div><div class="feedback" id="fb"></div>`;
   if(fo)autoSay(c.w.w);
 }
@@ -997,7 +1059,7 @@ function pickOption(i,btn){
   task().querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(c.options[j]===c.answer)b.classList.add('right');});
   if(!ok)btn.classList.add('wrong');
   const ev=finish(ok);if(c.dir==='toForeign'||!ok)autoSay(c.w.w);
-  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:`<span class="err">${t('wrong')}</span>`)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+exampleLine(c.w)+(ok&&G().autoNext?'':`<div class="actions"><button class="btn primary" data-act="next">${t('next')}</button></div>`);
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:`<span class="err">${t('wrong')}</span>`)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+(trShow(c.w)?wordLine(c.w):'')+exampleLine(c.w)+(ok&&G().autoNext?'':`<div class="actions"><button class="btn primary" data-act="next">${t('next')}</button></div>`);
   if(!(ok&&G().autoNext))$('#fb [data-act="next"]').focus();
   scheduleNext(ok);
 }
@@ -1005,17 +1067,17 @@ function pickOption(i,btn){
 /* ---- mosaic ---- */
 function drawMosaic(){
   const c=R.cur,tk=task();tk.dataset.kind='mosaic';const W=id=>c.chunk.find(w=>w.id===id);
-  const btn=(id,side)=>`<button class="mt${side==='l'?' f':''}${c.matched.has(id)?' done':''}${c.sel&&c.sel.id===id&&c.sel.side===side?' sel':''}" data-act="mt" data-side="${side}" data-id="${id}"${side==='l'?' lang="de"':''}>${esc(side==='l'?W(id).w:W(id).t)}</button>`;
+  const btn=(id,side)=>`<button class="mt${side==='l'?' f':''}${c.matched.has(id)?' done':''}${c.sel&&c.sel.id===id&&c.sel.side===side?' sel':''}" data-act="mt" data-side="${side}" data-id="${id}"${side==='l'?' lang="de"':''}>${side==='l'?esc(W(id).w)+(G().showTr==='always'&&W(id).tr?`<span class="trn blk">[${esc(W(id).tr)}]</span>`:''):esc(W(id).t)}</button>`;
   tk.innerHTML=`<span class="label">${t('mosaic_lbl')}</span><div class="mosaic"><div class="mcol">${c.left.map(id=>btn(id,'l')).join('')}</div><div class="mcol">${c.right.map(id=>btn(id,'r')).join('')}</div></div><div class="feedback" id="fb"></div>`;
 }
 function mosaicTap(b){
   const c=R.cur,id=b.dataset.id,side=b.dataset.side;if(c.matched.has(id))return;
-  if(!c.sel||c.sel.side===side){c.sel=(c.sel&&c.sel.id===id&&c.sel.side===side)?null:{id,side};if(side==='l'&&c.sel)speak(c.chunk.find(w=>w.id===id).w);return drawMosaic();}
+  if(!c.sel||c.sel.side===side){c.sel=(c.sel&&c.sel.id===id&&c.sel.side===side)?null:{id,side};if(side==='l'&&c.sel){const sw=c.chunk.find(w=>w.id===id);CURLANG=wl(sw);speak(sw.w);}return drawMosaic();}
   const a=c.sel;c.sel=null;
   if(a.id===id){
     c.matched.add(id);const w=c.chunk.find(x=>x.id===id);
     if(!c.filler.has(id)){R.cur.w=w;const ok=!c.errs.has(id);const mev=applyResult(w,'mosaic',ok,0);afterResult(w,mev);if(ok)R.ok++;else{R.bad++;if(!R.requeued.has(id)){R.requeued.add(id);R.queue.push(id);}}save();}
-    autoSay(w.w);drawMosaic();statusBar();
+    CURLANG=wl(w);autoSay(w.w);drawMosaic();statusBar();
     if(c.matched.size===c.chunk.length)R.timer=setTimeout(nextTask,600);
   }else{
     const lid=a.side==='l'?a.id:id;c.errs.add(lid);drawMosaic();
@@ -1046,7 +1108,7 @@ function drawInput(){
     if(can)speak(c.say,true,{force:true});
   }else if(R.type==='writing'){
     foreignAns=c.dir==='toForeign';
-    $('#pr').innerHTML=prompt(foreignAns?t('lbl_tr'):t('lbl_word'),c.prompt,{foreign:!foreignAns,lang:foreignAns?'':'de'});
+    $('#pr').innerHTML=prompt(foreignAns?t('lbl_tr'):t('lbl_word'),c.prompt,{foreign:!foreignAns,lang:foreignAns?'':'de',tr:!foreignAns&&G().showTr==='always'?c.w.tr:''});
     $('#sent').innerHTML='';
     $('#hl').textContent=(ex.showFirst?c.primary[0]:'')+(ex.showLength?' '+[...c.primary].slice(ex.showFirst?1:0).map(ch=>ch===' '?'  ':'_').join(' '):'');
     if(!foreignAns)autoSay(c.w.w);
@@ -1057,7 +1119,7 @@ function drawInput(){
   }
   inp.lang=foreignAns?'de':L;
   $('#corr').lang=foreignAns?'de':L;
-  $('#keys').hidden=!(foreignAns&&/^de/i.test(S.settings.audio.langF));
+  $('#keys').hidden=!(foreignAns&&/^de/i.test(CURLANG||S.settings.audio.langF));
   $('#acts').innerHTML=`<button class="btn primary" data-act="check" data-keep>${t('btn_check')}</button><button class="btn" data-act="hint" data-keep>${t('btn_letter')}</button><button class="btn" data-act="skip" data-keep>${t('btn_skip')}</button>`;
   $('#fb').innerHTML='';corr('');
   if(document.activeElement!==inp)try{inp.focus({preventScroll:true});}catch(e){}
@@ -1143,7 +1205,7 @@ function complete(){
   if(!ok&&!c.skipped&&isW)h+=`<span>${t('your_answer')} <b lang="${(R.type==='dictation'||c.dir==='toForeign')?'de':L}" class="mk">${marked(c.answers[0]||'',0)}</b></span>`;
   if(c.skipped&&isW)h+=`<span>${t('right_answer')} <b>${esc(c.targets[0])}</b></span>`;
   if(R.type==='dictation'&&c.phrase)h+=`<span><i lang="de">${esc(c.say)}</i>${c.exT?' — '+esc(c.exT):''}</span>`;
-  h+=`<span><b lang="de">${esc(c.w.w)}</b> — ${esc(c.w.t)}</span>`+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+(R.type==='writing'||(R.type==='dictation'&&!c.phrase)?exampleLine(c.w):'');
+  h+=wordLine(c.w)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+(R.type==='writing'||(R.type==='dictation'&&!c.phrase)?exampleLine(c.w):'');
   $('#fb').innerHTML=h;
   $('#acts').innerHTML=ok&&G().autoNext?'':`<button class="btn primary" data-act="next" data-keep>${t('next')}</button>`;
   scheduleNext(ok);
@@ -1193,7 +1255,7 @@ function letterTapKey(key){const c=R.cur;if(!c||c.done)return;key=fixLayout(key,
 function letterDone(){
   const c=R.cur;drawLetters();c.done=true;const ok=!c.err;const ev=finish(ok);autoSay(c.w.w);
   task().querySelectorAll('.slot').forEach((s,i)=>{if(c.target[i]!==' ')s.textContent=c.target[i];});
-  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:'')+`<span><b lang="de">${esc(c.w.w)}</b> — ${esc(c.w.t)}</span>`+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+exampleLine(c.w);
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:'')+wordLine(c.w)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+exampleLine(c.w);
   $('#acts').innerHTML=ok&&G().autoNext?'':`<button class="btn primary" data-act="next">${t('next')}</button>`;
   scheduleNext(ok);
 }
@@ -1215,7 +1277,7 @@ function phraseTap(k,btn){
 function phraseDone(){
   const c=R.cur;drawPhrase();c.done=true;const ok=!c.err;const ev=finish(ok);autoSay(c.ex);
   task().querySelector('.built').innerHTML=c.tokens.map(x=>`<span>${esc(x)}</span>`).join('');
-  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:'')+`<span><b lang="de">${esc(c.w.w)}</b> — ${esc(c.w.t)}</span>`+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'');
+  $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:'')+wordLine(c.w)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'');
   $('#acts').innerHTML=ok&&G().autoNext?'':`<button class="btn primary" data-act="next">${t('next')}</button>`;
   scheduleNext(ok);
 }
@@ -1226,6 +1288,88 @@ document.addEventListener('keydown',e=>{
   if((R.type==='choice'||R.type==='article')&&/^[1-9]$/.test(e.key)){const b=task()&&task().querySelector(`[data-i="${+e.key-1}"]`);if(b)b.click();}
   if(R.type==='letters'&&e.key.length===1&&!e.metaKey&&!e.ctrlKey)letterTapKey(e.key);
 });
+
+/* ===================== quick add & edit sheet ===================== */
+let SH=null;
+function openSheet(html,onClose){const sh=$('#sheet');$('#sheetin').innerHTML=html;sh.hidden=false;SH={onClose};}
+function closeSheet(){const sh=$('#sheet');if(sh.hidden)return;sh.hidden=true;$('#sheetin').innerHTML='';const f=SH&&SH.onClose;SH=null;if(f)f();}
+$('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet'||e.target.closest('[data-x="close"]'))closeSheet();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#sheet').hidden){e.preventDefault();closeSheet();}},true);
+const sheetHead=title=>`<div class="sheet-head"><h2 class="h">${title}</h2><button class="btn sm" data-x="close">${t('add_close')}</button></div>`;
+function guessLang(ws,hasTr){ws=ws.filter(Boolean);if(!ws.length)return'';
+  if(ws.some(x=>/[äöüßÄÖÜ]/.test(x))||ws.filter(x=>/^(der|die|das|sich)\s/i.test(x)).length>=ws.length*.1)return'de-DE';
+  if(hasTr||ws.some(x=>/\[[^\]]+\]/.test(x))||ws.filter(x=>/^(to|the|a|an)\s/i.test(x)).length>=ws.length*.1)return'en-GB';return'';}
+const wkey=w=>(w.w+'|'+w.t).toLowerCase().replace(/\s+/g,' ').trim();
+function addOne(d,v){
+  splitTr(v);if(!v.w||!v.t)return null;
+  const ex=S.words.find(w=>wkey(w)===wkey(v));
+  if(ex){if(!ex.dicts.includes(d.id))ex.dicts.push(d.id);if(!ex.tr&&v.tr)ex.tr=v.tr;if(!ex.ex&&v.ex){ex.ex=v.ex;ex.exT=v.exT||'';}return{w:ex,dup:true};}
+  const w=mkWord(v.w,v.t,v.ex||'',v.exT||'',d.id);w.tr=v.tr||'';w.added=Date.now();S.words.push(w);return{w,dup:false};
+}
+let AD={mode:'one',n:0,recent:[]};
+function openAdd(){AD={mode:'one',n:0,recent:[]};if(R)clearTimeout(R.timer);openSheet('',()=>{if(S.ui.view==='dicts'||S.ui.view==='progress')render();});drawAdd();}
+function drawAdd(){
+  const cur=S.dicts.find(d=>d.id===S.ui.addDict)?S.ui.addDict:'__new';
+  const curD=S.dicts.find(d=>d.id===cur);const isDe=curD&&/^de/i.test(curD.lang||'');
+  $('#sheetin').innerHTML=sheetHead(t('add_title'))+`
+  <label class="field">${t('add_dict')}<select id="a-d">${S.dicts.map(d=>`<option value="${d.id}" ${d.id===cur?'selected':''}>${esc(d.name)}</option>`).join('')}<option value="__new" ${cur==='__new'?'selected':''}>${t('add_newdict')}</option></select></label>
+  <label class="field" id="a-nn" ${cur==='__new'?'':'hidden'}>${t('add_newname')}<input id="a-name" value="${esc(t('add_def_name'))}"></label>
+  <div class="seg-tabs"><button class="${AD.mode==='one'?'on':''}" data-m="one">${t('add_one')}</button><button class="${AD.mode==='list'?'on':''}" data-m="list">${t('add_list')}</button></div>
+  ${AD.mode==='one'?`
+  <label class="field">${t('f_word')}<input id="a-w" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next"></label>
+  <label class="field" ${isDe?'hidden':''}>${t('f_trn')}<input id="a-tr" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next"></label>
+  <label class="field">${t('f_tr')}<input id="a-t" enterkeyhint="done"></label>
+  <details><summary>${t('add_ex')}</summary>
+    <label class="field">${t('f_ex')}<textarea id="a-ex" rows="2" autocapitalize="off" autocorrect="off"></textarea></label>
+    <label class="field">${t('f_exT')}<textarea id="a-exT" rows="2"></textarea></label></details>
+  <div class="row"><button class="btn primary" data-x="add">${t('add_btn')}</button><span class="note" id="a-msg"></span></div>`:`
+  <label class="field"><textarea class="big" id="a-list" placeholder="${esc(t('add_list_ph'))}"></textarea></label>
+  <div class="row"><button class="btn primary" data-x="addlist">${t('add_list_btn')}</button><span class="note" id="a-msg"></span></div>`}
+  ${AD.n?`<div class="recent">${AD.recent.slice(-12).map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
+  <p class="note">${AD.n?`<b>${t('add_done',{n:AD.n})}</b> · `:''}${t('add_note')}</p>`;
+  const sin=$('#sheetin');
+  $('#a-d').onchange=e=>{S.ui.addDict=e.target.value==='__new'?'':e.target.value;save();drawAdd();};
+  sin.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{AD.mode=b.dataset.m;drawAdd();});
+  if(AD.mode==='one'){
+    $('#a-w').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const n=$('#a-tr');(n&&!n.closest('label').hidden?n:$('#a-t')).focus();}});
+    const trI=$('#a-tr');if(trI)trI.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#a-t').focus();}});
+    $('#a-t').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doAdd();}});
+    sin.querySelector('[data-x="add"]').onclick=doAdd;
+    try{$('#a-w').focus();}catch(e){}
+  }else{sin.querySelector('[data-x="addlist"]').onclick=doAddList;}
+}
+function addTarget(wordsForGuess,hasTr){
+  let d=S.dicts.find(x=>x.id===$('#a-d').value);
+  if(!d){d={id:uid(),name:($('#a-name')&&$('#a-name').value.trim())||t('add_def_name'),active:true,lang:guessLang(wordsForGuess,hasTr)};S.dicts.push(d);}
+  if(!d.lang){const g=guessLang(wordsForGuess,hasTr);if(g)d.lang=g;}
+  d.active=true;S.ui.addDict=d.id;return d;
+}
+function doAdd(){
+  const v={w:$('#a-w').value.trim(),tr:($('#a-tr')?$('#a-tr').value.trim():''),t:$('#a-t').value.trim(),ex:$('#a-ex').value.trim(),exT:$('#a-exT').value.trim()};
+  if(!v.w||!v.t){$('#a-msg').textContent=t('t_need_wt');return;}
+  const d=addTarget([v.w],!!v.tr);const r=addOne(d,v);save();
+  if(r){AD.n++;AD.recent.push(r.w.w);}
+  drawAdd();if(r&&r.dup)$('#a-msg').textContent=t('add_dup');
+}
+function doAddList(){
+  const rows=parseText($('#a-list').value).filter(r=>r[0]);if(!rows.length){$('#a-msg').textContent=t('i_need');return;}
+  const d=addTarget(rows.map(r=>r[0]),rows.some(r=>/\[[^\]]+\]/.test(r[0])));let n=0;
+  for(const r of rows){const v={w:r[0]||'',t:r[1]||'',ex:r[2]||'',exT:r[3]||''};const x=addOne(d,v);if(x){n++;AD.recent.push(x.w.w);}}
+  AD.n+=n;save();AD.mode='list';drawAdd();
+}
+function openEdit(w,after){
+  const f=(id,lbl,val,area,lang)=>area?`<label class="field">${lbl}<textarea id="${id}" rows="2" ${lang?'autocapitalize="off" autocorrect="off"':''}>${esc(val||'')}</textarea></label>`:`<label class="field">${lbl}<input id="${id}" value="${esc(val||'')}" ${lang?'autocapitalize="off" autocorrect="off" spellcheck="false"':''}></label>`;
+  openSheet(sheetHead(t('edit_title'))+f('e-w',t('f_word'),w.w,0,1)+f('e-tr',t('f_trn'),w.tr,0,1)+f('e-t',t('f_tr'),w.t)+
+    f('e-ex',t('f_ex'),w.ex,1,1)+f('e-exT',t('f_exT'),w.exT,1)+f('e-ex2',t('f_exn',{n:2}),w.ex2,1,1)+f('e-exT2',t('f_exTn',{n:2}),w.exT2,1)+f('e-ex3',t('f_exn',{n:3}),w.ex3,1,1)+f('e-exT3',t('f_exTn',{n:3}),w.exT3,1)+
+    `<div class="row"><button class="btn primary" data-x="esave">${t('b_save')}</button><button class="btn" data-x="close">${t('b_cancel')}</button><span class="note" id="e-msg"></span></div>`,after);
+  $('#sheetin [data-x="esave"]').onclick=()=>{
+    const g=id=>$('#'+id).value.trim();
+    const v=splitTr({w:g('e-w'),tr:g('e-tr'),t:g('e-t'),ex:g('e-ex'),exT:g('e-exT'),ex2:g('e-ex2'),exT2:g('e-exT2'),ex3:g('e-ex3'),exT3:g('e-exT3')});
+    if(!v.w||!v.t){$('#e-msg').textContent=t('t_need_wt');return;}
+    Object.assign(w,v);save();toast(t('t_saved'));closeSheet();
+  };
+}
+$('#addw').addEventListener('click',openAdd);
 
 /* ===================== DICTIONARIES ===================== */
 let DV={open:null,edit:null,q:'',imp:null,rename:null,sel:null};
@@ -1251,12 +1395,13 @@ function renderDicts(){
         <button class="btn sm" data-a="down" data-id="${d.id}" ${i===S.dicts.length-1?'disabled':''} aria-label="${t('b_down')}">↓</button>
         ${DV.rename===d.id?`<button class="btn sm primary" data-a="rnsave" data-id="${d.id}">${t('b_save')}</button>`:`<button class="btn sm" data-a="rename" data-id="${d.id}">${t('b_rename')}</button>`}
         <button class="btn sm" data-a="export" data-id="${d.id}">${t('b_export')}</button>
+        <select class="dlang" data-a="lang" data-id="${d.id}" aria-label="${t('d_lang')}"><option value="">${t('d_lang')}: ${esc(t('d_lang_def',{l:S.settings.audio.langF}))}</option>${LANGS_F.map(([c,n])=>`<option value="${c}" ${d.lang===c?'selected':''}>${t('d_lang')}: ${n}</option>`).join('')}</select>
         <button class="btn sm danger" data-a="del" data-id="${d.id}">${t('b_delete')}</button>
       </div></div>`;}).join(''):`<p class="note">${t('d_empty')}</p>`}</div>
   <div id="exportbox"></div></div>`;
   $('#imp').onclick=()=>{DV.imp={step:1};renderDicts();};
   const panel=view.querySelector('.panel');
-  panel.addEventListener('change',e=>{const x=e.target;if(x.dataset.a==='toggle'){const d=S.dicts.find(d=>d.id===x.dataset.id);d.active=x.checked;R=null;save();renderDicts();}});
+  panel.addEventListener('change',e=>{const x=e.target;if(x.dataset.a==='lang'){const d=S.dicts.find(d=>d.id===x.dataset.id);d.lang=x.value;R=null;save();return;}if(x.dataset.a==='toggle'){const d=S.dicts.find(d=>d.id===x.dataset.id);d.active=x.checked;R=null;save();renderDicts();}});
   panel.addEventListener('click',e=>{
     const b=e.target.closest('button[data-a]');if(!b)return;const id=b.dataset.id,i=S.dicts.findIndex(d=>d.id===id),d=S.dicts[i];
     const a=b.dataset.a;
@@ -1264,7 +1409,7 @@ function renderDicts(){
     else if(a==='up'||a==='down'){const j=a==='up'?i-1:i+1;[S.dicts[i],S.dicts[j]]=[S.dicts[j],S.dicts[i]];R=null;save();renderDicts();}
     else if(a==='rename'){DV.rename=id;renderDicts();$('#rn').focus();}
     else if(a==='rnsave'){const v=$('#rn').value.trim();if(v)d.name=v;DV.rename=null;save();renderDicts();}
-    else if(a==='export'){const txt=dictWords(id).map(w=>[w.w,w.t,w.ex,w.exT,w.ex2,w.exT2,w.ex3,w.exT3].map(x=>(x||'').replace(/[\t\n]/g,' ')).join('\t').replace(/\t+$/,'')).join('\n');offerFile(d.name.replace(/[^\p{L}\p{N}]+/gu,'_')+'.tsv',txt,'text/tab-separated-values',$('#exportbox'));}
+    else if(a==='export'){const txt=dictWords(id).map(w=>[w.w+(w.tr?` [${w.tr}]`:''),w.t,w.ex,w.exT,w.ex2,w.exT2,w.ex3,w.exT3].map(x=>(x||'').replace(/[\t\n]/g,' ')).join('\t').replace(/\t+$/,'')).join('\n');offerFile(d.name.replace(/[^\p{L}\p{N}]+/gu,'_')+'.tsv',txt,'text/tab-separated-values',$('#exportbox'));}
     else if(a==='del')armed(b,()=>{S.words.forEach(w=>w.dicts=w.dicts.filter(x=>x!==id));S.words=S.words.filter(w=>w.dicts.length);S.dicts.splice(i,1);R=null;save();toast(t('d_deleted'));renderDicts();});
   });
 }
@@ -1274,6 +1419,7 @@ function renderWords(){
   const exNote=w=>{const xs=exList(w);if(!xs.length)return t('f_noex');return xs.map(x=>{const ct=clozeOf(w,x.ex);return (xs.length>1?(x.i+1)+': ':'')+(x.ex.includes('{')?t('f_manual'):ct?t('f_auto',{s:esc(ct)}):t('f_nf'));}).join('<br>');};
   const form=w=>{return `<div class="form" id="wf">
     <label>${t('f_word')}<input id="f-w" value="${esc(w.w)}" lang="de" autocapitalize="off" autocorrect="off"></label>
+    <label>${t('f_trn')}<input id="f-tr" value="${esc(w.tr||'')}" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
     <label>${t('f_tr')}<input id="f-t" value="${esc(w.t)}"></label>
     <label>${t('f_ex')}<textarea id="f-ex" rows="2" lang="de" autocapitalize="off" autocorrect="off">${esc(w.ex)}</textarea></label>
     <label>${t('f_exT')}<textarea id="f-exT" rows="2">${esc(w.exT)}</textarea></label>
@@ -1288,7 +1434,7 @@ function renderWords(){
   ${DV.sel?`<div class="selbar"><button class="btn primary" id="seldo">${t('sel_do',{n:DV.sel.size})}</button><button class="btn" id="selno">${t('b_cancel')}</button></div><p class="note">${t('sel_note')}</p>`:''}
   <div class="panel"><div class="words">
   ${DV.edit==='new'?form({w:'',t:'',ex:'',exT:''}):''}
-  ${DV.sel?ws.filter(w=>w.st!=='done'&&w.st!=='known').map(w=>`<label class="selrow"><input type="checkbox" data-sid="${w.id}" ${DV.sel.has(w.id)?'checked':''}><span class="wf" lang="de">${esc(w.w)}</span><span class="wt">${esc(w.t)}</span></label>`).join('')||`<p class="note">${t('w_none')}</p>`:ws.map(w=>DV.edit===w.id?form(w):`<button class="w" data-a="edit" data-id="${w.id}"><span class="wf" lang="de">${esc(w.w)}</span><span class="wt">${esc(w.t)}</span><span class="pill ${w.st}">${w.st==='learning'?w.sc:t('s_'+w.st)}</span></button>`).join('')||`<p class="note">${t('w_none')}</p>`}
+  ${DV.sel?ws.filter(w=>w.st!=='done'&&w.st!=='known').map(w=>`<label class="selrow"><input type="checkbox" data-sid="${w.id}" ${DV.sel.has(w.id)?'checked':''}><span class="wf" lang="${wl(w).slice(0,2)}">${esc(w.w)}${w.tr?` <span class="trn">[${esc(w.tr)}]</span>`:''}</span><span class="wt">${esc(w.t)}</span></label>`).join('')||`<p class="note">${t('w_none')}</p>`:ws.map(w=>DV.edit===w.id?form(w):`<button class="w" data-a="edit" data-id="${w.id}"><span class="wf" lang="${wl(w).slice(0,2)}">${esc(w.w)}${w.tr?` <span class="trn">[${esc(w.tr)}]</span>`:''}</span><span class="wt">${esc(w.t)}</span><span class="pill ${w.st}">${w.st==='learning'?w.sc:t('s_'+w.st)}</span></button>`).join('')||`<p class="note">${t('w_none')}</p>`}
   </div></div></div>`;
   $('#back').onclick=()=>{DV.open=null;DV.edit=null;renderDicts();};
   $('#add').onclick=()=>{DV.sel=null;DV.edit='new';renderWords();$('#f-w').focus();};
@@ -1304,9 +1450,9 @@ function renderWords(){
     if(a==='edit'){DV.edit=b.dataset.id;renderWords();return;}
     if(a==='cancel'){DV.edit=null;renderWords();return;}
     const w=DV.edit==='new'?null:S.words.find(x=>x.id===DV.edit);
-    if(a==='save'){const v={w:$('#f-w').value.trim(),t:$('#f-t').value.trim(),ex:$('#f-ex').value.trim(),exT:$('#f-exT').value.trim(),ex2:$('#f-ex2').value.trim(),exT2:$('#f-exT2').value.trim(),ex3:$('#f-ex3').value.trim(),exT3:$('#f-exT3').value.trim()};
-      if(!v.w||!v.t){toast(t('t_need_wt'));return;}
-      if(w)Object.assign(w,v);else{const nw=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(nw,{ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(nw);}
+    if(a==='save'){const v={tr:$('#f-tr').value.trim(),w:$('#f-w').value.trim(),t:$('#f-t').value.trim(),ex:$('#f-ex').value.trim(),exT:$('#f-exT').value.trim(),ex2:$('#f-ex2').value.trim(),exT2:$('#f-exT2').value.trim(),ex3:$('#f-ex3').value.trim(),exT3:$('#f-exT3').value.trim()};
+      splitTr(v);if(!v.w||!v.t){toast(t('t_need_wt'));return;}
+      if(w)Object.assign(w,v);else{const nw=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(nw,{tr:v.tr,ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(nw);}
       DV.edit=null;R=null;save();renderWords();toast(t('t_saved'));}
     if(a==='known'&&w){markKnown(w);R=null;save();DV.edit=null;renderWords();toast(t('t_known',{w:w.w}));return;}
     if(a==='unknow'&&w){Object.assign(w,{st:'new',sc:0});R=null;save();DV.edit=null;renderWords();return;}
@@ -1331,11 +1477,15 @@ async function readFile(f){
     return X.utils.sheet_to_json(ws,{header:1,raw:false,defval:''}).map(r=>r.map(x=>String(x).trim())).filter(r=>r.some(Boolean));}
   return parseText(await f.text());
 }
-const FIELDS=()=>[['w',t('fl_w')],['t',t('fl_t')],['ex',t('fl_ex')],['exT',t('fl_exT')],['ex2',t('fl_ex')+' 2'],['exT2',t('fl_exT')+' 2'],['ex3',t('fl_ex')+' 3'],['exT3',t('fl_exT')+' 3'],['-',t('fl_skip')]];
+const FIELDS=()=>[['w',t('fl_w')],['tr',t('fl_tr')],['t',t('fl_t')],['ex',t('fl_ex')],['exT',t('fl_exT')],['ex2',t('fl_ex')+' 2'],['exT2',t('fl_exT')+' 2'],['ex3',t('fl_ex')+' 3'],['exT3',t('fl_exT')+' 3'],['-',t('fl_skip')]];
 function setImportRows(rows,name){
   const ncol=Math.min(8,Math.max(...rows.map(r=>r.length)));
   const head=/^(word|term|слово|термин|тэрмін|wort|begriff|front)$/i.test((rows[0]&&rows[0][0]||'').trim());
-  DV.imp={step:2,rows,name:name||DV.imp.name||t('i_newname'),map:Array.from({length:ncol},(_,i)=>['w','t','ex','exT','ex2','exT2','ex3','exT3'][i]||'-'),head};
+  const body=rows.slice(head?1:0,40);
+  const isTrCol=i=>{const v=body.map(r=>(r[i]||'').trim()).filter(Boolean);return v.length>0&&v.filter(x=>/^[\[\/].*[\]\/]$/.test(x)||(IPA.test(x)&&!/\s\S+\s\S+\s/.test(x))).length>=v.length*.6;};
+  const roles=['w','t','ex','exT','ex2','exT2','ex3','exT3'];let k=0;
+  const map=Array.from({length:ncol},(_,i)=>i>0&&isTrCol(i)?'tr':(roles[k++]||'-'));
+  DV.imp={step:2,rows,name:name||DV.imp.name||t('i_newname'),map,head,lang:(DV.imp&&DV.imp.lang)||''};
   renderImport();
 }
 function renderImport(){
@@ -1355,7 +1505,7 @@ function renderImport(){
       const lv=e.target.closest('[data-lv]');if(lv){LIBF=lv.dataset.lv;drawLib();return;}
       const b=e.target.closest('[data-lib]');if(!b)return;const it=LIB[+b.dataset.lib];
       try{const r=await fetch(LIBDIR+it.file,{cache:'no-cache'});if(!r.ok)throw 0;const rows=parseText(await r.text());if(!rows.length)throw 0;
-        DV.imp.name=it.name;setImportRows(rows,it.name);}catch(err){toast(t('i_read_fail'));}
+        DV.imp.name=it.name;const pl=String(it.pair||'').trim().slice(0,2).toLowerCase();DV.imp.lang=(LANGS_F.find(([c])=>c.slice(0,2)===pl)||[''])[0];setImportRows(rows,it.name);}catch(err){toast(t('i_read_fail'));}
     });
     $('#inext').onclick=()=>{const x=$('#itext').value;if(!x.trim()){toast(t('i_need'));return;}setImportRows(parseText(x),$('#iname').value.trim());};
     return;
@@ -1374,15 +1524,17 @@ function renderImport(){
   view.querySelectorAll('select[data-col]').forEach(s=>s.onchange=()=>{I.map[+s.dataset.col]=s.value;I.name=$('#iname').value;});
   $('#ido').onclick=()=>{
     const col=k=>I.map.indexOf(k);if(col('w')<0||col('t')<0){toast(t('i_need_cols'));return;}
-    const d={id:uid(),name:$('#iname').value.trim()||t('i_newname'),active:true};S.dicts.push(d);
+    const ws0=rows.map(r=>(r[col('w')]||'')).filter(Boolean);
+    const guess=I.lang||(ws0.some(x=>/[äöüßÄÖÜ]/.test(x))||ws0.filter(x=>/^(der|die|das|sich)\s/i.test(x)).length>=ws0.length*.1?'de-DE':(col('tr')>=0||ws0.some(x=>/\[[^\]]+\]/.test(x))||ws0.filter(x=>/^(to|the|a|an)\s/i.test(x)).length>=ws0.length*.1)?'en-GB':'');
+    const d={id:uid(),name:$('#iname').value.trim()||t('i_newname'),active:true,lang:guess};S.dicts.push(d);
     const key=w=>(w.w+'|'+w.t).toLowerCase().replace(/\s+/g,' ').trim();const idx=new Map(S.words.map(w=>[key(w),w]));
     let added=0,merged=0;
-    for(const r of rows){const g=k=>col(k)>=0?(r[col(k)]||'').trim():'';const v={w:g('w'),t:g('t'),ex:g('ex'),exT:g('exT'),ex2:g('ex2'),exT2:g('exT2'),ex3:g('ex3'),exT3:g('exT3')};if(!v.w||!v.t)continue;
+    for(const r of rows){const g=k=>col(k)>=0?(r[col(k)]||'').trim():'';const v=splitTr({tr:g('tr'),w:g('w'),t:g('t'),ex:g('ex'),exT:g('exT'),ex2:g('ex2'),exT2:g('exT2'),ex3:g('ex3'),exT3:g('exT3')});if(!v.w||!v.t)continue;
       const ex=idx.get(key(v));
-      if(ex){if(!ex.dicts.includes(d.id)){ex.dicts.push(d.id);merged++;}
+      if(ex){if(!ex.dicts.includes(d.id)){ex.dicts.push(d.id);merged++;}if(!ex.tr&&v.tr)ex.tr=v.tr;
         const have=new Set(exList(ex).map(x=>stripBraces(x.ex)));
         for(const [e,tr] of [[v.ex,v.exT],[v.ex2,v.exT2],[v.ex3,v.exT3]]){if(!e||have.has(stripBraces(e)))continue;const slot=['','2','3'].find(n=>!(ex['ex'+n]||'').trim());if(slot===undefined)break;ex['ex'+slot]=e;ex['exT'+slot]=tr;have.add(stripBraces(e));}}
-      else{const w=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(w,{ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(w);idx.set(key(w),w);added++;}}
+      else{const w=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(w,{tr:v.tr,ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(w);idx.set(key(w),w);added++;}}
     DV.imp=null;R=null;save();toast(t('i_done',{n:added+merged})+(merged?t('i_merged',{m:merged}):''));renderDicts();
   };
 }
@@ -1451,7 +1603,7 @@ function wordsPanel(ws){
     else if(w.st==='review'){pct=(w.stage-1+w.hits/Math.max(1,(S.settings.repeat.stages[w.stage-1]||{times:1}).times))/nst*100;col='var(--p-review)';lbl=t('wp_rev',{a:w.stage,b:nst,d:fmtDate(w.due)});}
     else if(w.st==='known'){pct=100;col='var(--p-known)';lbl=t('s_known');}
     else{pct=100;col='var(--p-done)';lbl=t('wp_learned');}
-    return `<div class="wr"><div class="wtxt"><span class="wf" lang="de">${esc(w.w)}</span><span class="wt">${esc(w.t)}</span></div>
+    return `<div class="wr" data-wid="${w.id}"><div class="wtxt"><span class="wf" lang="${wl(w).slice(0,2)}">${esc(w.w)}${w.tr?` <span class="trn">[${esc(w.tr)}]</span>`:''}</span><span class="wt">${esc(w.t)}</span></div>
       <div class="wm"><div class="meter"><span style="width:${Math.max(3,Math.min(100,pct))}%;background:${col}"></span></div><span class="wn">${lbl}${w.err?t('wp_err',{n:w.err}):''}</span></div></div>`;};
   return `<span class="label">${t('wp_title')}</span>
   <div class="row" style="justify-content:space-between">
@@ -1463,7 +1615,7 @@ function wordsPanel(ws){
 }
 function bindWordsPanel(){
   const wp=$('#wp');if(!wp)return;
-  wp.addEventListener('click',e=>{const x=e.target.closest('[data-pvtab]');if(x){PV.tab=x.dataset.pvtab;PV.all=false;}else if(e.target.closest('[data-pvall]'))PV.all=true;else return;wp.innerHTML=wordsPanel(activeWords());});
+  wp.addEventListener('click',e=>{const rw=e.target.closest('[data-wid]');if(rw){const ww=S.words.find(x=>x.id===rw.dataset.wid);if(ww)openEdit(ww,()=>{wp.innerHTML=wordsPanel(activeWords());});return;}const x=e.target.closest('[data-pvtab]');if(x){PV.tab=x.dataset.pvtab;PV.all=false;}else if(e.target.closest('[data-pvall]'))PV.all=true;else return;wp.innerHTML=wordsPanel(activeWords());});
   wp.addEventListener('change',e=>{if(e.target.id==='pvsort'){PV.sort=e.target.value;wp.innerHTML=wordsPanel(activeWords());}});
 }
 
@@ -1499,6 +1651,7 @@ function renderSettings(){
     num('general.autoEnterDelay',t('g_autod'),'',0,3000,50)+
     chk('general.layoutFix',t('g_lay'),t('g_lay_s'))+
     sel('general.foreignLayout',t('g_layk'),[['qwertz',t('g_layk_de')],['qwerty',t('g_layk_en')]])+
+    sel('general.showTr',t('g_tr'),[['always',t('g_tr_always')],['after',t('g_tr_after')],['never',t('g_tr_never')]],t('g_tr_s'))+
     chk('general.autoNext',t('g_next'))+
     num('general.nextDelay',t('g_nextd'),'',0,5000,100))}
   ${sect('goal',t('sec_goal'),
@@ -1607,6 +1760,8 @@ en:`<h2 class="h">How to use Wortkasten</h2>
 <p><b>Letter</b> gives you the next letter. <b>Don't know</b> shows the answer and counts as a mistake. The ä ö ü ß keys are under the field. Letters typed in the wrong keyboard layout are fixed automatically and do not count as mistakes.</p>
 <p><b>I know it</b>, above the task, takes a word out of learning straight away. To mark many words at once, open a dictionary → Words → Mark known words. Known words do not count towards “learned” and can be returned to learning in the word editor.</p></section>
 <section><h3>Dictionaries</h3>
+<p><b>+</b> next to the app name adds words quickly, one by one or as a list — for example after a lesson. Words added this way come first among new words for two weeks. During practice, <b>Edit the word</b> under the answer opens the word card; in Progress, tap a word to edit it.</p>
+<p>For English and other languages, add the transcription in square brackets after the word (<i>cat [kæt]</i>) or in a separate column: it is shown next to the word and never has to be typed. Each dictionary can have its own language (Dictionaries → Language), which sets the voice and the keyboard layout.</p>
 <p>Columns: word, translation, example, example translation; up to two more examples with translations can follow. With several examples, Gap and Sentence use a different one each time. Only the first two columns are required, and you can reassign the columns before loading. Ready-made dictionaries published with the app are listed under Load dictionary.</p>
 <p>For a word to appear in <b>Gap</b>, its form in the example has to be in curly braces: <i lang="de">Ich {nehme} an einem Kongress {teil}.</i> Often the app finds the word by itself; the word editor shows whether it did.</p>
 <p>Progress belongs to the word: if a word is in two dictionaries, learning it once counts for both.</p></section>
@@ -1637,6 +1792,8 @@ de:`<h2 class="h">So funktioniert Wortkasten</h2>
 <p><b>Buchstabe</b> gibt dir den nächsten Buchstaben. <b>Weiß nicht</b> zeigt die Antwort und zählt als Fehler. Unter dem Feld findest du ä ö ü ß. Buchstaben im falschen Tastaturlayout werden automatisch korrigiert und zählen nicht als Fehler.</p>
 <p><b>Kenne ich schon</b> über der Aufgabe nimmt ein Wort sofort aus dem Lernen. Viele Wörter auf einmal markierst du im Wörterbuch → Wörter → Bekannte markieren. Bekannte Wörter zählen nicht als „gelernt“ und lassen sich im Wort-Editor zurück ins Lernen schicken.</p></section>
 <section><h3>Wörterbücher</h3>
+<p><b>+</b> neben dem App-Namen fügt schnell Wörter hinzu, einzeln oder als Liste — etwa nach einer Lektion. So hinzugefügte Wörter kommen zwei Wochen lang als Erste unter den neuen Wörtern dran. Beim Üben öffnet <b>Wort bearbeiten</b> unter der Antwort die Wortkarte; unter „Fortschritt“ tippst du dafür auf ein Wort.</p>
+<p>Für Englisch und andere Sprachen kannst du die Transkription in eckigen Klammern hinter das Wort schreiben (<i>cat [kæt]</i>) oder in eine eigene Spalte: Sie wird beim Wort gezeigt und muss nie getippt werden. Jedes Wörterbuch kann eine eigene Sprache haben (Wörterbücher → Sprache); danach richten sich Stimme und Tastaturlayout.</p>
 <p>Spalten: Wort, Übersetzung, Beispiel, Übersetzung des Beispiels; danach können bis zu zwei weitere Beispiele mit Übersetzung folgen. Bei mehreren Beispielen nehmen „Lücke“ und „Satz“ jedes Mal ein anderes. Nur die ersten zwei Spalten sind Pflicht, und vor dem Laden kannst du die Spalten neu zuordnen. Fertige Wörterbücher, die mit der App veröffentlicht sind, findest du unter „Wörterbuch laden“.</p>
 <p>Damit ein Wort in <b>Lücke</b> vorkommt, muss seine Form im Beispiel in geschweiften Klammern stehen: <i lang="de">Ich {nehme} an einem Kongress {teil}.</i> Oft findet die App das Wort selbst; im Wort-Editor siehst du, ob es geklappt hat.</p>
 <p>Der Fortschritt gehört zum Wort: Steht ein Wort in zwei Wörterbüchern, zählt es nach einmaligem Lernen in beiden.</p></section>
@@ -1667,6 +1824,8 @@ be:`<h2 class="h">Як карыстацца Wortkasten</h2>
 <p><b>Літара</b> падказвае наступную літару. <b>Не ведаю</b> паказвае адказ і лічыцца памылкай. Пад полем ёсць ä ö ü ß. Літары, набраныя не ў той раскладцы, выпраўляюцца аўтаматычна і не лічацца памылкай.</p>
 <p><b>Ужо ведаю</b> над заданнем адразу выводзіць слова з вывучэння. Каб адзначыць шмат слоў адразу, адкрыйце слоўнік → Словы → Адзначыць вядомыя. Вядомыя словы не лічацца «вывучанымі», і іх можна вярнуць у вывучэнне ў рэдактары слова.</p></section>
 <section><h3>Слоўнікі</h3>
+<p><b>+</b> побач з назвай праграмы хутка дадае словы, па адным або спісам — напрыклад, пасля ўрока. Такія словы два тыдні ідуць першымі сярод новых. Падчас практыкавання <b>Змяніць слова</b> пад адказам адкрывае картку слова; у «Прагрэсе» для гэтага дастаткова націснуць на слова.</p>
+<p>Для англійскай і іншых моў транскрыпцыю можна дапісаць у квадратных дужках пасля слова (<i>cat [kæt]</i>) або ў асобны слупок: яна паказваецца побач са словам, і друкаваць яе не трэба. У кожнага слоўніка можа быць свая мова (Слоўнікі → Мова), ад яе залежаць голас і раскладка.</p>
 <p>Слупкі: слова, пераклад, прыклад, пераклад прыкладу; далей могуць ісці яшчэ два прыклады з перакладамі. Калі прыкладаў некалькі, «Пропуск» і «Фраза» кожны раз бяруць іншы. Абавязковыя толькі першыя два слупкі, а перад загрузкай слупкі можна пераназначыць. Гатовыя слоўнікі, апублікаваныя разам з праграмай, ёсць у раздзеле «Загрузіць слоўнік».</p>
 <p>Каб слова трапіла ў <b>Пропуск</b>, яго форма ў прыкладзе павінна быць у фігурных дужках: <i lang="de">Ich {nehme} an einem Kongress {teil}.</i> Часта праграма знаходзіць слова сама; у рэдактары слова відаць, ці атрымалася.</p>
 <p>Прагрэс належыць слову: калі слова ёсць у двух слоўніках, яно залічваецца ў абодвух.</p></section>
