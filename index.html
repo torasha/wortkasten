@@ -713,7 +713,8 @@ function checkTyped(val,targets){
 function origPrefix(alt,k){for(let i=0;i<=alt.length;i++){if(norm(alt.slice(0,i)).length>=k)return alt.slice(0,i);}return alt;}
 function autoMark(w,exs=w.ex){
   if(!exs)return null;
-  const heads=splitParts(w.w).map(p=>stripTags(p).replace(/^(der|die|das|ein|eine|sich|to|a|an|the)\s+/i,'').trim()).filter(Boolean);
+  const STOPW=/^(der|die|das|den|dem|des|ein|eine|einen|einem|sich|etwas|jemanden|jemandem|jmdn|jmdm|to|a|an|the|sb|sth)$/i;
+  const heads=splitParts(String(w.w).replace(/^(der|die|das)\/(der|die|das)\s+/i,'$2 ')).map(p=>stripTags(p).split(/\s+/).filter(x=>!STOPW.test(x)).join(' ').trim()).filter(Boolean);
   const toks=exs.split(/(\s+)/);
   for(const h of heads){
     const lm=h.split(' ')[0].toLowerCase();if(lm.length<2)continue;
@@ -1532,6 +1533,7 @@ function renderImport(){
     for(const r of rows){const g=k=>col(k)>=0?(r[col(k)]||'').trim():'';const v=splitTr({tr:g('tr'),w:g('w'),t:g('t'),ex:g('ex'),exT:g('exT'),ex2:g('ex2'),exT2:g('exT2'),ex3:g('ex3'),exT3:g('exT3')});if(!v.w||!v.t)continue;
       const ex=idx.get(key(v));
       if(ex){if(!ex.dicts.includes(d.id)){ex.dicts.push(d.id);merged++;}if(!ex.tr&&v.tr)ex.tr=v.tr;
+        for(const [e,tr] of [[v.ex,v.exT],[v.ex2,v.exT2],[v.ex3,v.exT3]]){if(!e||!e.includes('{'))continue;for(const n of ['','2','3']){const cur=ex['ex'+n]||'';if(cur&&!cur.includes('{')&&stripBraces(cur)===stripBraces(e)){ex['ex'+n]=e;if(tr&&!ex['exT'+n])ex['exT'+n]=tr;}}}
         const have=new Set(exList(ex).map(x=>stripBraces(x.ex)));
         for(const [e,tr] of [[v.ex,v.exT],[v.ex2,v.exT2],[v.ex3,v.exT3]]){if(!e||have.has(stripBraces(e)))continue;const slot=['','2','3'].find(n=>!(ex['ex'+n]||'').trim());if(slot===undefined)break;ex['ex'+slot]=e;ex['exT'+slot]=tr;have.add(stripBraces(e));}}
       else{const w=mkWord(v.w,v.t,v.ex,v.exT,d.id);Object.assign(w,{tr:v.tr,ex2:v.ex2,exT2:v.exT2,ex3:v.ex3,exT3:v.exT3});S.words.push(w);idx.set(key(w),w);added++;}}
