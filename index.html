@@ -374,7 +374,7 @@ en:{
   /* settings */
   set_title:'Settings', set_lang:'Interface language',
   sec_ex:'Exercises', sec_gen:'General', sec_goal:'Goal and milestones', sec_rep:'Reviewing learned words', sec_forget:'Forgetting (“ice slide”)', sec_audio:'Audio', sec_data:'Data and backup',
-  g_cap:'Points per word per day', g_cap_s:'0 = no limit. Lets a word ripen over several days', g_gap:'Pause between counted answers, min', g_gap_s:'A word earns points again only after this pause. 0 = off', n_cap:'Today’s points for this word are used up; it continues tomorrow.', n_gap:'Too soon for points: this word counts again from {h}.', pill_cap:'daily limit reached', pill_gap:'pause until {h}',
+  g_cap:'Points per word per day', g_cap_s:'0 = no limit. Lets a word ripen over several days', g_gap:'Pause between counted answers, min', g_gap_s:'A word earns full points again only after this pause. 0 = off', g_rest:'Points for a correct answer after the daily limit', g_rest_s:'They do not count towards the limit', g_tail:'Last points before “learned” only in Writing and Gap', g_tail_s:'In other exercises the word stops this many points short. 0 = off', n_cap:'Today’s points for this word are used up; it continues tomorrow.', n_gap:'Too soon for points: this word counts again from {h}.', pill_cap:'daily limit reached', pill_gap:'pause until {h}',
   g_thr:'Learned when the score reaches', g_thr_s:'Then the word moves to review', g_reset:'Reset the score after a mistake',
   g_inl:'Words in learning at once', g_inl_s:'New words are added only when there are free places', g_round:'Tasks per round', g_share:'Share of reviews in a round, %',
   g_new:'New words', g_new_seq:'one dictionary at a time', g_new_all:'from all active', g_new_s:'One at a time: the next dictionary starts only when the current one has no new words left',
@@ -387,7 +387,7 @@ en:{
   g_next:'Move on after a correct answer', g_nextd:'Pause before the next task, ms',
   go_goal:'Daily goal, answers', go_goal_s:'The ring around the streak number fills up as you answer', go_note:'You choose the prize for each milestone yourself. When you reach it, the app will remind you of it.', go_m:'{m} words',
   r_on:'Review learned words', r_on_s:'Otherwise a word counts as fully learned straight away', r_back:'An overdue review sends the word back to learning', r_back_s:'With half of the learned score',
-  r_h1:'Review', r_h2:'after, days', r_h3:'show, times', r_h4:'deadline, days', r_add:'Add review', r_del:'Delete review {i}', r_note:'The deadline counts from the day the word reached this review. Not reviewed in time — the word goes back to learning.',
+  r_h1:'Review', r_h2:'day after learning', r_h3:'show, times', r_h4:'deadline, days', r_add:'Add review', r_del:'Delete review {i}', r_note:'Days count from the day the word reached the learned score. Not reviewed by the deadline — the word goes back to learning with half the score.',
   fg_on:'Take points off for missed days', fg_grace:'Days without practice and without penalty', fg_per:'Points taken off per day', fg_per_s:'From every word in learning',
   sc_plus:'Points for a correct answer', sc_minus:'Penalty for a mistake', c_opts:'Answer options', m_pairs:'Pairs on screen',
   w_len:'Show the word length', w_cost:'— points taken off for this hint', w_first:'Show the first letter', w_lerr:'Show the correct letter after a mistake', w_lerr_s:'The correct beginning of the word appears under the field',
@@ -463,7 +463,7 @@ de:{
   wp_rev:'Wdh. {a}/{b} · {d}', wp_learned:'gelernt', wp_err:' · {n} Fehler', wp_empty:'Hier ist noch nichts.', wp_all:'Alle {n} zeigen',
   set_title:'Einstellungen', set_lang:'Sprache der Oberfläche',
   sec_ex:'Übungen', sec_gen:'Allgemein', sec_goal:'Ziel und Meilensteine', sec_rep:'Wiederholung gelernter Wörter', sec_forget:'Vergessen („Eisrutsche“)', sec_audio:'Aussprache', sec_data:'Daten und Sicherung',
-  g_cap:'Punkte pro Wort und Tag', g_cap_s:'0 = ohne Grenze. So reift ein Wort über mehrere Tage', g_gap:'Pause zwischen gewerteten Antworten, Min.', g_gap_s:'Ein Wort bekommt erst nach dieser Pause wieder Punkte. 0 = aus', n_cap:'Die Tagespunkte für dieses Wort sind erreicht, morgen geht es weiter.', n_gap:'Noch zu früh für Punkte: das Wort zählt wieder ab {h}.', pill_cap:'Tageslimit erreicht', pill_gap:'Pause bis {h}',
+  g_cap:'Punkte pro Wort und Tag', g_cap_s:'0 = ohne Grenze. So reift ein Wort über mehrere Tage', g_gap:'Pause zwischen gewerteten Antworten, Min.', g_gap_s:'Ein Wort bekommt erst nach dieser Pause wieder volle Punkte. 0 = aus', g_rest:'Punkte für eine richtige Antwort nach dem Tageslimit', g_rest_s:'Sie zählen nicht zum Limit', g_tail:'Letzte Punkte vor „gelernt“ nur beim Schreiben und in der Lücke', g_tail_s:'In anderen Übungen bleibt das Wort so viele Punkte darunter. 0 = aus', n_cap:'Die Tagespunkte für dieses Wort sind erreicht, morgen geht es weiter.', n_gap:'Noch zu früh für Punkte: das Wort zählt wieder ab {h}.', pill_cap:'Tageslimit erreicht', pill_gap:'Pause bis {h}',
   g_thr:'Gelernt, wenn die Punktzahl erreicht', g_thr_s:'Danach kommt das Wort in die Wiederholung', g_reset:'Punkte bei einem Fehler auf null setzen',
   g_inl:'Wörter gleichzeitig im Lernen', g_inl_s:'Neue Wörter kommen nur hinzu, wenn Plätze frei sind', g_round:'Aufgaben pro Runde', g_share:'Anteil der Wiederholungen pro Runde, %',
   g_new:'Neue Wörter', g_new_seq:'ein Wörterbuch nach dem anderen', g_new_all:'aus allen aktiven', g_new_s:'Nacheinander: das nächste Wörterbuch beginnt erst, wenn im aktuellen keine neuen Wörter mehr sind',
@@ -476,7 +476,7 @@ de:{
   g_next:'Nach richtiger Antwort weiter', g_nextd:'Pause vor der nächsten Aufgabe, ms',
   go_goal:'Tagesziel, Antworten', go_goal_s:'Der Ring um die Zahl der Tage füllt sich mit deinen Antworten', go_note:'Die Belohnung für jeden Meilenstein legst du selbst fest. Wenn du ihn erreichst, erinnert dich die App daran.', go_m:'{m} Wörter',
   r_on:'Gelernte Wörter wiederholen', r_on_s:'Sonst gilt ein Wort sofort als endgültig gelernt', r_back:'Eine verpasste Wiederholung schickt das Wort zurück ins Lernen', r_back_s:'Mit der Hälfte der Punktzahl',
-  r_h1:'Wdh.', r_h2:'nach, Tagen', r_h3:'zeigen, Mal', r_h4:'Frist, Tage', r_add:'Wiederholung hinzufügen', r_del:'Wiederholung {i} löschen', r_note:'Die Frist zählt ab dem Tag, an dem das Wort diese Wiederholung erreicht hat. Nicht rechtzeitig wiederholt — das Wort geht zurück ins Lernen.',
+  r_h1:'Wdh.', r_h2:'Tag nach „gelernt“', r_h3:'zeigen, Mal', r_h4:'Frist, Tage', r_add:'Wiederholung hinzufügen', r_del:'Wiederholung {i} löschen', r_note:'Die Tage zählen ab dem Tag, an dem das Wort die Punktzahl für „gelernt“ erreicht hat. Nicht bis zur Frist wiederholt — das Wort geht mit halber Punktzahl zurück ins Lernen.',
   fg_on:'Punkte für verpasste Tage abziehen', fg_grace:'Tage ohne Übung ohne Abzug', fg_per:'Abzug pro Tag', fg_per_s:'Von jedem Wort im Lernen',
   sc_plus:'Punkte für eine richtige Antwort', sc_minus:'Abzug für einen Fehler', c_opts:'Antwortmöglichkeiten', m_pairs:'Paare auf dem Bildschirm',
   w_len:'Wortlänge zeigen', w_cost:'— Abzug für diesen Hinweis', w_first:'Ersten Buchstaben zeigen', w_lerr:'Nach einem Fehler den richtigen Buchstaben zeigen', w_lerr_s:'Unter dem Feld erscheint der richtige Wortanfang',
@@ -552,7 +552,7 @@ be:{
   wp_rev:'паўтор {a}/{b} · {d}', wp_learned:'вывучана', wp_err:' · пам. {n}', wp_empty:'Тут пакуль пуста.', wp_all:'Паказаць усе {n}',
   set_title:'Налады', set_lang:'Мова інтэрфейсу',
   sec_ex:'Практыкаванні', sec_gen:'Агульныя', sec_goal:'Мэта і вехі', sec_rep:'Паўтор вывучаных слоў', sec_forget:'Забыванне («ледзяная горка»)', sec_audio:'Агучванне', sec_data:'Дадзеныя і рэзервовая копія',
-  g_cap:'Балаў на слова за дзень', g_cap_s:'0 — без абмежавання. Так слова сталее за некалькі дзён', g_gap:'Паўза паміж залічанымі адказамі, хв', g_gap_s:'Слова зноў атрымлівае балы толькі пасля гэтай паўзы. 0 — выключана', n_cap:'Балы гэтага слова на сёння набраны, працяг заўтра.', n_gap:'Яшчэ зарана для балаў: слова зноў залічваецца з {h}.', pill_cap:'дзённы ліміт', pill_gap:'паўза да {h}',
+  g_cap:'Балаў на слова за дзень', g_cap_s:'0 — без абмежавання. Так слова сталее за некалькі дзён', g_gap:'Паўза паміж залічанымі адказамі, хв', g_gap_s:'Слова зноў атрымлівае поўныя балы толькі пасля гэтай паўзы. 0 — выключана', g_rest:'Балы за правільны адказ пасля дзённага ліміту', g_rest_s:'У ліміт яны не ўваходзяць', g_tail:'Апошнія балы да «вывучана» толькі ў Напісанні і Пропуску', g_tail_s:'У іншых практыкаваннях слова спыняецца на столькі балаў ніжэй. 0 — выключана', n_cap:'Балы гэтага слова на сёння набраны, працяг заўтра.', n_gap:'Яшчэ зарана для балаў: слова зноў залічваецца з {h}.', pill_cap:'дзённы ліміт', pill_gap:'паўза да {h}',
   g_thr:'Вывучана, калі бал дасягнуў', g_thr_s:'Пасля гэтага слова пераходзіць у паўтор', g_reset:'Скідаць балы пры памылцы',
   g_inl:'Слоў адначасова ў вывучэнні', g_inl_s:'Новыя словы дадаюцца, толькі калі ёсць вольныя месцы', g_round:'Заданняў у раўндзе', g_share:'Доля паўтораў у раўндзе, %',
   g_new:'Новыя словы', g_new_seq:'па чарзе слоўнікаў', g_new_all:'з усіх актыўных', g_new_s:'«Па чарзе» — наступны слоўнік пачынаецца, толькі калі ў бягучым скончыліся новыя словы',
@@ -565,7 +565,7 @@ be:{
   g_next:'Пераходзіць далей пасля дакладнага адказу', g_nextd:'Паўза перад наступным заданнем, мс',
   go_goal:'Дзённая мэта, адказаў', go_goal_s:'Кольца вакол ліку дзён запаўняецца па меры адказаў', go_note:'Прыз за веху вы прыдумваеце самі. Калі вывучыце столькі слоў, праграма пра яго нагадае.', go_m:'{m} слоў',
   r_on:'Паўтараць вывучаныя словы', r_on_s:'Інакш слова адразу лічыцца вывучаным канчаткова', r_back:'Пратэрмінаваны паўтор вяртае слова ў вывучэнне', r_back_s:'З паловай бала вывучанасці',
-  r_h1:'Паўтор', r_h2:'праз, дз.', r_h3:'паказаць, раз', r_h4:'тэрмін, дз.', r_add:'Дадаць паўтор', r_del:'Выдаліць паўтор {i}', r_note:'Тэрмін лічыцца ад дня, калі слова трапіла на гэты паўтор. Не паспелі паўтарыць — слова вяртаецца ў вывучэнне.',
+  r_h1:'Паўтор', r_h2:'дзень пасля «вывучана»', r_h3:'паказаць, раз', r_h4:'тэрмін, дз.', r_add:'Дадаць паўтор', r_del:'Выдаліць паўтор {i}', r_note:'Дні лічацца ад дня, калі слова набрала бал «вывучана». Не паспелі паўтарыць да тэрміну — слова вяртаецца ў вывучэнне з паловай бала.',
   fg_on:'Здымаць балы за прапушчаныя дні', fg_grace:'Дзён без заняткаў без штрафу', fg_per:'Колькі балаў здымаць за дзень', fg_per_s:'З кожнага слова ў вывучэнні',
   sc_plus:'Бал за правільны адказ', sc_minus:'Штраф за памылку', c_opts:'Варыянтаў адказу', m_pairs:'Пар на экране',
   w_len:'Паказваць даўжыню слова', w_cost:'— здымаць балаў за падказку', w_first:'Паказваць першую літару', w_lerr:'Падказваць літару пры памылцы', w_lerr_s:'Пад полем з’яўляецца правільны пачатак слова',
@@ -600,18 +600,18 @@ const EXIDS=['choice','mosaic','writing','dictation','letters','cloze','phrase',
 const exName=id=>t('ex_'+id), exHint=id=>t('exh_'+id);
 
 function defaults(){return{
-  lang:'',mig:1,
-  general:{threshold:120,dailyCap:50,minGap:60,resetOnError:false,inLearning:25,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:900,layoutFix:true,foreignLayout:'qwertz',showTr:'always',dailyGoal:50},
-  repeat:{enabled:true,overdueBack:true,stages:[{after:1,times:2,deadline:4},{after:4,times:2,deadline:6},{after:8,times:2,deadline:10}]},
+  lang:'',mig:3,
+  general:{threshold:120,dailyCap:42,minGap:0,restPts:2,recallTail:30,resetOnError:false,inLearning:25,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:1200,layoutFix:true,foreignLayout:'qwertz',showTr:'always',dailyGoal:50},
+  repeat:{enabled:true,overdueBack:true,stages:[{after:1,times:2,deadline:3},{after:4,times:2,deadline:6},{after:8,times:2,deadline:12},{after:15,times:2,deadline:22},{after:30,times:2,deadline:45}]},
   forget:{enabled:true,grace:2,perDay:5},
   ex:{
-    choice:{on:true,plus:6,minus:8,options:4},
-    mosaic:{on:true,plus:4,minus:6,pairs:5},
-    writing:{on:true,plus:12,minus:8,showLength:false,showFirst:false,letterOnError:true,wordOnError:false,costLength:2,costFirst:3,costLetter:3},
-    letters:{on:true,plus:8,minus:6,letterOnError:true,costLetter:3},
-    cloze:{on:true,plus:12,minus:8,showBase:false,showLength:true,letterOnError:true,costBase:0,costLetter:3},
-    phrase:{on:true,plus:10,minus:6,wordOnError:true,costWord:3},
-    dictation:{on:true,plus:10,minus:8,mode:'word',showTr:false,letterOnError:true,wordOnError:false,costLetter:3},
+    choice:{on:true,plus:6,minus:4,options:4},
+    mosaic:{on:true,plus:4,minus:2,pairs:5},
+    writing:{on:true,plus:12,minus:4,showLength:false,showFirst:false,letterOnError:true,wordOnError:false,costLength:1,costFirst:1,costLetter:2},
+    letters:{on:true,plus:6,minus:4,letterOnError:true,costLetter:1},
+    cloze:{on:true,plus:10,minus:5,showBase:false,showLength:true,letterOnError:true,costBase:0,costLength:1,costLetter:2},
+    phrase:{on:true,plus:8,minus:3,wordOnError:true,costWord:2},
+    dictation:{on:true,plus:6,minus:3,mode:'word',showTr:false,letterOnError:true,wordOnError:false,costLetter:1},
     article:{on:true,perRound:20,confident:3},
   },
   prizes:{'50':'','100':'','250':'','500':'','1000':'','2000':''},
@@ -670,7 +670,14 @@ function load(){
   const mig=(S.settings&&S.settings.mig)||0;
   S.settings=mergeDeep(defaults(),S.settings);
   if(mig<1){S.settings.ex.cloze.showBase=false;}
-  S.settings.mig=1;
+  if(mig<2){const g0=S.settings.general;if(g0.minGap===60)g0.minGap=0;if(g0.dailyCap===50)g0.dailyCap=42;}
+  if(mig<3){const X=S.settings,set=(path,oldV,newV)=>{const ks=path.split('.'),last=ks.pop();const o=ks.reduce((a,k)=>a&&a[k],X);if(o&&o[last]===oldV)o[last]=newV;};
+    [['ex.choice.minus',8,4],['ex.mosaic.minus',6,2],['ex.writing.minus',8,4],['ex.writing.costLength',2,1],['ex.writing.costFirst',3,1],['ex.writing.costLetter',3,2],
+     ['ex.letters.plus',8,6],['ex.letters.minus',6,4],['ex.letters.costLetter',3,1],['ex.cloze.plus',12,10],['ex.cloze.minus',8,5],['ex.cloze.costLetter',3,2],
+     ['ex.phrase.plus',10,8],['ex.phrase.minus',6,3],['ex.phrase.costWord',3,2],['ex.dictation.plus',10,6],['ex.dictation.minus',8,3],['ex.dictation.costLetter',3,1],
+     ['general.nextDelay',900,1200]].forEach(a=>set(...a));
+    const st=X.repeat.stages;if(JSON.stringify(st)===JSON.stringify([{after:1,times:2,deadline:4},{after:4,times:2,deadline:6},{after:8,times:2,deadline:10}]))X.repeat.stages=defaults().repeat.stages;}
+  S.settings.mig=3;
   if(!LANGS[S.settings.lang])S.settings.lang=detectLang();
   L=S.settings.lang;
   for(const w of S.words)if(w.tr==null)splitTr(w);
@@ -753,39 +760,46 @@ function fixLayout(val,target){
 }
 
 /* ===================== scheduling ===================== */
+const addDays=(ts,n)=>{const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()+n);return d.getTime();};
+function setStage(w,i){const st=S.settings.repeat.stages[i];w.stage=i+1;w.hits=0;w.due=addDays(w.lday,st.after);w.dl=addDays(w.lday,Math.max(st.deadline,st.after));}
 function toReview(w){
   const st=S.settings.repeat.stages;
-  if(S.settings.repeat.enabled&&st.length){w.st='review';w.stage=1;w.hits=0;w.due=dayStart(st[0].after);w.dl=dayStart(Math.max(st[0].deadline,st[0].after));return'learned';}
+  if(S.settings.repeat.enabled&&st.length){w.st='review';w.lday=dayStart(0);setStage(w,0);return'learned';}
   w.st='done';return'done';
 }
 function dropBack(w){w.st='learning';w.sc=Math.round(G().threshold/2);w.stage=0;w.hits=0;w.due=0;w.dl=0;}
 let lastNote=null;
-function restInfo(w,now=Date.now()){const g=G();if(w.st!=='learning')return null;
+function restInfo(w,now=Date.now(),type){const g=G();if(w.st!=='learning')return null;
   if(g.dailyCap>0&&w.dayK===dayKey(now)&&(w.dayPts||0)>=g.dailyCap)return{k:'cap'};
+  if(type&&g.recallTail>0&&w.sc>=g.threshold-g.recallTail&&type!=='writing'&&type!=='cloze')return{k:'tail'};
   if(g.minGap>0&&w.lastPts&&now-w.lastPts<g.minGap*60000)return{k:'gap',until:w.lastPts+g.minGap*60000};return null;}
-const resting=(w,now)=>!!restInfo(w,now);
+const resting=(w,now,type)=>!!restInfo(w,now,type);
 const hhmm=ts=>{try{return new Date(ts).toLocaleTimeString(LOCALE[L]||'en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return new Date(ts).toTimeString().slice(0,5);}};
 function restLabel(w){const r=restInfo(w);return !r?'':r.k==='cap'?t('pill_cap'):t('pill_gap',{h:hhmm(r.until)});}
-function applyResult(w,type,correct,cost){
+function applyResult(w,type,correct,cost,errCost){
   const e=S.settings.ex[type],g=G();let ev=null;lastNote=null;
   w.last=Date.now();if(correct)w.ok++;else w.err++;
   if(w.st==='new')w.st='learning';
   if(w.st==='review'){
     if(correct){w.hits++;const st=S.settings.repeat.stages,cur=st[w.stage-1];
       if(!cur||w.hits>=cur.times){
-        if(w.stage<st.length){const nx=st[w.stage];w.stage++;w.hits=0;w.due=dayStart(nx.after);w.dl=dayStart(Math.max(nx.deadline,nx.after));ev='stage';}
+        if(w.stage<st.length){if(!w.lday)w.lday=addDays(Date.now(),-((cur&&cur.after)||0));setStage(w,w.stage);ev='stage';}
         else{w.st='done';ev='done';}
       }
     }else{dropBack(w);ev='dropped';}
   }else if(w.st==='learning'){
     if(correct){
       const today=dayKey();if(w.dayK!==today){w.dayK=today;w.dayPts=0;}
-      let add=Math.max(0,e.plus-(cost||0));
-      if(g.minGap>0&&w.lastPts&&Date.now()-w.lastPts<g.minGap*60000){add=0;lastNote='gap';}
-      else if(g.dailyCap>0&&w.dayPts+add>g.dailyCap){add=Math.max(0,g.dailyCap-w.dayPts);if(!add)lastNote='cap';}
-      w.sc+=add;w.dayPts+=add;if(add>0)w.lastPts=Date.now();
+      const full=Math.max(0,e.plus-(cost||0));let add=full;
+      // daily limit: an answer that starts below the limit counts in full; after the limit, only the small rest points
+      const capped=(g.dailyCap>0&&(w.dayPts||0)>=g.dailyCap)||(g.minGap>0&&w.lastPts&&Date.now()-w.lastPts<g.minGap*60000);
+      if(capped){add=Math.min(full,Math.max(0,g.restPts||0));}
+      else{w.dayPts=(w.dayPts||0)+add;if(add>0)w.lastPts=Date.now();}
+      // the last points before the threshold count only in Writing and Gap
+      if(g.recallTail>0&&type!=='writing'&&type!=='cloze'){const ceil=Math.max(0,g.threshold-g.recallTail);add=Math.max(0,Math.min(add,ceil-w.sc));}
+      w.sc+=add;
     }
-    else w.sc=g.resetOnError?0:Math.max(0,w.sc-e.minus);
+    else w.sc=g.resetOnError?0:Math.max(0,w.sc-e.minus-(errCost||0));
     if(w.sc>=g.threshold){w.sc=g.threshold;ev=toReview(w);}
   }
   const k=dayKey();const Lg=S.log[k]||(S.log[k]={n:0,ok:0});Lg.n++;if(correct)Lg.ok++;
@@ -838,7 +852,7 @@ function poolFor(type){
 function buildRound(type){
   const g=G(),now=Date.now(),pool=poolFor(type),n=g.perRound;
   const due=pool.filter(w=>w.st==='review'&&w.due<=now).sort((a,b)=>a.due-b.due).map(w=>w.id);
-  const learning=pool.filter(w=>w.st==='learning').sort((a,b)=>(resting(a,now)-resting(b,now))||a.sc-b.sc||b.err-a.err).map(w=>w.id);
+  const learning=pool.filter(w=>w.st==='learning').sort((a,b)=>(resting(a,now,type)-resting(b,now,type))||a.sc-b.sc||b.err-a.err).map(w=>w.id);
   const learningAll=activeWords().filter(w=>w.st==='learning').length;
   const free=Math.max(0,g.inLearning-learningAll);
   const newIds=pickNew(pool,free),out=[];
@@ -954,7 +968,7 @@ function nextTask(){
   else if(R.type==='writing'){c.dir=pickDir();const fo=c.dir==='toForeign';c.targets=alts(fo?w.w:w.t);c.prompt=fo?w.t:w.w;c.primary=fo?primary(w.w):primary(w.t);
     if(ex.showLength)c.cost+=ex.costLength;if(ex.showFirst)c.cost+=ex.costFirst;}
   else if(R.type==='letters'){c.target=[...primary(w.w)];c.pos=0;while(c.target[c.pos]===' ')c.pos++;c.tiles=shuffle(c.target.map((ch,i)=>({ch,i})).filter(x=>x.ch!==' '));c.used=new Set();}
-  else if(R.type==='cloze'){const x=pickEx(w,e=>!!clozeOf(w,e));c.ex=x.ex;c.exT=x.exT;c.parts=parseCloze(clozeOf(w,x.ex));c.gaps=c.parts.filter(p=>p.gap!=null).map(p=>p.gap);c.gi=0;c.typed='';if(ex.showBase)c.cost+=ex.costBase;}
+  else if(R.type==='cloze'){const x=pickEx(w,e=>!!clozeOf(w,e));c.ex=x.ex;c.exT=x.exT;c.parts=parseCloze(clozeOf(w,x.ex));c.gaps=c.parts.filter(p=>p.gap!=null).map(p=>p.gap);c.gi=0;c.typed='';if(ex.showBase)c.cost+=ex.costBase;if(ex.showLength)c.cost+=(ex.costLength||0);}
   else if(R.type==='phrase'){const x=pickEx(w,phraseOk);c.ex=x.ex;c.exT=x.exT;c.tokens=stripBraces(x.ex).replace(/\s+/g,' ').trim().split(' ');c.pos=0;c.tiles=shuffle(c.tokens.map((x,i)=>({t:x,i})));c.used=new Set();}
   drawTask();
 }
@@ -977,7 +991,7 @@ const exampleLine=w=>{const xs=exList(w);if(!xs.length)return '';const x=xs[Math
 function evMsg(ev){const d=R&&R.cur&&R.cur.w?fmtDate(R.cur.w.due):'';const m=ev==='learned'?t('ev_learned',{d}):ev==='stage'?t('ev_stage',{d}):ev==='done'?t('ev_done'):ev==='dropped'?t('ev_dropped'):'';return m;}
 function finish(correct){
   const c=R.cur;c.done=true;
-  const ev=applyResult(c.w,R.type,correct,c.cost);
+  const exs=S.settings.ex[R.type]||{};const ev=applyResult(c.w,R.type,correct,c.cost,c.hintErr?(R.type==='phrase'?exs.costWord:exs.costLetter)||0:0);
   if(correct)R.ok++;else{R.bad++;
     if(R.type==='choice'){if(!R.requeued.has(c.w.id)){R.requeued.add(c.w.id);R.queue.push(c.w.id);}}
     else if(!c.w.retry){c.w.retry=true;R.retry=(R.retry||0)+1;}}
@@ -1154,7 +1168,7 @@ function onInput(e){
   const r=checkTyped(inp.value,curTargets());
   if(r.state==='wrong'){
     noteFix(r.lcp,norm(inp.value)[r.lcp]||'');
-    corr(ex.letterOnError?origPrefix(r.alt,r.lcp+1):'');
+    corr(ex.letterOnError?origPrefix(r.alt,r.lcp+1):'');if(ex.letterOnError)c.hintErr=true;
     if(ex.wordOnError)reveal(t('hint_lbl'));
   }else corr('');
   inp.classList.toggle('bad',r.state==='wrong');inp.classList.toggle('good',r.state==='ok');
@@ -1169,7 +1183,7 @@ function hintInput(){
   const r=checkTyped(inp.value,curTargets());
   if(r.state==='ok'){clearTimeout(c.pend);accept();return;}
   const k=r.state==='wrong'?r.lcp+1:norm(inp.value).length+1;
-  const fx=origPrefix(r.alt,k);inp.value=fx;c.cost+=(ex.costLetter||3);
+  const fx=origPrefix(r.alt,k);inp.value=fx;c.cost+=(ex.costLetter||0);c.hintErr=true;
   c.fixes.push({g:gIdx(),i:[...fx].length-1,hint:true});
   inp.dispatchEvent(new Event('input'));
   try{inp.focus({preventScroll:true});}catch(e){}
@@ -1182,6 +1196,7 @@ function checkInput(){
   if(r.state==='ok')return accept();
   if(r.state==='prefix'){const fx=origPrefix(r.alt,norm(inp.value).length+1);noteFix([...fx].length-1,'');corr(ex.letterOnError?fx:'');}
   else{noteFix(r.lcp,norm(inp.value)[r.lcp]||'');corr(ex.letterOnError?origPrefix(r.alt,r.lcp+1):'');}
+  if(ex.letterOnError)c.hintErr=true;
   inp.classList.add('bad');
   if(ex.wordOnError)reveal(t('hint_lbl'));
 }
@@ -1248,7 +1263,7 @@ function letterTap(k,btn){
     if(c.pos>=c.target.length)return letterDone();drawLetters();
   }else{
     c.err=true;btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
-    if(S.settings.ex.letters.letterOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&same(x.ch,need));const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb)hb.classList.add('hinted');}
+    if(S.settings.ex.letters.letterOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&same(x.ch,need));const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb){hb.classList.add('hinted');c.hintErr=true;}}
   }
 }
 function letterTapKey(key){const c=R.cur;if(!c||c.done)return;key=fixLayout(key,c.target.join(''))||key;const k=c.tiles.findIndex((x,i)=>!c.used.has(i)&&same(x.ch,key));
@@ -1273,7 +1288,7 @@ function phraseTap(k,btn){
   const c=R.cur;if(c.done||c.used.has(k))return;
   if(c.tiles[k].t===c.tokens[c.pos]){c.used.add(k);c.pos++;if(c.pos>=c.tokens.length)return phraseDone();drawPhrase();}
   else{c.err=true;btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
-    if(S.settings.ex.phrase.wordOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&x.t===c.tokens[c.pos]);const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb){hb.classList.add('hinted');c.cost+=S.settings.ex.phrase.costWord;}}}
+    if(S.settings.ex.phrase.wordOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&x.t===c.tokens[c.pos]);const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb){hb.classList.add('hinted');c.hintErr=true;}}}
 }
 function phraseDone(){
   const c=R.cur;drawPhrase();c.done=true;const ok=!c.err;const ev=finish(ok);autoSay(c.ex);
@@ -1501,7 +1516,7 @@ function renderImport(){
       <div class="row"><button class="btn primary" id="inext">${t('i_next')}</button></div></div><div id="lib"></div></div>`;
     $('#back').onclick=()=>{DV.imp=null;renderDicts();};
     $('#ifile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const rows=await readFile(f);if(!rows.length)throw 0;setImportRows(rows,$('#iname').value.trim()||f.name.replace(/\.[^.]+$/,''));}catch(err){toast(err&&err.message==='xlsx'?t('i_xlsx_fail'):t('i_read_fail'));}};
-    loadLib().then(drawLib);
+    LIB=null;loadLib().then(drawLib);
     $('#lib').addEventListener('click',async e=>{
       const lv=e.target.closest('[data-lv]');if(lv){LIBF=lv.dataset.lv;drawLib();return;}
       const b=e.target.closest('[data-lib]');if(!b)return;const it=LIB[+b.dataset.lib];
@@ -1640,6 +1655,8 @@ function renderSettings(){
     num('general.threshold',t('g_thr'),t('g_thr_s'),10,1000)+
     num('general.dailyCap',t('g_cap'),t('g_cap_s'),0,1000)+
     num('general.minGap',t('g_gap'),t('g_gap_s'),0,720,5)+
+    num('general.restPts',t('g_rest'),t('g_rest_s'),0,50)+
+    num('general.recallTail',t('g_tail'),t('g_tail_s'),0,500)+
     chk('general.resetOnError',t('g_reset'))+
     num('general.inLearning',t('g_inl'),t('g_inl_s'),1,500)+
     num('general.perRound',t('g_round'),'',2,100)+
@@ -1684,10 +1701,10 @@ function renderSettings(){
     chk('ex.dictation.showTr',t('dc_tr'))+
     chk('ex.dictation.letterOnError',t('w_lerr'),t('w_lerr_s'))+num('ex.dictation.costLetter',t('w_lcost'),t('w_lcost_s'))+
     chk('ex.dictation.wordOnError',t('w_werr')))}
-  ${sect('s-letters',exName('letters'),scoring('letters')+chk('ex.letters.letterOnError',t('l_lerr')))}
+  ${sect('s-letters',exName('letters'),scoring('letters')+chk('ex.letters.letterOnError',t('l_lerr'))+num('ex.letters.costLetter',t('w_cost')))}
   ${sect('s-cloze',exName('cloze'),scoring('cloze')+
     chk('ex.cloze.showBase',t('cz_base'))+num('ex.cloze.costBase',t('w_cost'))+
-    chk('ex.cloze.showLength',t('cz_len'))+
+    chk('ex.cloze.showLength',t('cz_len'))+num('ex.cloze.costLength',t('w_cost'))+
     chk('ex.cloze.letterOnError',t('w_lerr'),t('w_lerr_s'))+num('ex.cloze.costLetter',t('w_lcost'),t('w_lcost_s')))}
   ${sect('s-phrase',exName('phrase'),scoring('phrase')+chk('ex.phrase.wordOnError',t('ph_werr'))+num('ex.phrase.costWord',t('ph_cost')))}
   ${sect('s-article',exName('article'),num('ex.article.perRound',t('g_round'),'',5,100)+num('ex.article.confident',t('ar_conf'),'',1,20)+`<p class="note" style="padding-block:8px">${t('ar_note')}</p>`)}
@@ -1746,8 +1763,8 @@ en:`<h2 class="h">How to use Wortkasten</h2>
 <li>Switch on the dictionaries you want to learn.</li>
 <li>Go to <b>Learn</b>, pick an exercise at the top and answer. A round has 12 tasks. In Choice and Mosaic, words you get wrong come back at the end of the round; in the other exercises they open the next round.</li></ol></section>
 <section><h3>How memorising works</h3>
-<p>A correct answer adds points to the word, a mistake takes points off, and hints cost a few points. When a word reaches the threshold (120 by default), it counts as learned and moves to review: after 1, 4 and 8 days it comes back twice. Once it passes all reviews, the word is fully learned. If a review deadline is missed, the word goes back to learning.</p>
-<p>A word earns at most 50 points a day, and only if at least an hour has passed since it last earned points. Practising three or four times a day, you learn a word in about three days; several rounds in a row do not rush it.</p>
+<p>A correct answer adds points to the word, a mistake takes points off once per task (plus the cost of a hint letter, if one was shown), and hints reduce the reward. The score never drops below zero. The last 30 points before “learned” count only in Writing and Gap. When a word reaches the threshold (120 by default), it counts as learned and moves to review: it comes back twice on days 1, 4, 8, 15 and 30 after that. Once it passes all reviews, the word is fully learned. If a review deadline is missed, the word goes back to learning.</p>
+<p>A word earns at most 42 points a day — about three correct answers in Writing; after that, a correct answer brings 2 points. So a word needs at least three days to reach 120, however many rounds you do.</p>
 <p>If you skip practice for more than two days, words in learning slowly lose points. This is the “ice slide”.</p>
 <p>Only 25 words are in learning at once; new ones are added as others are learned. With <b>one dictionary at a time</b>, new words come only from the top active dictionary until it has none left, so switching between dictionaries does not scatter your attention. All numbers can be changed in Settings.</p></section>
 <section><h3>Exercises</h3><ul>
@@ -1778,8 +1795,8 @@ de:`<h2 class="h">So funktioniert Wortkasten</h2>
 <li>Schalte die Wörterbücher ein, die du lernen willst.</li>
 <li>Geh zu <b>Lernen</b>, wähle oben eine Übung und antworte. Eine Runde hat 12 Aufgaben. Bei Auswahl und Mosaik kommen falsch beantwortete Wörter am Ende der Runde wieder, bei den anderen Übungen zu Beginn der nächsten Runde.</li></ol></section>
 <section><h3>So funktioniert das Einprägen</h3>
-<p>Eine richtige Antwort bringt dem Wort Punkte, ein Fehler kostet Punkte, und Hinweise kosten ein paar Punkte. Erreicht ein Wort die Schwelle (standardmäßig 120), gilt es als gelernt und kommt in die Wiederholung: nach 1, 4 und 8 Tagen erscheint es je zweimal. Hat es alle Wiederholungen geschafft, ist das Wort endgültig gelernt. Wird eine Frist verpasst, geht das Wort zurück ins Lernen.</p>
-<p>Ein Wort bekommt höchstens 50 Punkte am Tag, und nur, wenn seit seinen letzten Punkten mindestens eine Stunde vergangen ist. Wer drei- bis viermal am Tag übt, lernt ein Wort so in etwa drei Tagen; mehrere Runden hintereinander beschleunigen das nicht.</p>
+<p>Eine richtige Antwort bringt dem Wort Punkte, ein Fehler kostet einmal pro Aufgabe Punkte (plus den Preis eines gezeigten Hinweisbuchstabens), und Hinweise verringern die Belohnung. Unter null fällt die Punktzahl nie. Die letzten 30 Punkte vor „gelernt“ zählen nur beim Schreiben und in der Lücke. Erreicht ein Wort die Schwelle (standardmäßig 120), gilt es als gelernt und kommt in die Wiederholung: am 1., 4., 8., 15. und 30. Tag danach erscheint es je zweimal. Hat es alle Wiederholungen geschafft, ist das Wort endgültig gelernt. Wird eine Frist verpasst, geht das Wort zurück ins Lernen.</p>
+<p>Ein Wort bekommt höchstens 42 Punkte am Tag — etwa drei richtige Antworten beim Schreiben; danach bringt eine richtige Antwort 2 Punkte. So braucht ein Wort mindestens drei Tage bis 120, egal wie viele Runden du machst.</p>
 <p>Wenn du länger als zwei Tage pausierst, verlieren Wörter im Lernen langsam Punkte. Das ist die „Eisrutsche“.</p>
 <p>Es sind immer nur 25 Wörter gleichzeitig im Lernen; neue kommen hinzu, sobald andere gelernt sind. Mit <b>ein Wörterbuch nach dem anderen</b> kommen neue Wörter nur aus dem obersten aktiven Wörterbuch, bis es keine mehr hat. So verzettelst du dich nicht zwischen mehreren Wörterbüchern. Alle Zahlen lassen sich in den Einstellungen ändern.</p></section>
 <section><h3>Übungen</h3><ul>
@@ -1810,8 +1827,8 @@ be:`<h2 class="h">Як карыстацца Wortkasten</h2>
 <li>Уключыце слоўнікі, якія хочаце вучыць.</li>
 <li>Перайдзіце ў <b>Вучыць</b>, выберыце ўверсе практыкаванне і адказвайце. У раўндзе 12 заданняў. У Варыянце і Мазаіцы словы з памылкамі вяртаюцца ў канцы раўнда, у астатніх практыкаваннях — у пачатку наступнага.</li></ol></section>
 <section><h3>Як працуе запамінанне</h3>
-<p>За правільны адказ слова атрымлівае балы, за памылку губляе, а падказкі каштуюць некалькі балаў. Калі слова дасягае парога (па змаўчанні 120), яно лічыцца вывучаным і пераходзіць у паўтор: праз 1, 4 і 8 дзён яно вяртаецца па два разы. Пасля ўсіх паўтораў слова вывучана канчаткова. Калі тэрмін паўтору прапушчаны, слова вяртаецца ў вывучэнне.</p>
-<p>Слова атрымлівае не больш за 50 балаў за дзень, і толькі калі з апошніх балаў прайшла хаця б гадзіна. Калі займацца тры-чатыры разы на дзень, слова вывучаецца прыкладна за тры дні; некалькі раўндаў запар гэта не паскараюць.</p>
+<p>За правільны адказ слова атрымлівае балы, за памылку губляе іх адзін раз за заданне (плюс кошт падказанай літары, калі яна была), а падказкі памяншаюць узнагароду. Ніжэй за нуль бал не апускаецца. Апошнія 30 балаў да «вывучана» залічваюцца толькі ў Напісанні і Пропуску. Калі слова дасягае парога (па змаўчанні 120), яно лічыцца вывучаным і пераходзіць у паўтор: на 1, 4, 8, 15 і 30-ы дзень пасля гэтага яно вяртаецца па два разы. Пасля ўсіх паўтораў слова вывучана канчаткова. Калі тэрмін паўтору прапушчаны, слова вяртаецца ў вывучэнне.</p>
+<p>Слова атрымлівае не больш за 42 балы за дзень — гэта прыкладна тры правільныя адказы ў Напісанні; пасля гэтага правільны адказ дае 2 балы. Таму да 120 слова ідзе не менш за тры дні, колькі б раўндаў вы ні рабілі.</p>
 <p>Калі вы не займаецеся больш за два дні, словы ў вывучэнні паступова губляюць балы. Гэта «ледзяная горка».</p>
 <p>Адначасова вывучаецца толькі 25 слоў; новыя дадаюцца, калі іншыя вывучаны. У рэжыме <b>па чарзе слоўнікаў</b> новыя словы бяруцца толькі з верхняга актыўнага слоўніка, пакуль у ім не скончацца, таму пераключэнне паміж слоўнікамі не распыляе ўвагу. Усе лічбы можна змяніць у наладах.</p></section>
 <section><h3>Практыкаванні</h3><ul>
