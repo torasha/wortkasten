@@ -16,9 +16,7 @@
 <body>
 <title>Wortkasten</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Layout: one narrow column, app header with view switcher, exercise switcher as chips, a single task card. */
 :root{
@@ -196,6 +194,10 @@ mark.hint{background:var(--hint-soft);color:var(--hint);border-radius:3px;paddin
 .mile.on b{color:var(--p-done)}
 .mile .prize{color:var(--fg);overflow-wrap:anywhere}
 .ansbox{display:flex;flex-direction:column;gap:4px}
+.ansfield{position:relative}
+input.answer.typo{border-color:var(--line);background:var(--surface2);color:transparent;caret-color:transparent}
+.ansview{position:absolute;inset:0;display:flex;align-items:center;padding:0 16px;font-family:var(--font-word);font-size:1.25rem;color:var(--fg);pointer-events:none;overflow:hidden;white-space:nowrap}
+.ansview mark.fix,.ansview mark.hint{background:none;padding:0;text-decoration:none;color:var(--err)}
 .under{display:flex;justify-content:space-between;gap:10px;min-height:1.6em;align-items:baseline}
 .corr{font-family:var(--font-word);font-size:1.15rem;color:var(--err)}
 .lay{font-size:.78rem;color:var(--muted)}
@@ -350,7 +352,7 @@ en:{
   know:'I know it', t_known:'Marked as known: {w}', undo:'Undo', s_known:'known', wp_known:'Known', bx_known:'Known', d_meta_k:' · known {k}',
   f_known:'I know it', f_unknow:'Back to learning', sel_known:'Mark known words', sel_do:'Mark ({n})', sel_note:'Tick the words you already know. They will not appear in exercises.', t_marked:'Marked as known: {n}',
   dc_mode:'What to dictate', dc_word:'the word', dc_phrase:'a sentence from the examples', dc_mixed:'alternate', dc_tr:'Show the translation',
-  ar_conf:'Confident after correct answers in a row', ar_note:'Article practice does not change the word score: it only checks the gender.', p_art:'Articles: confident {a} of {b}',
+  ar_conf:'Confident after correct answers in a row', ar_note:'A correct article earns the word a point; it only counts until the word reaches the score from which only Writing and Gap count.', p_art:'Articles: confident {a} of {b}',
   fl_tr:'Transcription', f_trn:'Transcription (shown next to the word, never typed)', d_lang:'Language', d_lang_def:'default ({l})',
   g_tr:'Transcription', g_tr_s:'Shown next to the word only where the word itself is not the answer', g_tr_always:'show with the word', g_tr_after:'only after the answer', g_tr_never:'do not show',
   add_title:'Add words', add_aria:'Add words', add_dict:'Dictionary', add_newdict:'New dictionary…', add_newname:'Name of the new dictionary', add_def_name:'Lessons',
@@ -374,7 +376,7 @@ en:{
   /* settings */
   set_title:'Settings', set_lang:'Interface language',
   sec_ex:'Exercises', sec_gen:'General', sec_goal:'Goal and milestones', sec_rep:'Reviewing learned words', sec_forget:'Forgetting (“ice slide”)', sec_audio:'Audio', sec_data:'Data and backup',
-  g_cap:'Points per word per day', g_cap_s:'0 = no limit. Lets a word ripen over several days', g_gap:'Pause between counted answers, min', g_gap_s:'A word earns full points again only after this pause. 0 = off', g_rest:'Points for a correct answer after the daily limit', g_rest_s:'They do not count towards the limit', g_tail:'Last points before “learned” only in Writing and Gap', g_tail_s:'In other exercises the word stops this many points short. 0 = off', n_cap:'Today’s points for this word are used up; it continues tomorrow.', n_gap:'Too soon for points: this word counts again from {h}.', pill_cap:'daily limit reached', pill_gap:'pause until {h}',
+  g_cap:'Points per word per day', g_cap_s:'0 = no limit. Lets a word ripen over several days', g_gap:'Pause between counted answers, min', g_gap_s:'A word earns full points again only after this pause. 0 = off', g_rest:'Points for a correct answer after the daily limit', g_rest_s:'They do not count towards the limit', g_from:'From this score, points only in Writing and Gap', g_from_s:'Other exercises stop here. 0 = off', n_cap:'Today’s points for this word are used up; it continues tomorrow.', n_gap:'Too soon for points: this word counts again from {h}.', pill_cap:'daily limit reached', pill_gap:'pause until {h}',
   g_thr:'Learned when the score reaches', g_thr_s:'Then the word moves to review', g_reset:'Reset the score after a mistake',
   g_inl:'Words in learning at once', g_inl_s:'New words are added only when there are free places', g_round:'Tasks per round', g_share:'Share of reviews in a round, %',
   g_new:'New words', g_new_seq:'one dictionary at a time', g_new_all:'from all active', g_new_s:'One at a time: the next dictionary starts only when the current one has no new words left',
@@ -386,13 +388,13 @@ en:{
   g_layk:'Layout of the language you are learning', g_layk_de:'German (QWERTZ)', g_layk_en:'English (QWERTY)',
   g_next:'Move on after a correct answer', g_nextd:'Pause before the next task, ms',
   go_goal:'Daily goal, answers', go_goal_s:'The ring around the streak number fills up as you answer', go_note:'You choose the prize for each milestone yourself. When you reach it, the app will remind you of it.', go_m:'{m} words',
-  r_on:'Review learned words', r_on_s:'Otherwise a word counts as fully learned straight away', r_back:'An overdue review sends the word back to learning', r_back_s:'With half of the learned score',
+  r_on:'Review learned words', r_on_s:'Otherwise a word counts as fully learned straight away', r_drop:'Mistake or missed deadline in review, % of points', r_drop_s:'Rounded down. Below the learned score the word goes back to learning',
   r_h1:'Review', r_h2:'day after learning', r_h3:'show, times', r_h4:'deadline, days', r_add:'Add review', r_del:'Delete review {i}', r_note:'Days count from the day the word reached the learned score. Not reviewed by the deadline — the word goes back to learning with half the score.',
   fg_on:'Take points off for missed days', fg_grace:'Days without practice and without penalty', fg_per:'Points taken off per day', fg_per_s:'From every word in learning',
-  sc_plus:'Points for a correct answer', sc_minus:'Penalty for a mistake', c_opts:'Answer options', m_pairs:'Pairs on screen',
+  sc_plus:'Base price of an answer', sc_minus:'Deduction for an answer with a mistake (once)', c_opts:'Answer options', m_pairs:'Pairs on screen',
   w_len:'Show the word length', w_cost:'— points taken off for this hint', w_first:'Show the first letter', w_lerr:'Show the correct letter after a mistake', w_lerr_s:'The correct beginning of the word appears under the field',
-  w_lcost:'Points taken off for a hint letter', w_lcost_s:'Also for the Letter button', w_werr:'Show the whole word after a mistake',
-  l_lerr:'Highlight the needed letter after a mistake', cz_base:'Show the dictionary form and translation', cz_len:'Show the gap length', ph_werr:'Highlight the needed word after a mistake', ph_cost:'— points taken off for the hint',
+  w_lcost:'Deduction for each wrong letter', w_lcost_s:'Also for the Letter button', w_werr:'Show the whole word after a mistake',
+  l_lerr:'Highlight the needed letter after a mistake', cz_base:'Show the dictionary form and translation', cz_len:'Show the gap length', ph_werr:'Highlight the needed word after a mistake', ph_cost:'Deduction for each word in the wrong place', l_ded:'Deduction for each wrong letter',
   a_on:'Speak', a_auto:'Speak automatically after an answer', a_lang:'Default language you are learning', a_lang_s:'Language code: de-DE, en-GB, fr-FR… A dictionary can have its own language (Dictionaries → Language)', a_voice:'Voice', a_voice_s:'On iPhone, better voices can be downloaded in Settings → Accessibility → Spoken Content', a_def:'Default', a_rate:'Speech rate', a_test:'Listen',
   dt_note:'All data is stored only on this device, in this browser. Make a backup from time to time — it lets you restore everything on another device.',
   dt_bk:'Make a backup', dt_file:'Restore from a file', dt_paste:'or paste the backup text', dt_restore:'Restore', dt_reset:'Reset all progress', dt_def:'Restore default settings',
@@ -441,7 +443,7 @@ de:{
   know:'Kenne ich schon', t_known:'Als bekannt markiert: {w}', undo:'Rückgängig', s_known:'bekannt', wp_known:'Bekannt', bx_known:'Bekannt', d_meta_k:' · bekannt {k}',
   f_known:'Kenne ich schon', f_unknow:'Zurück ins Lernen', sel_known:'Bekannte markieren', sel_do:'Markieren ({n})', sel_note:'Hake die Wörter an, die du schon kennst. Sie kommen in den Übungen nicht mehr vor.', t_marked:'Als bekannt markiert: {n}',
   dc_mode:'Was diktieren', dc_word:'das Wort', dc_phrase:'einen Satz aus den Beispielen', dc_mixed:'abwechselnd', dc_tr:'Übersetzung zeigen',
-  ar_conf:'Sicher nach richtigen Antworten in Folge', ar_note:'Die Artikelübung ändert die Punktzahl des Wortes nicht: sie prüft nur das Genus.', p_art:'Artikel: sicher {a} von {b}',
+  ar_conf:'Sicher nach richtigen Antworten in Folge', ar_note:'Ein richtiger Artikel bringt dem Wort einen Punkt; das zählt nur bis zu der Punktzahl, ab der nur noch Schreiben und Lücke zählen.', p_art:'Artikel: sicher {a} von {b}',
   fl_tr:'Transkription', f_trn:'Transkription (wird beim Wort gezeigt, nie getippt)', d_lang:'Sprache', d_lang_def:'Standard ({l})',
   g_tr:'Transkription', g_tr_s:'Wird beim Wort nur gezeigt, wenn das Wort selbst nicht die Antwort ist', g_tr_always:'mit dem Wort zeigen', g_tr_after:'nur nach der Antwort', g_tr_never:'nicht zeigen',
   add_title:'Wörter hinzufügen', add_aria:'Wörter hinzufügen', add_dict:'Wörterbuch', add_newdict:'Neues Wörterbuch…', add_newname:'Name des neuen Wörterbuchs', add_def_name:'Lektionen',
@@ -463,7 +465,7 @@ de:{
   wp_rev:'Wdh. {a}/{b} · {d}', wp_learned:'gelernt', wp_err:' · {n} Fehler', wp_empty:'Hier ist noch nichts.', wp_all:'Alle {n} zeigen',
   set_title:'Einstellungen', set_lang:'Sprache der Oberfläche',
   sec_ex:'Übungen', sec_gen:'Allgemein', sec_goal:'Ziel und Meilensteine', sec_rep:'Wiederholung gelernter Wörter', sec_forget:'Vergessen („Eisrutsche“)', sec_audio:'Aussprache', sec_data:'Daten und Sicherung',
-  g_cap:'Punkte pro Wort und Tag', g_cap_s:'0 = ohne Grenze. So reift ein Wort über mehrere Tage', g_gap:'Pause zwischen gewerteten Antworten, Min.', g_gap_s:'Ein Wort bekommt erst nach dieser Pause wieder volle Punkte. 0 = aus', g_rest:'Punkte für eine richtige Antwort nach dem Tageslimit', g_rest_s:'Sie zählen nicht zum Limit', g_tail:'Letzte Punkte vor „gelernt“ nur beim Schreiben und in der Lücke', g_tail_s:'In anderen Übungen bleibt das Wort so viele Punkte darunter. 0 = aus', n_cap:'Die Tagespunkte für dieses Wort sind erreicht, morgen geht es weiter.', n_gap:'Noch zu früh für Punkte: das Wort zählt wieder ab {h}.', pill_cap:'Tageslimit erreicht', pill_gap:'Pause bis {h}',
+  g_cap:'Punkte pro Wort und Tag', g_cap_s:'0 = ohne Grenze. So reift ein Wort über mehrere Tage', g_gap:'Pause zwischen gewerteten Antworten, Min.', g_gap_s:'Ein Wort bekommt erst nach dieser Pause wieder volle Punkte. 0 = aus', g_rest:'Punkte für eine richtige Antwort nach dem Tageslimit', g_rest_s:'Sie zählen nicht zum Limit', g_from:'Ab dieser Punktzahl Punkte nur beim Schreiben und in der Lücke', g_from_s:'Andere Übungen hören hier auf. 0 = aus', n_cap:'Die Tagespunkte für dieses Wort sind erreicht, morgen geht es weiter.', n_gap:'Noch zu früh für Punkte: das Wort zählt wieder ab {h}.', pill_cap:'Tageslimit erreicht', pill_gap:'Pause bis {h}',
   g_thr:'Gelernt, wenn die Punktzahl erreicht', g_thr_s:'Danach kommt das Wort in die Wiederholung', g_reset:'Punkte bei einem Fehler auf null setzen',
   g_inl:'Wörter gleichzeitig im Lernen', g_inl_s:'Neue Wörter kommen nur hinzu, wenn Plätze frei sind', g_round:'Aufgaben pro Runde', g_share:'Anteil der Wiederholungen pro Runde, %',
   g_new:'Neue Wörter', g_new_seq:'ein Wörterbuch nach dem anderen', g_new_all:'aus allen aktiven', g_new_s:'Nacheinander: das nächste Wörterbuch beginnt erst, wenn im aktuellen keine neuen Wörter mehr sind',
@@ -475,13 +477,13 @@ de:{
   g_layk:'Layout der Lernsprache', g_layk_de:'Deutsch (QWERTZ)', g_layk_en:'Englisch (QWERTY)',
   g_next:'Nach richtiger Antwort weiter', g_nextd:'Pause vor der nächsten Aufgabe, ms',
   go_goal:'Tagesziel, Antworten', go_goal_s:'Der Ring um die Zahl der Tage füllt sich mit deinen Antworten', go_note:'Die Belohnung für jeden Meilenstein legst du selbst fest. Wenn du ihn erreichst, erinnert dich die App daran.', go_m:'{m} Wörter',
-  r_on:'Gelernte Wörter wiederholen', r_on_s:'Sonst gilt ein Wort sofort als endgültig gelernt', r_back:'Eine verpasste Wiederholung schickt das Wort zurück ins Lernen', r_back_s:'Mit der Hälfte der Punktzahl',
+  r_on:'Gelernte Wörter wiederholen', r_on_s:'Sonst gilt ein Wort sofort als endgültig gelernt', r_drop:'Fehler oder verpasste Frist in der Wiederholung, % der Punkte', r_drop_s:'Abgerundet. Unter der Punktzahl für „gelernt“ geht das Wort zurück ins Lernen',
   r_h1:'Wdh.', r_h2:'Tag nach „gelernt“', r_h3:'zeigen, Mal', r_h4:'Frist, Tage', r_add:'Wiederholung hinzufügen', r_del:'Wiederholung {i} löschen', r_note:'Die Tage zählen ab dem Tag, an dem das Wort die Punktzahl für „gelernt“ erreicht hat. Nicht bis zur Frist wiederholt — das Wort geht mit halber Punktzahl zurück ins Lernen.',
   fg_on:'Punkte für verpasste Tage abziehen', fg_grace:'Tage ohne Übung ohne Abzug', fg_per:'Abzug pro Tag', fg_per_s:'Von jedem Wort im Lernen',
-  sc_plus:'Punkte für eine richtige Antwort', sc_minus:'Abzug für einen Fehler', c_opts:'Antwortmöglichkeiten', m_pairs:'Paare auf dem Bildschirm',
+  sc_plus:'Grundpreis einer Antwort', sc_minus:'Abzug für eine Antwort mit Fehler (einmal)', c_opts:'Antwortmöglichkeiten', m_pairs:'Paare auf dem Bildschirm',
   w_len:'Wortlänge zeigen', w_cost:'— Abzug für diesen Hinweis', w_first:'Ersten Buchstaben zeigen', w_lerr:'Nach einem Fehler den richtigen Buchstaben zeigen', w_lerr_s:'Unter dem Feld erscheint der richtige Wortanfang',
-  w_lcost:'Abzug für einen Hinweisbuchstaben', w_lcost_s:'Auch für die Taste „Buchstabe“', w_werr:'Nach einem Fehler das ganze Wort zeigen',
-  l_lerr:'Nach einem Fehler den gesuchten Buchstaben hervorheben', cz_base:'Grundform und Übersetzung zeigen', cz_len:'Länge der Lücke zeigen', ph_werr:'Nach einem Fehler das gesuchte Wort hervorheben', ph_cost:'— Abzug für den Hinweis',
+  w_lcost:'Abzug für jeden falschen Buchstaben', w_lcost_s:'Auch für die Taste „Buchstabe“', w_werr:'Nach einem Fehler das ganze Wort zeigen',
+  l_lerr:'Nach einem Fehler den gesuchten Buchstaben hervorheben', cz_base:'Grundform und Übersetzung zeigen', cz_len:'Länge der Lücke zeigen', ph_werr:'Nach einem Fehler das gesuchte Wort hervorheben', ph_cost:'Abzug für jedes Wort an der falschen Stelle', l_ded:'Abzug für jeden falschen Buchstaben',
   a_on:'Aussprechen', a_auto:'Nach der Antwort automatisch aussprechen', a_lang:'Standard-Lernsprache', a_lang_s:'Sprachcode: de-DE, en-GB, fr-FR… Ein Wörterbuch kann eine eigene Sprache haben (Wörterbücher → Sprache)', a_voice:'Stimme', a_voice_s:'Auf dem iPhone lassen sich bessere Stimmen unter Einstellungen → Bedienungshilfen → Gesprochene Inhalte laden', a_def:'Standard', a_rate:'Sprechtempo', a_test:'Anhören',
   dt_note:'Alle Daten liegen nur auf diesem Gerät, in diesem Browser. Mach ab und zu eine Sicherung — damit kannst du alles auf einem anderen Gerät wiederherstellen.',
   dt_bk:'Sicherung erstellen', dt_file:'Aus einer Datei wiederherstellen', dt_paste:'oder den Text der Sicherung einfügen', dt_restore:'Wiederherstellen', dt_reset:'Gesamten Fortschritt zurücksetzen', dt_def:'Standardeinstellungen wiederherstellen',
@@ -530,7 +532,7 @@ be:{
   know:'Ужо ведаю', t_known:'Адзначана як вядомае: {w}', undo:'Адмяніць', s_known:'ведаю', wp_known:'Ведаю', bx_known:'Ведаю', d_meta_k:' · ведаю {k}',
   f_known:'Ужо ведаю', f_unknow:'Вярнуць у вывучэнне', sel_known:'Адзначыць вядомыя', sel_do:'Адзначыць ({n})', sel_note:'Адзначце словы, якія вы ўжо ведаеце. Яны больш не будуць трапляць у практыкаванні.', t_marked:'Адзначана як вядомыя: {n}',
   dc_mode:'Што дыктаваць', dc_word:'слова', dc_phrase:'фразу з прыкладаў', dc_mixed:'па чарзе', dc_tr:'Паказваць пераклад',
-  ar_conf:'Упэўнена пасля дакладных адказаў запар', ar_note:'Практыкаванне на артыклі не мяняе бал слова: яно правярае толькі род.', p_art:'Артыклі: упэўнена {a} з {b}',
+  ar_conf:'Упэўнена пасля дакладных адказаў запар', ar_note:'Правільны артыкль дае слову адзін бал; гэта залічваецца толькі да таго бала, з якога лічацца толькі Напісанне і Пропуск.', p_art:'Артыклі: упэўнена {a} з {b}',
   fl_tr:'Транскрыпцыя', f_trn:'Транскрыпцыя (паказваецца побач са словам, друкаваць не трэба)', d_lang:'Мова', d_lang_def:'па змаўчанні ({l})',
   g_tr:'Транскрыпцыя', g_tr_s:'Паказваецца побач са словам толькі тады, калі само слова не з’яўляецца адказам', g_tr_always:'паказваць са словам', g_tr_after:'толькі пасля адказу', g_tr_never:'не паказваць',
   add_title:'Дадаць словы', add_aria:'Дадаць словы', add_dict:'Слоўнік', add_newdict:'Новы слоўнік…', add_newname:'Назва новага слоўніка', add_def_name:'Урокі',
@@ -552,7 +554,7 @@ be:{
   wp_rev:'паўтор {a}/{b} · {d}', wp_learned:'вывучана', wp_err:' · пам. {n}', wp_empty:'Тут пакуль пуста.', wp_all:'Паказаць усе {n}',
   set_title:'Налады', set_lang:'Мова інтэрфейсу',
   sec_ex:'Практыкаванні', sec_gen:'Агульныя', sec_goal:'Мэта і вехі', sec_rep:'Паўтор вывучаных слоў', sec_forget:'Забыванне («ледзяная горка»)', sec_audio:'Агучванне', sec_data:'Дадзеныя і рэзервовая копія',
-  g_cap:'Балаў на слова за дзень', g_cap_s:'0 — без абмежавання. Так слова сталее за некалькі дзён', g_gap:'Паўза паміж залічанымі адказамі, хв', g_gap_s:'Слова зноў атрымлівае поўныя балы толькі пасля гэтай паўзы. 0 — выключана', g_rest:'Балы за правільны адказ пасля дзённага ліміту', g_rest_s:'У ліміт яны не ўваходзяць', g_tail:'Апошнія балы да «вывучана» толькі ў Напісанні і Пропуску', g_tail_s:'У іншых практыкаваннях слова спыняецца на столькі балаў ніжэй. 0 — выключана', n_cap:'Балы гэтага слова на сёння набраны, працяг заўтра.', n_gap:'Яшчэ зарана для балаў: слова зноў залічваецца з {h}.', pill_cap:'дзённы ліміт', pill_gap:'паўза да {h}',
+  g_cap:'Балаў на слова за дзень', g_cap_s:'0 — без абмежавання. Так слова сталее за некалькі дзён', g_gap:'Паўза паміж залічанымі адказамі, хв', g_gap_s:'Слова зноў атрымлівае поўныя балы толькі пасля гэтай паўзы. 0 — выключана', g_rest:'Балы за правільны адказ пасля дзённага ліміту', g_rest_s:'У ліміт яны не ўваходзяць', g_from:'З гэтага бала балы толькі ў Напісанні і Пропуску', g_from_s:'Іншыя практыкаванні спыняюцца тут. 0 — выключана', n_cap:'Балы гэтага слова на сёння набраны, працяг заўтра.', n_gap:'Яшчэ зарана для балаў: слова зноў залічваецца з {h}.', pill_cap:'дзённы ліміт', pill_gap:'паўза да {h}',
   g_thr:'Вывучана, калі бал дасягнуў', g_thr_s:'Пасля гэтага слова пераходзіць у паўтор', g_reset:'Скідаць балы пры памылцы',
   g_inl:'Слоў адначасова ў вывучэнні', g_inl_s:'Новыя словы дадаюцца, толькі калі ёсць вольныя месцы', g_round:'Заданняў у раўндзе', g_share:'Доля паўтораў у раўндзе, %',
   g_new:'Новыя словы', g_new_seq:'па чарзе слоўнікаў', g_new_all:'з усіх актыўных', g_new_s:'«Па чарзе» — наступны слоўнік пачынаецца, толькі калі ў бягучым скончыліся новыя словы',
@@ -564,13 +566,13 @@ be:{
   g_layk:'Раскладка мовы, якую вывучаеце', g_layk_de:'нямецкая (QWERTZ)', g_layk_en:'англійская (QWERTY)',
   g_next:'Пераходзіць далей пасля дакладнага адказу', g_nextd:'Паўза перад наступным заданнем, мс',
   go_goal:'Дзённая мэта, адказаў', go_goal_s:'Кольца вакол ліку дзён запаўняецца па меры адказаў', go_note:'Прыз за веху вы прыдумваеце самі. Калі вывучыце столькі слоў, праграма пра яго нагадае.', go_m:'{m} слоў',
-  r_on:'Паўтараць вывучаныя словы', r_on_s:'Інакш слова адразу лічыцца вывучаным канчаткова', r_back:'Пратэрмінаваны паўтор вяртае слова ў вывучэнне', r_back_s:'З паловай бала вывучанасці',
+  r_on:'Паўтараць вывучаныя словы', r_on_s:'Інакш слова адразу лічыцца вывучаным канчаткова', r_drop:'Памылка або пропушчаны тэрмін у паўторы, % балаў', r_drop_s:'З акругленнем уніз. Ніжэй за бал «вывучана» слова вяртаецца ў вывучэнне',
   r_h1:'Паўтор', r_h2:'дзень пасля «вывучана»', r_h3:'паказаць, раз', r_h4:'тэрмін, дз.', r_add:'Дадаць паўтор', r_del:'Выдаліць паўтор {i}', r_note:'Дні лічацца ад дня, калі слова набрала бал «вывучана». Не паспелі паўтарыць да тэрміну — слова вяртаецца ў вывучэнне з паловай бала.',
   fg_on:'Здымаць балы за прапушчаныя дні', fg_grace:'Дзён без заняткаў без штрафу', fg_per:'Колькі балаў здымаць за дзень', fg_per_s:'З кожнага слова ў вывучэнні',
-  sc_plus:'Бал за правільны адказ', sc_minus:'Штраф за памылку', c_opts:'Варыянтаў адказу', m_pairs:'Пар на экране',
+  sc_plus:'Базавы кошт адказу', sc_minus:'Вылік за адказ з памылкай (адзін раз)', c_opts:'Варыянтаў адказу', m_pairs:'Пар на экране',
   w_len:'Паказваць даўжыню слова', w_cost:'— здымаць балаў за падказку', w_first:'Паказваць першую літару', w_lerr:'Падказваць літару пры памылцы', w_lerr_s:'Пад полем з’яўляецца правільны пачатак слова',
-  w_lcost:'Здымаць балаў за падказку літары', w_lcost_s:'І за кнопку «Літара»', w_werr:'Падказваць слова пры памылцы',
-  l_lerr:'Падсвечваць патрэбную літару пры памылцы', cz_base:'Паказваць слоўнікавую форму і пераклад', cz_len:'Паказваць даўжыню пропуску', ph_werr:'Падсвечваць патрэбнае слова пры памылцы', ph_cost:'— здымаць балаў за падказку',
+  w_lcost:'Вылік за кожную няправільную літару', w_lcost_s:'І за кнопку «Літара»', w_werr:'Падказваць слова пры памылцы',
+  l_lerr:'Падсвечваць патрэбную літару пры памылцы', cz_base:'Паказваць слоўнікавую форму і пераклад', cz_len:'Паказваць даўжыню пропуску', ph_werr:'Падсвечваць патрэбнае слова пры памылцы', ph_cost:'Вылік за кожнае слова не на сваім месцы', l_ded:'Вылік за кожную няправільную літару',
   a_on:'Агучваць', a_auto:'Вымаўляць аўтаматычна пасля адказу', a_lang:'Мова вывучэння па змаўчанні', a_lang_s:'Код мовы: de-DE, en-GB, fr-FR… У слоўніка можа быць свая мова (Слоўнікі → Мова)', a_voice:'Голас', a_voice_s:'На iPhone лепшыя галасы спампоўваюцца ў Наладах → Універсальны доступ → Прамаўленне', a_def:'Па змаўчанні', a_rate:'Хуткасць маўлення', a_test:'Праслухаць',
   dt_note:'Усе дадзеныя захоўваюцца толькі на гэтай прыладзе, у гэтым браўзеры. Час ад часу рабіце рэзервовую копію — з яе можна аднавіць усё на іншай прыладзе.',
   dt_bk:'Зрабіць рэзервовую копію', dt_file:'Аднавіць з файла', dt_paste:'або ўстаўце тэкст копіі', dt_restore:'Аднавіць', dt_reset:'Скінуць увесь прагрэс', dt_def:'Вярнуць налады па змаўчанні',
@@ -600,19 +602,19 @@ const EXIDS=['choice','mosaic','writing','dictation','letters','cloze','phrase',
 const exName=id=>t('ex_'+id), exHint=id=>t('exh_'+id);
 
 function defaults(){return{
-  lang:'',mig:3,
-  general:{threshold:120,dailyCap:42,minGap:0,restPts:2,recallTail:30,resetOnError:false,inLearning:25,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:1200,layoutFix:true,foreignLayout:'qwertz',showTr:'always',dailyGoal:50},
-  repeat:{enabled:true,overdueBack:true,stages:[{after:1,times:2,deadline:3},{after:4,times:2,deadline:6},{after:8,times:2,deadline:12},{after:15,times:2,deadline:22},{after:30,times:2,deadline:45}]},
+  lang:'',mig:4,
+  general:{threshold:80,dailyCap:42,minGap:0,restPts:2,recallFrom:50,resetOnError:false,inLearning:36,perRound:12,reviewShare:60,learnInOrder:false,newMode:'sequential',direction:'toForeign',caseSensitive:false,umlautFallback:false,autoEnter:true,autoEnterDelay:350,autoNext:true,nextDelay:1200,layoutFix:true,foreignLayout:'qwertz',showTr:'always',dailyGoal:50},
+  repeat:{enabled:true,drop:10,stages:[{after:1,times:2,deadline:3},{after:4,times:2,deadline:6},{after:8,times:2,deadline:12},{after:15,times:2,deadline:22},{after:30,times:2,deadline:45}]},
   forget:{enabled:true,grace:2,perDay:5},
   ex:{
     choice:{on:true,plus:6,minus:4,options:4},
     mosaic:{on:true,plus:4,minus:2,pairs:5},
-    writing:{on:true,plus:12,minus:4,showLength:false,showFirst:false,letterOnError:true,wordOnError:false,costLength:1,costFirst:1,costLetter:2},
-    letters:{on:true,plus:6,minus:4,letterOnError:true,costLetter:1},
-    cloze:{on:true,plus:10,minus:5,showBase:false,showLength:true,letterOnError:true,costBase:0,costLength:1,costLetter:2},
-    phrase:{on:true,plus:8,minus:3,wordOnError:true,costWord:2},
-    dictation:{on:true,plus:6,minus:3,mode:'word',showTr:false,letterOnError:true,wordOnError:false,costLetter:1},
-    article:{on:true,perRound:20,confident:3},
+    writing:{on:true,plus:12,minus:3,showLength:false,showFirst:false,letterOnError:true,wordOnError:false,costLength:1,costFirst:1,costLetter:1},
+    letters:{on:true,plus:6,letterOnError:true,costLetter:1},
+    cloze:{on:true,plus:12,minus:3,showBase:false,showLength:true,letterOnError:true,costBase:0,costLength:1,costLetter:1},
+    phrase:{on:true,plus:8,wordOnError:true,costWord:1},
+    dictation:{on:true,plus:10,minus:3,mode:'word',showTr:false,letterOnError:true,wordOnError:false,costLetter:1},
+    article:{on:true,perRound:20,confident:3,plus:1},
   },
   prizes:{'50':'','100':'','250':'','500':'','1000':'','2000':''},
   audio:{on:true,autoSpeak:true,langF:'de-DE',langN:'en-GB',voiceF:'',rate:0.9},
@@ -677,7 +679,13 @@ function load(){
      ['ex.phrase.plus',10,8],['ex.phrase.minus',6,3],['ex.phrase.costWord',3,2],['ex.dictation.plus',10,6],['ex.dictation.minus',8,3],['ex.dictation.costLetter',3,1],
      ['general.nextDelay',900,1200]].forEach(a=>set(...a));
     const st=X.repeat.stages;if(JSON.stringify(st)===JSON.stringify([{after:1,times:2,deadline:4},{after:4,times:2,deadline:6},{after:8,times:2,deadline:10}]))X.repeat.stages=defaults().repeat.stages;}
-  S.settings.mig=3;
+  if(mig<4){const X=S.settings,D=defaults();
+    // the scoring model changed: every answer now earns its base price minus deductions, so the old numbers no longer mean the same thing
+    for(const k of ['choice','mosaic','writing','dictation','letters','cloze','phrase','article'])for(const f of ['plus','minus','costLetter','costLength','costFirst','costWord'])if(D.ex[k][f]!==undefined)X.ex[k][f]=D.ex[k][f];
+    if(X.general.threshold===120)X.general.threshold=80;
+    if(X.general.inLearning===25)X.general.inLearning=36;
+    X.general.recallFrom=50;X.repeat.drop=10;}
+  S.settings.mig=4;
   if(!LANGS[S.settings.lang])S.settings.lang=detectLang();
   L=S.settings.lang;
   for(const w of S.words)if(w.tr==null)splitTr(w);
@@ -767,47 +775,61 @@ function toReview(w){
   if(S.settings.repeat.enabled&&st.length){w.st='review';w.lday=dayStart(0);setStage(w,0);return'learned';}
   w.st='done';return'done';
 }
-function dropBack(w){w.st='learning';w.sc=Math.round(G().threshold/2);w.stage=0;w.hits=0;w.due=0;w.dl=0;}
+const RECALL=t=>t==='writing'||t==='cloze';
+// in review: a mistake or a missed deadline takes off a share of the score (rounded down); below the threshold the word goes back to learning
+function reviewSlip(w){const g=G();w.sc=Math.floor((w.sc||0)*(1-(S.settings.repeat.drop||0)/100));w.hits=0;
+  if(w.sc<g.threshold){w.st='learning';w.stage=0;w.due=0;w.dl=0;return'dropped';}
+  const st=S.settings.repeat.stages[w.stage-1]||{after:0,deadline:2};w.due=dayStart(0);w.dl=addDays(dayStart(0),Math.max(2,st.deadline-st.after));return'slipped';}
+// points for one answer: base price minus deductions, never below zero
+function taskPoints(type,c,correct){
+  const e=S.settings.ex[type]||{};
+  if(type==='article')return correct?(e.plus||0):0;
+  if(type==='choice'||type==='mosaic')return correct?e.plus:Math.max(0,e.plus-(e.minus||0));
+  if(c&&c.skipped)return 0;
+  if(type==='letters')return Math.max(0,e.plus-(c.wrongPos?c.wrongPos.size:0)*(e.costLetter||0));
+  if(type==='phrase')return Math.max(0,e.plus-(c.wrongPos?c.wrongPos.size:0)*(e.costWord||0));
+  const letters=new Set((c.fixes||[]).map(f=>f.g+':'+f.i)).size;
+  return Math.max(0,e.plus-(c.cost||0)-(c.err?(e.minus||0):0)-letters*(e.costLetter||0));
+}
 let lastNote=null;
 function restInfo(w,now=Date.now(),type){const g=G();if(w.st!=='learning')return null;
   if(g.dailyCap>0&&w.dayK===dayKey(now)&&(w.dayPts||0)>=g.dailyCap)return{k:'cap'};
-  if(type&&g.recallTail>0&&w.sc>=g.threshold-g.recallTail&&type!=='writing'&&type!=='cloze')return{k:'tail'};
+  if(type&&g.recallFrom>0&&w.sc>=g.recallFrom&&!RECALL(type))return{k:'tail'};
   if(g.minGap>0&&w.lastPts&&now-w.lastPts<g.minGap*60000)return{k:'gap',until:w.lastPts+g.minGap*60000};return null;}
 const resting=(w,now,type)=>!!restInfo(w,now,type);
 const hhmm=ts=>{try{return new Date(ts).toLocaleTimeString(LOCALE[L]||'en-GB',{hour:'2-digit',minute:'2-digit'});}catch(e){return new Date(ts).toTimeString().slice(0,5);}};
 function restLabel(w){const r=restInfo(w);return !r?'':r.k==='cap'?t('pill_cap'):t('pill_gap',{h:hhmm(r.until)});}
-function applyResult(w,type,correct,cost,errCost){
-  const e=S.settings.ex[type],g=G();let ev=null;lastNote=null;
+function applyResult(w,type,correct,pts){
+  const g=G();let ev=null;lastNote=null;
   w.last=Date.now();if(correct)w.ok++;else w.err++;
-  if(w.st==='new')w.st='learning';
+  if(w.st==='new'&&type!=='article')w.st='learning';
   if(w.st==='review'){
-    if(correct){w.hits++;const st=S.settings.repeat.stages,cur=st[w.stage-1];
-      if(!cur||w.hits>=cur.times){
-        if(w.stage<st.length){if(!w.lday)w.lday=addDays(Date.now(),-((cur&&cur.after)||0));setStage(w,w.stage);ev='stage';}
-        else{w.st='done';ev='done';}
-      }
-    }else{dropBack(w);ev='dropped';}
-  }else if(w.st==='learning'){
-    if(correct){
-      const today=dayKey();if(w.dayK!==today){w.dayK=today;w.dayPts=0;}
-      const full=Math.max(0,e.plus-(cost||0));let add=full;
-      // daily limit: an answer that starts below the limit counts in full; after the limit, only the small rest points
-      const capped=(g.dailyCap>0&&(w.dayPts||0)>=g.dailyCap)||(g.minGap>0&&w.lastPts&&Date.now()-w.lastPts<g.minGap*60000);
-      if(capped){add=Math.min(full,Math.max(0,g.restPts||0));}
-      else{w.dayPts=(w.dayPts||0)+add;if(add>0)w.lastPts=Date.now();}
-      // the last points before the threshold count only in Writing and Gap
-      if(g.recallTail>0&&type!=='writing'&&type!=='cloze'){const ceil=Math.max(0,g.threshold-g.recallTail);add=Math.max(0,Math.min(add,ceil-w.sc));}
-      w.sc+=add;
+    if(RECALL(type)){   // reviews count only in Writing and Gap
+      if(correct){w.hits++;const st=S.settings.repeat.stages,cur=st[w.stage-1];
+        if(!cur||w.hits>=cur.times){
+          if(w.stage<st.length){if(!w.lday)w.lday=addDays(Date.now(),-((cur&&cur.after)||0));setStage(w,w.stage);ev='stage';}
+          else{w.st='done';ev='done';}
+        }
+      }else ev=reviewSlip(w);
     }
-    else w.sc=g.resetOnError?0:Math.max(0,w.sc-e.minus-(errCost||0));
-    if(w.sc>=g.threshold){w.sc=g.threshold;ev=toReview(w);}
+  }else if(w.st==='learning'){
+    const today=dayKey();if(w.dayK!==today){w.dayK=today;w.dayPts=0;}
+    let add=Math.max(0,pts||0);
+    // daily limit: an answer that starts below the limit counts in full; after the limit, only the small rest points
+    const capped=(g.dailyCap>0&&(w.dayPts||0)>=g.dailyCap)||(g.minGap>0&&w.lastPts&&Date.now()-w.lastPts<g.minGap*60000);
+    if(capped)add=Math.min(add,Math.max(0,g.restPts||0));
+    else{w.dayPts=(w.dayPts||0)+add;if(add>0)w.lastPts=Date.now();}
+    // from this score on, points come only from Writing and Gap
+    if(g.recallFrom>0&&!RECALL(type))add=Math.max(0,Math.min(add,g.recallFrom-w.sc));
+    w.sc=(w.sc||0)+add;
+    if(w.sc>=g.threshold)ev=toReview(w);   // no clipping: the score may stay above the threshold
   }
   const k=dayKey();const Lg=S.log[k]||(S.log[k]={n:0,ok:0});Lg.n++;if(correct)Lg.ok++;
   S.lastActiveDay=k;return ev;
 }
 function maintain(){
   const now=Date.now(),today=dayKey();
-  if(S.settings.repeat.overdueBack)for(const w of S.words)if(w.st==='review'&&w.dl&&now>w.dl)dropBack(w);
+  for(const w of S.words)if(w.st==='review'&&w.dl&&now>w.dl)reviewSlip(w);
   const f=S.settings.forget;
   if(f.enabled&&S.lastActiveDay&&S.lastActiveDay<today){
     const missed=daysBetween(S.lastActiveDay,today)-1,pdays=Math.max(0,missed-f.grace);
@@ -851,7 +873,7 @@ function poolFor(type){
 }
 function buildRound(type){
   const g=G(),now=Date.now(),pool=poolFor(type),n=g.perRound;
-  const due=pool.filter(w=>w.st==='review'&&w.due<=now).sort((a,b)=>a.due-b.due).map(w=>w.id);
+  const due=RECALL(type)?pool.filter(w=>w.st==='review'&&w.due<=now).sort((a,b)=>a.due-b.due).map(w=>w.id):[];
   const learning=pool.filter(w=>w.st==='learning').sort((a,b)=>(resting(a,now,type)-resting(b,now,type))||a.sc-b.sc||b.err-a.err).map(w=>w.id);
   const learningAll=activeWords().filter(w=>w.st==='learning').length;
   const free=Math.max(0,g.inLearning-learningAll);
@@ -991,7 +1013,7 @@ const exampleLine=w=>{const xs=exList(w);if(!xs.length)return '';const x=xs[Math
 function evMsg(ev){const d=R&&R.cur&&R.cur.w?fmtDate(R.cur.w.due):'';const m=ev==='learned'?t('ev_learned',{d}):ev==='stage'?t('ev_stage',{d}):ev==='done'?t('ev_done'):ev==='dropped'?t('ev_dropped'):'';return m;}
 function finish(correct){
   const c=R.cur;c.done=true;
-  const exs=S.settings.ex[R.type]||{};const ev=applyResult(c.w,R.type,correct,c.cost,c.hintErr?(R.type==='phrase'?exs.costWord:exs.costLetter)||0:0);
+  const ev=applyResult(c.w,R.type,correct,taskPoints(R.type,c,correct));
   if(correct)R.ok++;else{R.bad++;
     if(R.type==='choice'){if(!R.requeued.has(c.w.id)){R.requeued.add(c.w.id);R.queue.push(c.w.id);}}
     else if(!c.w.retry){c.w.retry=true;R.retry=(R.retry||0)+1;}}
@@ -1058,8 +1080,8 @@ function onTaskClick(e){
   if(act==='check')return checkInput();
   if(act==='hint')return hintInput();
   if(act==='skip')return skipInput();
-  if(act==='skip-l'){if(c&&!c.done){c.err=true;c.pos=c.target.length;letterDone();}return;}
-  if(act==='skip-p'){if(c&&!c.done){c.err=true;c.pos=c.tokens.length;phraseDone();}return;}
+  if(act==='skip-l'){if(c&&!c.done){c.err=true;c.skipped=true;c.pos=c.target.length;letterDone();}return;}
+  if(act==='skip-p'){if(c&&!c.done){c.err=true;c.skipped=true;c.pos=c.tokens.length;phraseDone();}return;}
 }
 
 /* ---- choice ---- */
@@ -1091,7 +1113,7 @@ function mosaicTap(b){
   const a=c.sel;c.sel=null;
   if(a.id===id){
     c.matched.add(id);const w=c.chunk.find(x=>x.id===id);
-    if(!c.filler.has(id)){R.cur.w=w;const ok=!c.errs.has(id);const mev=applyResult(w,'mosaic',ok,0);afterResult(w,mev);if(ok)R.ok++;else{R.bad++;if(!R.requeued.has(id)){R.requeued.add(id);R.queue.push(id);}}save();}
+    if(!c.filler.has(id)){R.cur.w=w;const ok=!c.errs.has(id);const mev=applyResult(w,'mosaic',ok,taskPoints('mosaic',null,ok));afterResult(w,mev);if(ok)R.ok++;else{R.bad++;if(!R.requeued.has(id)){R.requeued.add(id);R.queue.push(id);}}save();}
     CURLANG=wl(w);autoSay(w.w);drawMosaic();statusBar();
     if(c.matched.size===c.chunk.length)R.timer=setTimeout(nextTask,600);
   }else{
@@ -1107,14 +1129,14 @@ function drawInput(){
   if(tk.dataset.kind!==R.type){
     tk.dataset.kind=R.type;
     tk.innerHTML=`<div id="pr"></div><div id="sent"></div><div class="hintline" id="hl"></div>
-    <div class="ansbox"><input class="answer" id="answer" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-label="${t('your_answer_aria')}">
+    <div class="ansbox"><div class="ansfield"><input class="answer" id="answer" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-label="${t('your_answer_aria')}"><div class="ansview" id="ansview" hidden></div></div>
     <div class="under"><div class="corr" id="corr" lang="de" aria-live="polite"></div><span class="lay" id="lay" hidden>${t('layout_fixed')}</span></div></div>
     <div class="keys" id="keys">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(k=>`<button class="key" data-act="key" data-keep data-k="${k}" tabindex="-1">${k}</button>`).join('')}</div>
     <div class="actions" id="acts"></div><div class="feedback" id="fb"></div>`;
     const inp=$('#answer');inp.addEventListener('input',onInput);
     inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();if(R.cur&&R.cur.done)nextTask();else checkInput();}});
   }
-  const inp=$('#answer');inp.value='';inp.classList.remove('bad','good');
+  const inp=$('#answer');inp.value='';inp.classList.remove('bad','good','typo');$('#ansview').hidden=true;
   let foreignAns=true;
   if(R.type==='dictation'){
     const can='speechSynthesis' in window;
@@ -1183,7 +1205,7 @@ function hintInput(){
   const r=checkTyped(inp.value,curTargets());
   if(r.state==='ok'){clearTimeout(c.pend);accept();return;}
   const k=r.state==='wrong'?r.lcp+1:norm(inp.value).length+1;
-  const fx=origPrefix(r.alt,k);inp.value=fx;c.cost+=(ex.costLetter||0);c.hintErr=true;
+  const fx=origPrefix(r.alt,k);inp.value=fx;c.hintErr=true;
   c.fixes.push({g:gIdx(),i:[...fx].length-1,hint:true});
   inp.dispatchEvent(new Event('input'));
   try{inp.focus({preventScroll:true});}catch(e){}
@@ -1211,14 +1233,17 @@ function accept(){
 }
 function complete(){
   const c=R.cur,inp=$('#answer');const ok=!c.err;
-  inp.classList.remove('bad','good');inp.classList.add(ok?'good':'bad');corr('');
-  if(R.type==='cloze'){c.typed='';inp.value='';c.done=true;drawSentence();}
+  inp.classList.remove('bad','good','typo');corr('');
+  const typo=!ok&&!c.skipped;
+  // after typos: neutral field, only the corrected letters in red (Gap shows them inside the sentence)
+  inp.classList.add(ok?'good':typo?'typo':'bad');
+  if(R.type==='cloze'){c.typed='';inp.value='';c.done=true;drawSentence();if(typo)inp.classList.remove('typo');}
   else if(c.skipped)inp.value='';
+  else if(typo){const v=$('#ansview');v.lang=(R.type==='dictation'||c.dir==='toForeign')?'de':L;v.innerHTML=marked(c.answers[0]||inp.value,0);v.hidden=false;}
   const ev=finish(ok);
   autoSay(R.type==='cloze'?c.ex:R.type==='dictation'?c.say:c.w.w);
   const isW=R.type!=='cloze';
   let h=ok?`<span class="ok">${t('correct')}</span>`:c.skipped?`<span class="err">${t('res_skip')}</span>`:'';
-  if(!ok&&!c.skipped&&isW)h+=`<span>${t('your_answer')} <b lang="${(R.type==='dictation'||c.dir==='toForeign')?'de':L}" class="mk">${marked(c.answers[0]||'',0)}</b></span>`;
   if(c.skipped&&isW)h+=`<span>${t('right_answer')} <b>${esc(c.targets[0])}</b></span>`;
   if(R.type==='dictation'&&c.phrase)h+=`<span><i lang="de">${esc(c.say)}</i>${c.exT?' — '+esc(c.exT):''}</span>`;
   h+=wordLine(c.w)+(evMsg(ev)?`<span>${evMsg(ev)}</span>`:'')+(R.type==='writing'||(R.type==='dictation'&&!c.phrase)?exampleLine(c.w):'');
@@ -1240,7 +1265,7 @@ function pickArticle(i,btn){
   if(!ok)btn.classList.add('wrong');
   if(ok){w.aRun=(w.aRun||0)+1;w.aOk=(w.aOk||0)+1;R.ok++;}
   else{w.aRun=0;w.aErr=(w.aErr||0)+1;R.bad++;if(!R.requeued.has(w.id)){R.requeued.add(w.id);R.queue.push(w.id);}}
-  const k=dayKey();const Lg=S.log[k]||(S.log[k]={n:0,ok:0});Lg.n++;if(ok)Lg.ok++;S.lastActiveDay=k;
+  const aev=applyResult(w,'article',ok,taskPoints('article',c,ok));afterResult(w,aev);
   save();drawStreak();statusBar();speak(c.art.a+' '+c.art.n,true);
   $('#fb').innerHTML=(ok?`<span class="ok">${t('correct')}</span>`:`<span class="err">${t('wrong')}</span>`)+`<span><b lang="de">${esc(c.art.a+' '+c.art.n)}</b> — ${esc(w.t)}</span>`+(ok&&G().autoNext?'':`<div class="actions"><button class="btn primary" data-act="next">${t('next')}</button></div>`);
   if(!(ok&&G().autoNext))$('#fb [data-act="next"]').focus();
@@ -1262,7 +1287,7 @@ function letterTap(k,btn){
     c.used.add(k);c.pos++;while(c.target[c.pos]===' ')c.pos++;
     if(c.pos>=c.target.length)return letterDone();drawLetters();
   }else{
-    c.err=true;btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
+    c.err=true;(c.wrongPos||(c.wrongPos=new Set())).add(c.pos);btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
     if(S.settings.ex.letters.letterOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&same(x.ch,need));const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb){hb.classList.add('hinted');c.hintErr=true;}}
   }
 }
@@ -1287,7 +1312,7 @@ function drawPhrase(){
 function phraseTap(k,btn){
   const c=R.cur;if(c.done||c.used.has(k))return;
   if(c.tiles[k].t===c.tokens[c.pos]){c.used.add(k);c.pos++;if(c.pos>=c.tokens.length)return phraseDone();drawPhrase();}
-  else{c.err=true;btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
+  else{c.err=true;(c.wrongPos||(c.wrongPos=new Set())).add(c.pos);btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash');
     if(S.settings.ex.phrase.wordOnError){const j=c.tiles.findIndex((x,i)=>!c.used.has(i)&&x.t===c.tokens[c.pos]);const hb=task().querySelector(`.tile[data-i="${j}"]`);if(hb){hb.classList.add('hinted');c.hintErr=true;}}}
 }
 function phraseDone(){
@@ -1645,7 +1670,7 @@ const chk=(p,l,s='')=>`<label class="sr"><span>${l}${sub_(s)}</span><input type=
 const sel=(p,l,opts,s='')=>`<label class="sr"><span>${l}${sub_(s)}</span><select data-p="${p}">${opts.map(([v,x])=>`<option value="${v}" ${getP(p)===v?'selected':''}>${x}</option>`).join('')}</select></label>`;
 const txt=(p,l,s='')=>`<label class="sr"><span>${l}${sub_(s)}</span><input type="text" data-p="${p}" value="${esc(getP(p))}" autocapitalize="off" autocorrect="off"></label>`;
 const sect=(id,title,body)=>`<details class="set" data-s="${id}" ${S.ui.openSet===id?'open':''}><summary>${title}</summary><div class="setbody">${body}</div></details>`;
-const scoring=k=>num(`ex.${k}.plus`,t('sc_plus'))+num(`ex.${k}.minus`,t('sc_minus'));
+const scoring=k=>num(`ex.${k}.plus`,t('sc_plus'))+(S.settings.ex[k].minus!==undefined?num(`ex.${k}.minus`,t('sc_minus')):'');
 function renderSettings(){
   const st=S.settings.repeat.stages;
   view.innerHTML=`<div class="stack"><h2 class="h">${t('set_title')}</h2>
@@ -1656,8 +1681,7 @@ function renderSettings(){
     num('general.dailyCap',t('g_cap'),t('g_cap_s'),0,1000)+
     num('general.minGap',t('g_gap'),t('g_gap_s'),0,720,5)+
     num('general.restPts',t('g_rest'),t('g_rest_s'),0,50)+
-    num('general.recallTail',t('g_tail'),t('g_tail_s'),0,500)+
-    chk('general.resetOnError',t('g_reset'))+
+    num('general.recallFrom',t('g_from'),t('g_from_s'),0,1000)+
     num('general.inLearning',t('g_inl'),t('g_inl_s'),1,500)+
     num('general.perRound',t('g_round'),'',2,100)+
     num('general.reviewShare',t('g_share'),'',0,100)+
@@ -1679,7 +1703,7 @@ function renderSettings(){
     MILES.map(m=>txt('prizes.'+m,t('go_m',{m}))).join(''))}
   ${sect('rep',t('sec_rep'),
     chk('repeat.enabled',t('r_on'),t('r_on_s'))+
-    chk('repeat.overdueBack',t('r_back'),t('r_back_s'))+
+    num('repeat.drop',t('r_drop'),t('r_drop_s'),0,100)+
     `<div style="overflow-x:auto;padding-block:8px"><table class="stages"><thead><tr><th>${t('r_h1')}</th><th>${t('r_h2')}</th><th>${t('r_h3')}</th><th>${t('r_h4')}</th><th></th></tr></thead><tbody>
     ${st.map((s,i)=>`<tr><td>${i+1}</td><td><input type="number" min="0" data-st="${i}.after" value="${s.after}" aria-label="${t('r_h1')} ${i+1}: ${t('r_h2')}"></td><td><input type="number" min="1" data-st="${i}.times" value="${s.times}" aria-label="${t('r_h1')} ${i+1}: ${t('r_h3')}"></td><td><input type="number" min="0" data-st="${i}.deadline" value="${s.deadline}" aria-label="${t('r_h1')} ${i+1}: ${t('r_h4')}"></td><td>${st.length>1?`<button class="btn sm" data-strm="${i}" aria-label="${t('r_del',{i:i+1})}">×</button>`:''}</td></tr>`).join('')}
     </tbody></table></div><div class="row"><button class="btn sm" id="stadd">${t('r_add')}</button></div>
@@ -1701,13 +1725,13 @@ function renderSettings(){
     chk('ex.dictation.showTr',t('dc_tr'))+
     chk('ex.dictation.letterOnError',t('w_lerr'),t('w_lerr_s'))+num('ex.dictation.costLetter',t('w_lcost'),t('w_lcost_s'))+
     chk('ex.dictation.wordOnError',t('w_werr')))}
-  ${sect('s-letters',exName('letters'),scoring('letters')+chk('ex.letters.letterOnError',t('l_lerr'))+num('ex.letters.costLetter',t('w_cost')))}
+  ${sect('s-letters',exName('letters'),scoring('letters')+num('ex.letters.costLetter',t('l_ded'))+chk('ex.letters.letterOnError',t('l_lerr')))}
   ${sect('s-cloze',exName('cloze'),scoring('cloze')+
     chk('ex.cloze.showBase',t('cz_base'))+num('ex.cloze.costBase',t('w_cost'))+
     chk('ex.cloze.showLength',t('cz_len'))+num('ex.cloze.costLength',t('w_cost'))+
     chk('ex.cloze.letterOnError',t('w_lerr'),t('w_lerr_s'))+num('ex.cloze.costLetter',t('w_lcost'),t('w_lcost_s')))}
-  ${sect('s-phrase',exName('phrase'),scoring('phrase')+chk('ex.phrase.wordOnError',t('ph_werr'))+num('ex.phrase.costWord',t('ph_cost')))}
-  ${sect('s-article',exName('article'),num('ex.article.perRound',t('g_round'),'',5,100)+num('ex.article.confident',t('ar_conf'),'',1,20)+`<p class="note" style="padding-block:8px">${t('ar_note')}</p>`)}
+  ${sect('s-phrase',exName('phrase'),scoring('phrase')+num('ex.phrase.costWord',t('ph_cost'))+chk('ex.phrase.wordOnError',t('ph_werr')))}
+  ${sect('s-article',exName('article'),num('ex.article.plus',t('sc_plus'))+num('ex.article.perRound',t('g_round'),'',5,100)+num('ex.article.confident',t('ar_conf'),'',1,20)+`<p class="note" style="padding-block:8px">${t('ar_note')}</p>`)}
   ${sect('audio',t('sec_audio'),
     chk('audio.on',t('a_on'))+chk('audio.autoSpeak',t('a_auto'))+
     txt('audio.langF',t('a_lang'),t('a_lang_s'))+
@@ -1763,10 +1787,11 @@ en:`<h2 class="h">How to use Wortkasten</h2>
 <li>Switch on the dictionaries you want to learn.</li>
 <li>Go to <b>Learn</b>, pick an exercise at the top and answer. A round has 12 tasks. In Choice and Mosaic, words you get wrong come back at the end of the round; in the other exercises they open the next round.</li></ol></section>
 <section><h3>How memorising works</h3>
-<p>A correct answer adds points to the word, a mistake takes points off once per task (plus the cost of a hint letter, if one was shown), and hints reduce the reward. The score never drops below zero. The last 30 points before “learned” count only in Writing and Gap. When a word reaches the threshold (120 by default), it counts as learned and moves to review: it comes back twice on days 1, 4, 8, 15 and 30 after that. Once it passes all reviews, the word is fully learned. If a review deadline is missed, the word goes back to learning.</p>
-<p>A word earns at most 42 points a day — about three correct answers in Writing; after that, a correct answer brings 2 points. So a word needs at least three days to reach 120, however many rounds you do.</p>
+<p>Every answer earns the word points: each exercise has a base price, and mistakes and hints only make it smaller, never below zero. Choice: 6, with a mistake 2. Mosaic: 4, with a mistake 2. Writing: 12, minus 3 once for an answer with a mistake, minus 1 for each wrong letter and for each hint you switched on. Gap: 12 and Dictation: 10, the same way. Letters: 6 minus 1 per wrong letter. Sentence: 8 minus 1 per word you put in the wrong place. der/die/das: 1. “Don't know” gives 0. A word with a mistake comes back in the next round.</p>
+<p>From 50 points on, a word earns points only in Writing and Gap. At 80 points (the score is not cut off there) it counts as learned and moves to review: it comes back twice on days 1, 4, 8, 15 and 30 after that, and reviews count only in Writing and Gap. A mistake in review, or a missed review deadline, takes 10% off the score, rounded down (83 → 74). If the score drops below 80, the word goes back to learning.</p>
+<p>A word earns at most 42 points a day; an answer that starts below the limit counts in full, after that an answer brings 2 points. So a word needs at least two days to be learned, however many rounds you do.</p>
 <p>If you skip practice for more than two days, words in learning slowly lose points. This is the “ice slide”.</p>
-<p>Only 25 words are in learning at once; new ones are added as others are learned. With <b>one dictionary at a time</b>, new words come only from the top active dictionary until it has none left, so switching between dictionaries does not scatter your attention. All numbers can be changed in Settings.</p></section>
+<p>Only 36 words are in learning at once; new ones are added as others are learned. With <b>one dictionary at a time</b>, new words come only from the top active dictionary until it has none left, so switching between dictionaries does not scatter your attention. All numbers can be changed in Settings.</p></section>
 <section><h3>Exercises</h3><ul>
 <li><b>Choice</b>: pick the right answer out of four.</li>
 <li><b>Mosaic</b>: match words with their translations.</li>
@@ -1775,7 +1800,7 @@ en:`<h2 class="h">How to use Wortkasten</h2>
 <li><b>Letters</b>: tap the letters in the right order.</li>
 <li><b>Gap</b>: type the word into a sentence. Separable verbs have two gaps (<i lang="de">Ich nehme … teil</i>).</li>
 <li><b>Sentence</b>: tap the words in the right order.</li>
-<li><b>der/die/das</b>: pick the article of a noun. Nouns must be written with their article (<i lang="de">das Haus</i>). This exercise only checks the gender and does not change the word's score.</li></ul>
+<li><b>der/die/das</b>: pick the article of a noun. Nouns must be written with their article (<i lang="de">das Haus</i>). A correct article earns the word 1 point.</li></ul>
 <p><b>Letter</b> gives you the next letter. <b>Don't know</b> shows the answer and counts as a mistake. The ä ö ü ß keys are under the field. Letters typed in the wrong keyboard layout are fixed automatically and do not count as mistakes.</p>
 <p><b>I know it</b>, above the task, takes a word out of learning straight away. To mark many words at once, open a dictionary → Words → Mark known words. Known words do not count towards “learned” and can be returned to learning in the word editor.</p></section>
 <section><h3>Dictionaries</h3>
@@ -1788,17 +1813,25 @@ en:`<h2 class="h">How to use Wortkasten</h2>
 <p>The ring next to the app name shows how many days in a row you have practised; it fills up towards your daily goal. <b>Progress</b> shows the boxes (how many words are at each stage), your record, conquered hard words (10+ mistakes, then learned), milestones, and all words with their scores. You choose a prize for each milestone yourself in Settings → Goal and milestones.</p></section>
 <section><h3>On iPhone, and backups</h3>
 <p>Open the app's address in Safari and tap Share → Add to Home Screen. It then opens like a normal app and also works offline.</p>
-<p>Your data lives only on this device. Make a backup now and then in Settings → Data and backup; you can restore it on any other device.</p></section>`,
+<p>Your data lives only on this device. Make a backup now and then in Settings → Data and backup; you can restore it on any other device.</p></section>
+<section><h3>Your data</h3>
+<p>Wortkasten collects nothing. Your dictionaries and progress are stored only on this device, in this browser; nothing is sent anywhere. The app is hosted on GitHub Pages, which, like any web host, technically sees visitors' IP addresses.</p>
+<p><b>Before clearing Safari data or changing your phone, make a backup</b> in Settings → Data and backup. Without it, progress cannot be restored.</p></section>
+<section><h3>About</h3>
+<p>Wortkasten is inspired by BX Language acquisition (bxmemo.com).</p>
+<p>© 2026 Wortkasten. Code: MIT licence. Ready-made dictionaries: CC BY 4.0. Excel files are read with SheetJS (Apache 2.0). Fonts: Golos Text and Literata (SIL Open Font License).</p>
+<p class="note">Version 2026-11-01</p></section>`,
 de:`<h2 class="h">So funktioniert Wortkasten</h2>
 <section><h3>Erste Schritte</h3><ol>
 <li>Öffne <b>Wörterbücher</b> und lade deine eigene Liste: eine Excel- oder CSV-Datei oder Text aus Quizlet. Das Beispiel-Wörterbuch ist zum Ausprobieren da, du kannst es jederzeit löschen.</li>
 <li>Schalte die Wörterbücher ein, die du lernen willst.</li>
 <li>Geh zu <b>Lernen</b>, wähle oben eine Übung und antworte. Eine Runde hat 12 Aufgaben. Bei Auswahl und Mosaik kommen falsch beantwortete Wörter am Ende der Runde wieder, bei den anderen Übungen zu Beginn der nächsten Runde.</li></ol></section>
 <section><h3>So funktioniert das Einprägen</h3>
-<p>Eine richtige Antwort bringt dem Wort Punkte, ein Fehler kostet einmal pro Aufgabe Punkte (plus den Preis eines gezeigten Hinweisbuchstabens), und Hinweise verringern die Belohnung. Unter null fällt die Punktzahl nie. Die letzten 30 Punkte vor „gelernt“ zählen nur beim Schreiben und in der Lücke. Erreicht ein Wort die Schwelle (standardmäßig 120), gilt es als gelernt und kommt in die Wiederholung: am 1., 4., 8., 15. und 30. Tag danach erscheint es je zweimal. Hat es alle Wiederholungen geschafft, ist das Wort endgültig gelernt. Wird eine Frist verpasst, geht das Wort zurück ins Lernen.</p>
-<p>Ein Wort bekommt höchstens 42 Punkte am Tag — etwa drei richtige Antworten beim Schreiben; danach bringt eine richtige Antwort 2 Punkte. So braucht ein Wort mindestens drei Tage bis 120, egal wie viele Runden du machst.</p>
+<p>Jede Antwort bringt dem Wort Punkte: Jede Übung hat einen Grundpreis, Fehler und Hinweise machen ihn nur kleiner, nie unter null. Auswahl: 6, mit Fehler 2. Mosaik: 4, mit Fehler 2. Schreiben: 12, minus 3 einmal für eine Antwort mit Fehler, minus 1 für jeden falschen Buchstaben und für jeden eingeschalteten Hinweis. Lücke: 12 und Diktat: 10, genauso. Buchstaben: 6 minus 1 pro falschem Buchstaben. Satz: 8 minus 1 pro Wort an der falschen Stelle. der/die/das: 1. „Weiß nicht“ bringt 0. Ein Wort mit Fehler kommt in der nächsten Runde wieder.</p>
+<p>Ab 50 Punkten bekommt ein Wort Punkte nur noch beim Schreiben und in der Lücke. Bei 80 Punkten (darüber wird nicht abgeschnitten) gilt es als gelernt und kommt in die Wiederholung: am 1., 4., 8., 15. und 30. Tag danach erscheint es je zweimal, und Wiederholungen zählen nur beim Schreiben und in der Lücke. Ein Fehler in der Wiederholung oder eine verpasste Frist kostet 10 % der Punkte, abgerundet (83 → 74). Fällt die Punktzahl unter 80, geht das Wort zurück ins Lernen.</p>
+<p>Ein Wort bekommt höchstens 42 Punkte am Tag; eine Antwort, die unter dem Limit beginnt, zählt voll, danach bringt eine Antwort 2 Punkte. So braucht ein Wort mindestens zwei Tage, egal wie viele Runden du machst.</p>
 <p>Wenn du länger als zwei Tage pausierst, verlieren Wörter im Lernen langsam Punkte. Das ist die „Eisrutsche“.</p>
-<p>Es sind immer nur 25 Wörter gleichzeitig im Lernen; neue kommen hinzu, sobald andere gelernt sind. Mit <b>ein Wörterbuch nach dem anderen</b> kommen neue Wörter nur aus dem obersten aktiven Wörterbuch, bis es keine mehr hat. So verzettelst du dich nicht zwischen mehreren Wörterbüchern. Alle Zahlen lassen sich in den Einstellungen ändern.</p></section>
+<p>Es sind immer nur 36 Wörter gleichzeitig im Lernen; neue kommen hinzu, sobald andere gelernt sind. Mit <b>ein Wörterbuch nach dem anderen</b> kommen neue Wörter nur aus dem obersten aktiven Wörterbuch, bis es keine mehr hat. So verzettelst du dich nicht zwischen mehreren Wörterbüchern. Alle Zahlen lassen sich in den Einstellungen ändern.</p></section>
 <section><h3>Übungen</h3><ul>
 <li><b>Auswahl</b>: wähle die richtige von vier Antworten.</li>
 <li><b>Mosaik</b>: ordne Wörter ihren Übersetzungen zu.</li>
@@ -1807,7 +1840,7 @@ de:`<h2 class="h">So funktioniert Wortkasten</h2>
 <li><b>Buchstaben</b>: tippe die Buchstaben in der richtigen Reihenfolge.</li>
 <li><b>Lücke</b>: setz das Wort in einen Satz ein. Trennbare Verben haben zwei Lücken (<i lang="de">Ich nehme … teil</i>).</li>
 <li><b>Satz</b>: tippe die Wörter in der richtigen Reihenfolge.</li>
-<li><b>der/die/das</b>: wähle den Artikel eines Substantivs. Substantive müssen mit Artikel eingetragen sein (<i lang="de">das Haus</i>). Die Übung prüft nur das Genus und ändert die Punktzahl des Wortes nicht.</li></ul>
+<li><b>der/die/das</b>: wähle den Artikel eines Substantivs. Substantive müssen mit Artikel eingetragen sein (<i lang="de">das Haus</i>). Ein richtiger Artikel bringt dem Wort 1 Punkt.</li></ul>
 <p><b>Buchstabe</b> gibt dir den nächsten Buchstaben. <b>Weiß nicht</b> zeigt die Antwort und zählt als Fehler. Unter dem Feld findest du ä ö ü ß. Buchstaben im falschen Tastaturlayout werden automatisch korrigiert und zählen nicht als Fehler.</p>
 <p><b>Kenne ich schon</b> über der Aufgabe nimmt ein Wort sofort aus dem Lernen. Viele Wörter auf einmal markierst du im Wörterbuch → Wörter → Bekannte markieren. Bekannte Wörter zählen nicht als „gelernt“ und lassen sich im Wort-Editor zurück ins Lernen schicken.</p></section>
 <section><h3>Wörterbücher</h3>
@@ -1820,17 +1853,25 @@ de:`<h2 class="h">So funktioniert Wortkasten</h2>
 <p>Der Ring neben dem Namen zeigt, wie viele Tage in Folge du geübt hast; er füllt sich bis zu deinem Tagesziel. Unter <b>Fortschritt</b> siehst du die Kästen (wie viele Wörter in welcher Stufe sind), deinen Rekord, besiegte schwere Wörter (10+ Fehler, dann gelernt), Meilensteine und alle Wörter mit ihren Punkten. Eine Belohnung für jeden Meilenstein legst du selbst fest: Einstellungen → Ziel und Meilensteine.</p></section>
 <section><h3>Auf dem iPhone und Sicherung</h3>
 <p>Öffne die Adresse der App in Safari und tippe auf Teilen → Zum Home-Bildschirm. Dann startet sie wie eine normale App und funktioniert auch offline.</p>
-<p>Deine Daten liegen nur auf diesem Gerät. Mach ab und zu eine Sicherung unter Einstellungen → Daten und Sicherung; damit kannst du alles auf einem anderen Gerät wiederherstellen.</p></section>`,
+<p>Deine Daten liegen nur auf diesem Gerät. Mach ab und zu eine Sicherung unter Einstellungen → Daten und Sicherung; damit kannst du alles auf einem anderen Gerät wiederherstellen.</p></section>
+<section><h3>Deine Daten</h3>
+<p>Wortkasten sammelt nichts. Deine Wörterbücher und dein Fortschritt liegen nur auf diesem Gerät, in diesem Browser; nichts wird irgendwohin gesendet. Die App liegt auf GitHub Pages, das wie jeder Webhoster technisch die IP-Adressen der Besucher sieht.</p>
+<p><b>Mach vor dem Löschen der Safari-Daten oder einem Handywechsel eine Sicherung</b> unter Einstellungen → Daten und Sicherung. Ohne sie lässt sich der Fortschritt nicht wiederherstellen.</p></section>
+<section><h3>Über die App</h3>
+<p>Wortkasten ist inspiriert von BX Language acquisition (bxmemo.com).</p>
+<p>© 2026 Wortkasten. Code: MIT-Lizenz. Fertige Wörterbücher: CC BY 4.0. Excel-Dateien werden mit SheetJS gelesen (Apache 2.0). Schriften: Golos Text und Literata (SIL Open Font License).</p>
+<p class="note">Version 2026-11-01</p></section>`,
 be:`<h2 class="h">Як карыстацца Wortkasten</h2>
 <section><h3>З чаго пачаць</h3><ol>
 <li>Адкрыйце <b>Слоўнікі</b> і загрузіце свой спіс: файл Excel або CSV ці тэкст з Quizlet. Слоўнік-прыклад — каб паспрабаваць; яго можна выдаліць у любы момант.</li>
 <li>Уключыце слоўнікі, якія хочаце вучыць.</li>
 <li>Перайдзіце ў <b>Вучыць</b>, выберыце ўверсе практыкаванне і адказвайце. У раўндзе 12 заданняў. У Варыянце і Мазаіцы словы з памылкамі вяртаюцца ў канцы раўнда, у астатніх практыкаваннях — у пачатку наступнага.</li></ol></section>
 <section><h3>Як працуе запамінанне</h3>
-<p>За правільны адказ слова атрымлівае балы, за памылку губляе іх адзін раз за заданне (плюс кошт падказанай літары, калі яна была), а падказкі памяншаюць узнагароду. Ніжэй за нуль бал не апускаецца. Апошнія 30 балаў да «вывучана» залічваюцца толькі ў Напісанні і Пропуску. Калі слова дасягае парога (па змаўчанні 120), яно лічыцца вывучаным і пераходзіць у паўтор: на 1, 4, 8, 15 і 30-ы дзень пасля гэтага яно вяртаецца па два разы. Пасля ўсіх паўтораў слова вывучана канчаткова. Калі тэрмін паўтору прапушчаны, слова вяртаецца ў вывучэнне.</p>
-<p>Слова атрымлівае не больш за 42 балы за дзень — гэта прыкладна тры правільныя адказы ў Напісанні; пасля гэтага правільны адказ дае 2 балы. Таму да 120 слова ідзе не менш за тры дні, колькі б раўндаў вы ні рабілі.</p>
+<p>Кожны адказ дае слову балы: у кожнага практыкавання ёсць базавы кошт, а памылкі і падказкі толькі памяншаюць яго, але не ніжэй за нуль. Варыянт: 6, з памылкай 2. Мазаіка: 4, з памылкай 2. Напісанне: 12, мінус 3 адзін раз за адказ з памылкай, мінус 1 за кожную няправільную літару і за кожную ўключаную падказку. Пропуск: 12 і Дыктоўка: 10, гэтак жа. Літары: 6 мінус 1 за кожную няправільную літару. Фраза: 8 мінус 1 за кожнае слова не на сваім месцы. der/die/das: 1. «Не ведаю» дае 0. Слова з памылкай вяртаецца ў наступным раўндзе.</p>
+<p>З 50 балаў слова атрымлівае балы толькі ў Напісанні і Пропуску. Пры 80 балах (вышэй не абразаецца) яно лічыцца вывучаным і пераходзіць у паўтор: на 1, 4, 8, 15 і 30-ы дзень пасля гэтага яно вяртаецца па два разы, і паўторы залічваюцца толькі ў Напісанні і Пропуску. Памылка ў паўторы або пропушчаны тэрмін здымае 10% балаў з акругленнем уніз (83 → 74). Калі бал апускаецца ніжэй за 80, слова вяртаецца ў вывучэнне.</p>
+<p>Слова атрымлівае не больш за 42 балы за дзень; адказ, які пачынаецца ніжэй за ліміт, залічваецца цалкам, пасля гэтага адказ дае 2 балы. Таму слова вывучаецца не менш чым за два дні, колькі б раўндаў вы ні рабілі.</p>
 <p>Калі вы не займаецеся больш за два дні, словы ў вывучэнні паступова губляюць балы. Гэта «ледзяная горка».</p>
-<p>Адначасова вывучаецца толькі 25 слоў; новыя дадаюцца, калі іншыя вывучаны. У рэжыме <b>па чарзе слоўнікаў</b> новыя словы бяруцца толькі з верхняга актыўнага слоўніка, пакуль у ім не скончацца, таму пераключэнне паміж слоўнікамі не распыляе ўвагу. Усе лічбы можна змяніць у наладах.</p></section>
+<p>Адначасова вывучаецца толькі 36 слоў; новыя дадаюцца, калі іншыя вывучаны. У рэжыме <b>па чарзе слоўнікаў</b> новыя словы бяруцца толькі з верхняга актыўнага слоўніка, пакуль у ім не скончацца, таму пераключэнне паміж слоўнікамі не распыляе ўвагу. Усе лічбы можна змяніць у наладах.</p></section>
 <section><h3>Практыкаванні</h3><ul>
 <li><b>Варыянт</b>: выберыце правільны адказ з чатырох.</li>
 <li><b>Мазаіка</b>: злучыце словы з перакладамі.</li>
@@ -1839,7 +1880,7 @@ be:`<h2 class="h">Як карыстацца Wortkasten</h2>
 <li><b>Літары</b>: націскайце літары ў правільным парадку.</li>
 <li><b>Пропуск</b>: упішыце слова ў фразу. У дзеясловаў з аддзяляльнай прыстаўкай два пропускі (<i lang="de">Ich nehme … teil</i>).</li>
 <li><b>Фраза</b>: націскайце словы ў правільным парадку.</li>
-<li><b>der/die/das</b>: выберыце артыкль назоўніка. Назоўнікі павінны быць запісаны з артыклем (<i lang="de">das Haus</i>). Практыкаванне правярае толькі род і не мяняе бал слова.</li></ul>
+<li><b>der/die/das</b>: выберыце артыкль назоўніка. Назоўнікі павінны быць запісаны з артыклем (<i lang="de">das Haus</i>). Правільны артыкль дае слову 1 бал.</li></ul>
 <p><b>Літара</b> падказвае наступную літару. <b>Не ведаю</b> паказвае адказ і лічыцца памылкай. Пад полем ёсць ä ö ü ß. Літары, набраныя не ў той раскладцы, выпраўляюцца аўтаматычна і не лічацца памылкай.</p>
 <p><b>Ужо ведаю</b> над заданнем адразу выводзіць слова з вывучэння. Каб адзначыць шмат слоў адразу, адкрыйце слоўнік → Словы → Адзначыць вядомыя. Вядомыя словы не лічацца «вывучанымі», і іх можна вярнуць у вывучэнне ў рэдактары слова.</p></section>
 <section><h3>Слоўнікі</h3>
@@ -1852,7 +1893,14 @@ be:`<h2 class="h">Як карыстацца Wortkasten</h2>
 <p>Кольца побач з назвай паказвае, колькі дзён запар вы займаецеся, і запаўняецца да дзённай мэты. У раздзеле <b>Прагрэс</b> — скрыні (колькі слоў на кожнай стадыі), рэкорд, пераможаныя цяжкія словы (10+ памылак, потым вывучана), вехі і ўсе словы з баламі. Прыз за кожную веху вы прызначаеце самі: Налады → Мэта і вехі.</p></section>
 <section><h3>На iPhone і рэзервовая копія</h3>
 <p>Адкрыйце адрас праграмы ў Safari і націсніце «Абагуліць» → «На экран „Дадому“». Пасля гэтага яна адкрываецца як звычайная праграма і працуе без інтэрнэту.</p>
-<p>Дадзеныя захоўваюцца толькі на гэтай прыладзе. Час ад часу рабіце рэзервовую копію ў Наладах → Дадзеныя і рэзервовая копія; з яе можна аднавіць усё на іншай прыладзе.</p></section>`
+<p>Дадзеныя захоўваюцца толькі на гэтай прыладзе. Час ад часу рабіце рэзервовую копію ў Наладах → Дадзеныя і рэзервовая копія; з яе можна аднавіць усё на іншай прыладзе.</p></section>
+<section><h3>Вашы дадзеныя</h3>
+<p>Wortkasten нічога не збірае. Слоўнікі і прагрэс захоўваюцца толькі на гэтай прыладзе, у гэтым браўзеры; нікуды нічога не адпраўляецца. Праграма размешчана на GitHub Pages, які, як і любы хостынг, тэхнічна бачыць IP-адрасы наведвальнікаў.</p>
+<p><b>Перад ачысткай дадзеных Safari або зменай тэлефона зрабіце рэзервовую копію</b> ў Наладах → Дадзеныя і рэзервовая копія. Без яе прагрэс не аднавіць.</p></section>
+<section><h3>Пра праграму</h3>
+<p>Wortkasten натхнёны праграмай BX Language acquisition (bxmemo.com).</p>
+<p>© 2026 Wortkasten. Код: ліцэнзія MIT. Гатовыя слоўнікі: CC BY 4.0. Файлы Excel чытаюцца з дапамогай SheetJS (Apache 2.0). Шрыфты: Golos Text і Literata (SIL Open Font License).</p>
+<p class="note">Версія 2026-11-01</p></section>`
 };
 function renderHelp(){view.innerHTML=`<article class="help">${HELP[L]||HELP.en}</article>`;}
 
