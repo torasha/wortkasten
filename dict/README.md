@@ -28,3 +28,6 @@ Tip: build the list in Excel or Google Sheets and save it as “Text (tab-delimi
 ]
 ```
 `file` and `name` are required; `level` is used for the level filter.
+
+## Licence
+The dictionaries in this folder are licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/): you may use and adapt them with attribution to Wortkasten. Add only lists you made yourself or that are openly licensed.
