@@ -3,7 +3,7 @@
 A free vocabulary trainer that runs in the browser and works offline. You learn with exercises instead of flashcards: choosing, matching, writing, dictation, building words from letters, filling gaps in sentences, building sentences and picking der/die/das. Spaced repetition then brings every learned word back after 2, 5, 8, 15 and 30 days.
 
 **Open the app:** https://torasha.github.io/wortkasten/
-**News, new dictionaries and tips:** Telegram channel [@wortkasten](https://t.me/wortkasten)
+**News, new dictionaries and tips:** Telegram channel [@wortkasten](https://t.me/wortkasten) (in Russian)
 
 No account, no ads, no tracking. Your words and progress stay on your device.
 
