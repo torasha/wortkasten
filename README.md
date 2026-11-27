@@ -80,5 +80,6 @@ The full manual is built into the app: **Help**, available in English, German an
 - Ready-made dictionaries in the `dict` folder: CC BY 4.0 (see `dict/README.md`).
 - Excel files are read with SheetJS (Apache 2.0). Fonts: Golos Text and Literata (SIL Open Font License).
 - Wortkasten is inspired by BX Language acquisition (bxmemo.com).
+- Built with Claude (Anthropic) as an AI-assisted development project: product design, rules and testing by the author, code generated with AI.
 
 © 2026 Wortkasten
